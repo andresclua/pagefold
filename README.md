@@ -10,7 +10,7 @@ Page transitions for server-rendered websites.
 pnpm install
 pnpm test        # unit tests
 pnpm build       # library build into dist/
-pnpm size        # core size budget (4 KB gzip)
+pnpm size        # core size budget (minified + gzip)
 pnpm docs:dev    # documentation site
 ```
 

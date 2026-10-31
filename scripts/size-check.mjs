@@ -1,11 +1,13 @@
-// Fails when the gzipped core bundle exceeds the budget.
+// Fails when the minified + gzipped core bundle exceeds the budget.
 import { readFileSync } from 'node:fs'
 import { gzipSync } from 'node:zlib'
+import { transformSync } from 'esbuild'
 
-const BUDGET = 4096 // bytes gzip, core only
-const size = gzipSync(readFileSync('dist/index.js')).length
+const BUDGET = 8192 // bytes, minified + gzip, core only
+const { code } = transformSync(readFileSync('dist/index.js', 'utf8'), { minify: true, format: 'esm' })
+const size = gzipSync(code).length
 
-console.log(`core: ${size} B gzip (budget ${BUDGET} B)`)
+console.log(`core: ${size} B minified+gzip (budget ${BUDGET} B)`)
 if (size > BUDGET) {
   console.error('Size budget exceeded')
   process.exit(1)

@@ -2,9 +2,9 @@ import type { PageData } from './types'
 
 export interface CacheOptions {
   /** Keep at most this many pages, dropping the least recently used. Default: unlimited */
-  max?: number
+  max?: number | undefined
   /** Drop pages older than this many milliseconds. Default: never */
-  ttl?: number
+  ttl?: number | undefined
 }
 
 interface Entry {
