@@ -5,11 +5,25 @@
       "release-type": "node",
       "package-name": "pagefold",
       "changelog-sections": [
-        { "type": "feat", "section": "Features" },
-        { "type": "fix", "section": "Bug fixes" },
-        { "type": "refactor", "section": "Refactors" },
-        { "type": "docs", "section": "Documentation" }
-      ]
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug fixes"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactors"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        }
+      ],
+      "initial-version": "0.1.0",
+      "bump-minor-pre-major": true
     }
   }
 }
