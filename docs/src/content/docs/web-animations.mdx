@@ -1,0 +1,35 @@
+---
+title: "Web Animations API"
+description: "Animate page transitions with the browser's own animation API: no library, no extra bytes."
+section: guides
+order: 5
+---
+
+The Web Animations API is built into every modern browser. `element.animate()` returns an object with a `finished` promise, which is exactly what Pagefold needs.
+
+```js
+import Pagefold from 'pagefold'
+import PagefoldJs from 'pagefold/js'
+
+const el = () => document.querySelector('#pagefold')
+
+new Pagefold({
+  animationSelector: false,
+  plugins: [
+    new PagefoldJs({
+      animations: [
+        {
+          out: () =>
+            el().animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: 'forwards' }).finished,
+          in: () =>
+            el().animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400 }).finished,
+        },
+      ],
+    }),
+  ],
+})
+```
+
+`fill: 'forwards'` keeps the old content hidden between `out` finishing and the content being replaced. It is not needed in `in`, because the animation ends at the element's normal state.
+
+This is the setup with the fewest dependencies, and it is the one the project's browser tests use as the baseline for the other engines.

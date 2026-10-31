@@ -1,0 +1,46 @@
+---
+title: "Animation hooks"
+description: "The hooks around the animate-out and animate-in phases, and how to skip or replace the wait."
+section: hooks
+order: 2
+---
+
+An animated visit runs these six hooks. The first and the fourth set up the state classes; the middle ones are where the waiting happens.
+
+| Hook | When | Default |
+|---|---|---|
+| `animation:out:start` | Before the old content animates out | Adds `is-changing`, `is-animating`, `is-leaving` (and `is-popstate`, `to-<name>` if they apply) |
+| `animation:out:await` | While the old content animates out | Waits for CSS transitions and animations |
+| `animation:out:end` | After it finished | none |
+| `animation:in:start` | After the new content is in place | Removes `is-animating`, which starts the transition in |
+| `animation:in:await` | While the new content animates in | Waits for CSS transitions and animations |
+| `animation:in:end` | After it finished | none |
+
+Arguments are `undefined` for `start` and `end`, and `{ skip: boolean }` for `await`.
+
+## Skipping the wait
+
+```js
+pagefold.hooks.before('animation:out:await', (visit, args) => {
+  if (visit.to.url === '/instant') args.skip = true
+})
+```
+
+## Doing the waiting yourself
+
+Replace the `await` hooks. This is exactly what the [JS plugin](/docs/js) does:
+
+```js
+pagefold.hooks.replace('animation:out:await', async (visit, { skip }) => {
+  if (skip) return
+  await myAnimation()
+})
+```
+
+## `animation:skip`
+
+Fires instead of the six hooks above when a visit is not animated: `visit.animation.animate` is `false` (back and forward visits, `{ animate: false }`, reduced motion). Arguments: none.
+
+## Not animated, still replaced
+
+Skipping animation does not skip the content swap: `content:replace`, `content:scroll` and `page:view` still run.

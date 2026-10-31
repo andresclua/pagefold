@@ -1,0 +1,55 @@
+---
+title: "Head"
+description: "Keep the title, meta tags, canonical link and stylesheets of the document in sync with the page you navigate to."
+section: plugins
+order: 1
+whenToUse: "Whenever your pages have different titles, meta descriptions, social tags or stylesheets. Without it only the containers change."
+options:
+  - name: "persistTags"
+    type: "boolean | string | (el) => boolean"
+    default: "false"
+    description: "Keep tags of the old page that the new page does not have. A string is a selector; a function decides per tag."
+  - name: "persistAssets"
+    type: "boolean"
+    default: "false"
+    description: "Shortcut: keep stylesheets, scripts and style tags."
+  - name: "awaitAssets"
+    type: "boolean"
+    default: "false"
+    description: "Wait for new stylesheets to load before showing the page, so it never appears unstyled."
+  - name: "attributes"
+    type: "(string | RegExp)[]"
+    default: "['lang', 'dir']"
+    description: "Attributes of the html element to keep in sync."
+  - name: "timeout"
+    type: "number"
+    default: "3000"
+    description: "Give up waiting for assets after this many milliseconds."
+---
+
+Import it from `pagefold/head` (about 1.3 KB minified and compressed, shared code included).
+
+```js
+import Pagefold from 'pagefold'
+import PagefoldHead from 'pagefold/head'
+
+new Pagefold({ plugins: [new PagefoldHead({ awaitAssets: true })] })
+```
+
+## How it merges
+
+The new page's `<head>` is compared tag by tag with the current one.
+
+- Tags that are **identical** are left exactly as they are. The browser does not reload them.
+- **New** tags are inserted in the order the new page has them.
+- Tags that only the old page has are **removed**, unless `persistTags` says to keep them.
+
+The `lang` and `dir` attributes of the `html` element are copied too. Add more with `attributes`, using names or patterns such as `/^data-/`.
+
+## Scripts in the head
+
+New `<script>` tags are inserted but the browser does not run them. Use the [Scripts plugin](/docs/scripts) for that. The two work together: an identical script that is already in the head is kept and is not run again.
+
+## Waiting for stylesheets
+
+With `awaitAssets` the visit waits for the `load` or `error` event of every new stylesheet, up to `timeout`. This avoids a flash of unstyled content when a page brings its own CSS. Only stylesheets are awaited.

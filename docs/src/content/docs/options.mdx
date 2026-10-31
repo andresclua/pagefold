@@ -1,0 +1,51 @@
+---
+title: "Options"
+description: "Every option you can pass to new Pagefold(), with its default."
+section: reference
+order: 1
+---
+
+```js
+const pagefold = new Pagefold({ /* options */ })
+```
+
+| Option | Type | Default | What it does |
+|---|---|---|---|
+| `containers` | `string[]` | `['#pagefold']` | Selectors of the content areas replaced on each visit. Every page needs all of them. |
+| `linkSelector` | `string` | `'a[href]'` | Which elements start a visit when clicked. |
+| `linkToSelf` | `'scroll' \| 'navigate'` | `'scroll'` | What a link to the current page does: scroll to the top, or load it again. |
+| `ignoreVisit` | `(url, { el, event }) => boolean` | ignores `[data-no-pagefold]` | Return `true` to leave a visit to the browser. |
+| `plugins` | `Plugin[]` | `[]` | Plugins to install. |
+| `hooks` | `object` | `{}` | Hook handlers to register. Add `.before`, `.once` or `.replace` to a hook name for options. |
+| `animationSelector` | `string \| false` | `'[class*="transition-"]'` | Elements whose CSS transitions and animations are awaited. `false` waits for nothing. |
+| `animationScope` | `'html' \| 'containers'` | `'html'` | Where the state classes go. |
+| `animateHistoryBrowsing` | `boolean` | `false` | Animate and scroll back and forward visits. |
+| `native` | `boolean` | `false` | Use the View Transitions API when the browser has it. |
+| `cache` | `boolean` | `true` | Keep visited pages in memory. |
+| `cacheMax` | `number` | none | Keep at most this many pages, dropping the least recently used. |
+| `cacheTtl` | `number` | none | Forget cached pages after this many milliseconds. |
+| `failOnStatus` | `(status) => boolean` | `status === 500` | Which response statuses fail a visit, so the browser loads the page normally. |
+| `requestHeaders` | `Record<string, string>` | `X-Requested-With: pagefold`, `Accept: text/html, application/xhtml+xml` | Headers sent with every page request. |
+| `timeout` | `number` | `0` | Request timeout in milliseconds. `0` means none. |
+| `resolveUrl` | `(url) => string` | identity | Rewrite URLs before they are loaded or cached, to treat `/en/about` and `/about` as one page, for example. |
+| `skipPopStateHandling` | `(event) => boolean` | skips entries Pagefold did not create | Return `true` to ignore a back or forward event. |
+
+## Common setups
+
+```js
+// Several containers: all must exist in every page
+new Pagefold({ containers: ['#main', '#sidebar'] })
+
+// Treat every client error as a failure
+new Pagefold({ failOnStatus: (status) => status >= 400 })
+
+// Only handle links inside the main content
+new Pagefold({ linkSelector: '#pagefold a[href]' })
+
+// Skip some URLs
+new Pagefold({ ignoreVisit: (url) => url.startsWith('/wp-admin') })
+```
+
+## Changing options later
+
+`pagefold.options` is a plain object, and most options are read when they are needed, so you can change it at any time. `containers` is read at the start of each visit; `plugins` and `hooks` are only read at startup: use `pagefold.use(plugin)` and `pagefold.hooks.on(...)` afterwards.

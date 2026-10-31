@@ -1,0 +1,48 @@
+---
+title: "Forms"
+description: "Submit forms without leaving the page, with the same transitions as links."
+section: plugins
+order: 12
+whenToUse: "For search forms, filters, contact forms and anything whose result is a full page that you want to show with the transition."
+options:
+  - name: "formSelector"
+    type: "string"
+    default: "'form[data-pagefold-form]'"
+    description: "Which forms are handled. By default, only forms with data-pagefold-form. Use \"form\" for all."
+---
+
+Import it from `pagefold/forms` (about 1.2 KB minified and compressed, shared code included).
+
+```js
+import PagefoldForms from 'pagefold/forms'
+
+new Pagefold({ plugins: [new PagefoldForms()] })
+```
+
+```html
+<form data-pagefold-form action="/search" method="get">
+  <input name="q" />
+  <button>Search</button>
+</form>
+```
+
+## GET and POST
+
+- **GET** forms become a visit to the action URL with the fields as query string: `/search?q=cats`. The result is cached like any page.
+- **POST** forms send the fields in the request body, as `application/x-www-form-urlencoded` or, with `enctype="multipart/form-data"`, as `FormData`. The cache is never used. The server's response is shown like any other page.
+
+A submit button can override the form with `formaction`, `formmethod`, `formenctype` and `formtarget`, and its own name and value are sent.
+
+## What is left to the browser
+
+Forms to another origin, with `target="_blank"`, with `method="dialog"`, that already had their submit cancelled, or that match `ignoreVisit`.
+
+## Hook
+
+`form:submit` fires before the visit with `{ el, event }`. Replace its default behavior and you take over the submission, **including calling `event.preventDefault()`**: if you do not, the browser submits the form.
+
+```js
+pagefold.hooks.on('form:submit', (visit, { el }) => {
+  analytics.track('submit', { form: el.id })
+})
+```

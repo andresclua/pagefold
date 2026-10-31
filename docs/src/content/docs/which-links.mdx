@@ -1,0 +1,54 @@
+---
+title: "Which links are handled"
+description: "What Pagefold takes over, what it leaves to the browser, and how to opt a link out."
+section: concepts
+order: 2
+---
+
+By default Pagefold handles every `a[href]` on the page (change it with `linkSelector`). It leaves a link to the browser when:
+
+- it points to **another origin**;
+- it has `target="_blank"` or a `download` attribute;
+- it is clicked with a **modifier key** (Cmd, Ctrl, Shift, Alt) or any button other than the left one. The hook `link:newtab` fires for modifier clicks;
+- it, or an ancestor, has the attribute **`data-no-pagefold`**;
+- your `ignoreVisit(url, { el, event })` option returns `true`.
+
+```html
+<a href="/legacy-page" data-no-pagefold>Normal page load</a>
+```
+
+## Links to the current page
+
+| Link | What happens |
+|---|---|
+| `#section` on the same page | Scrolls to the anchor. Hook: `link:anchor` |
+| The page you are already on | Scrolls to the top (`linkToSelf: 'scroll'`) or reloads it through Pagefold (`linkToSelf: 'navigate'`). Hook: `link:self` |
+
+## Per-link attributes
+
+```html
+<!-- Use the animation named "slide" -->
+<a href="/about" data-pagefold-animation="slide">About</a>
+
+<!-- Replace the history entry instead of adding one -->
+<a href="/step-2" data-pagefold-history="replace">Next</a>
+```
+
+The attribute can be on the link or on any ancestor.
+
+## Keeping elements across pages
+
+Elements with `data-pagefold-persist` and a name survive a visit. Put the same element, with the same name, in every page.
+
+```html
+<audio data-pagefold-persist="player" src="song.mp3" controls></audio>
+```
+
+## Navigating from code
+
+```js
+pagefold.navigate('/about')
+pagefold.navigate('/about', { animation: 'slide', history: 'replace' })
+```
+
+See [The Pagefold instance](/docs/instance) for all the options.

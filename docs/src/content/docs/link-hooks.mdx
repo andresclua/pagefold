@@ -1,0 +1,48 @@
+---
+title: "Link and history hooks"
+description: "Hooks for clicks on links, links to the same page, and the browser's back and forward buttons."
+section: hooks
+order: 5
+---
+
+## `link:click`
+
+A click on a link that Pagefold may handle. Arguments: `{ el, event }`. The default prevents the browser's navigation and starts the visit.
+
+Replace it to decide what happens, or use `before` to look at every click:
+
+```js
+pagefold.hooks.before('link:click', (visit, { el }) => {
+  if (el.dataset.confirm && !confirm('Leave this page?')) visit.ignore()
+})
+```
+
+`visit.ignore()` hands the visit to the browser.
+
+## `link:self`
+
+A link to the page you are already on, without a hash. Arguments: none. The default scrolls to the top (`linkToSelf: 'scroll'`) or loads the page again (`'navigate'`).
+
+## `link:anchor`
+
+A link to a `#hash` on the current page. Arguments: `{ hash }`. The default updates the address bar and scrolls to the anchor.
+
+## `link:newtab`
+
+A click with a modifier key, which the browser will open in a new tab or window. Arguments: `{ href }`. Pagefold does not handle it.
+
+## `history:popstate`
+
+The browser's back or forward button. Arguments: `{ event }`. The default starts a visit to that entry.
+
+Before this hook runs, the visit is already marked: `visit.history.popstate` is `true`, and `visit.history.direction` is `'backwards'` or `'forwards'` when it could be determined. Such visits do not animate and do not scroll unless `animateHistoryBrowsing` is on.
+
+```js
+pagefold.hooks.before('history:popstate', (visit) => {
+  if (visit.history.direction === 'backwards') visit.animation.name = 'reverse'
+})
+```
+
+## These hooks are not awaited
+
+Clicks and history events need an immediate answer, so handlers for the hooks on this page run synchronously. Asynchronous work in them is not waited for.

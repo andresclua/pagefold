@@ -1,0 +1,93 @@
+---
+title: "Using hooks"
+description: "Run your code at any point of a visit, wait for it, run it first, or replace what Pagefold does."
+section: hooks
+order: 0
+---
+
+A hook is a named moment in a visit. You attach a handler and Pagefold calls it with the visit and the hook's arguments:
+
+```js
+pagefold.hooks.on('page:view', (visit, { url, title }) => {
+  console.log(`Now on ${title} (${url})`)
+})
+```
+
+The handler returns a function to remove it:
+
+```js
+const off = pagefold.hooks.on('page:view', handler)
+off()
+```
+
+## Waiting
+
+Handlers can be `async`. Pagefold waits for each one before moving to the next step, so a handler can hold the visit:
+
+```js
+pagefold.hooks.on('content:replace', async () => {
+  await document.fonts.ready
+})
+```
+
+## Options
+
+| Option | What it does |
+|---|---|
+| `before: true` | Run before Pagefold's own work for that hook |
+| `replace: true` | Replace Pagefold's own work |
+| `once: true` | Run once, then remove the handler |
+| `priority: n` | Lower numbers run first. Default: 0 |
+
+There are shortcuts:
+
+```js
+pagefold.hooks.before('content:replace', handler)
+pagefold.hooks.once('visit:end', handler)
+pagefold.hooks.replace('scroll:top', handler)
+```
+
+Or declare them when you create Pagefold, adding the modifier after the hook name:
+
+```js
+new Pagefold({
+  hooks: {
+    'page:view': (visit, args) => {},
+    'content:replace.before': (visit, args) => {},
+    'visit:end.once': (visit, args) => {},
+  },
+})
+```
+
+## Order inside a hook
+
+1. handlers with `before`, by priority;
+2. Pagefold's own work (the "default handler"), or the `replace` handler instead;
+3. all other handlers, by priority.
+
+## Replacing
+
+A `replace` handler gets the default handler as a third argument, so you can add to it or skip it:
+
+```js
+pagefold.hooks.replace('scroll:top', (visit, { options }, defaultHandler) => {
+  if (visit.to.url.startsWith('/app')) return false // do not scroll
+  return defaultHandler(visit, { options })
+})
+```
+
+Some hooks expect a return value from the default (`page:load` returns the page, `scroll:top` and `scroll:anchor` return whether they scrolled). Keep that in mind when replacing.
+
+Several `replace` handlers on one hook are chained: each receives the next one as its default handler.
+
+## Sharing data with other handlers
+
+The arguments object is the same for every handler of a hook, so changing it is a way to talk to the others. `animation:out:await` has `{ skip: boolean }`: set it to `true` and the default wait is skipped.
+
+## Custom hooks
+
+Plugins can add their own with `pagefold.hooks.create('my:hook')` and fire them with `pagefold.hooks.call`. They are not part of the built-in type definitions, so in TypeScript you need a cast.
+
+## Sync and async
+
+`hooks.call` waits for every handler. `hooks.callSync` does not wait: it is used where the browser needs an immediate answer, such as clicks. Handlers of `link:*`, `scroll:*`, `cache:*` and `history:popstate` should therefore not rely on being awaited.

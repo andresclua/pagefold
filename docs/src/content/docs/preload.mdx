@@ -1,0 +1,73 @@
+---
+title: "Preload"
+description: "Fetch pages before they are visited, so the click feels instant."
+section: plugins
+order: 5
+whenToUse: "On sites where people move between a handful of known pages, or whenever a click should show the next page without any wait."
+options:
+  - name: "throttle"
+    type: "number"
+    default: "5"
+    description: "Maximum simultaneous requests."
+  - name: "preloadInitialPage"
+    type: "boolean"
+    default: "true"
+    description: "Fetch the page you are on, so coming back to it is instant."
+  - name: "preloadHoveredLinks"
+    type: "boolean"
+    default: "true"
+    description: "Preload when a link is hovered, touched or focused."
+  - name: "hoverDelay"
+    type: "number"
+    default: "65"
+    description: "How long the pointer must rest on a link before it is preloaded, in milliseconds."
+  - name: "preloadVisibleLinks"
+    type: "boolean | object"
+    default: "false"
+    description: "Preload links that scroll into view. Pass an object to set threshold (0.2), delay (500), containers ([\"body\"]) and ignore."
+  - name: "ignore"
+    type: "(el) => boolean"
+    default: "() => false"
+    description: "Return true to never preload a link."
+  - name: "respectConnection"
+    type: "boolean"
+    default: "true"
+    description: "Do nothing on slow connections (2G) or when the user asked to save data."
+---
+
+Import it from `pagefold/preload` (about 2.2 KB minified and compressed, shared code included).
+
+```js
+import PagefoldPreload from 'pagefold/preload'
+
+const preload = new PagefoldPreload({ preloadVisibleLinks: { delay: 300 } })
+new Pagefold({ plugins: [preload] })
+```
+
+Preloaded pages go into the [cache](/docs/caching-and-history), so a later visit makes no request.
+
+## If the click comes first
+
+If someone clicks a link while its page is still being preloaded, the visit **waits for that request** instead of starting a second one.
+
+## What is skipped
+
+Links to other origins, to the current page, to pages already cached, with `data-no-preload`, rejected by `ignore`, or that Pagefold would not handle anyway (`target="_blank"`, `data-no-pagefold`). A failed preload is ignored: the visit will fetch it normally.
+
+## From code
+
+```js
+await preload.preload('/pricing')                  // one URL
+await preload.preload(linkElement)                 // a link
+await preload.preload(['/a', '/b'])                // several
+await preload.preload('/checkout', { priority: true }) // go first in the queue
+await preload.preloadLinks(document.querySelector('.menu')) // every link inside
+```
+
+Each returns the page, or `undefined` if it was skipped or failed.
+
+## Hook
+
+`page:preload` fires after a page is preloaded, with the page: `{ page }`.
+
+Slow connection detection uses the Network Information API, which not every browser has. Where it is missing, preloading simply stays on.

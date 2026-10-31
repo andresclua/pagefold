@@ -1,0 +1,41 @@
+---
+title: "JS"
+description: "Animate with JavaScript instead of CSS: GSAP, Motion, the Web Animations API or any library."
+section: plugins
+order: 3
+whenToUse: "When CSS transitions are not enough: timelines, springs, stagger, different animations per page, or an animation engine you already use."
+options:
+  - name: "animations"
+    type: "JsAnimation[]"
+    default: "[]"
+    description: "The animations. The first one whose from and to patterns match the visit runs."
+---
+
+Import it from `pagefold/js` (about 1.2 KB minified and compressed, shared code included).
+
+Each animation is an object:
+
+```js
+{
+  name: 'slide',           // optional: only runs when the visit asks for this name
+  from: '/',               // optional: pattern or list of patterns, default any page
+  to: '/blog/:slug',       // optional: same
+  out: (done, data) => {}, // animate the old content out
+  in: (done, data) => {},  // animate the new content in
+}
+```
+
+You can pass the array directly: `new PagefoldJs([ ... ])`.
+
+Read [Animating with JavaScript](/docs/javascript-animations) for the contract, and the guides for [GSAP](/docs/gsap), [Motion](/docs/motion) and the [Web Animations API](/docs/web-animations).
+
+## Matching
+
+- `:name` matches one path segment, `*` or `(.*)` matches anything.
+- The query string is ignored and a trailing slash is optional.
+- Matching entries are checked in order. If the visit has an animation name, an entry with that name wins; otherwise the first entry **without** a name runs.
+- When nothing matches, the visit simply does not wait.
+
+## How it fits in
+
+It replaces the default behavior of the `animation:out:await` and `animation:in:await` hooks. Handlers registered with `.before` or normally still run around it.

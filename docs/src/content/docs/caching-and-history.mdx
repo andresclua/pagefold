@@ -1,0 +1,51 @@
+---
+title: "Caching and history"
+description: "How visited pages are stored, how to limit the cache, and how the back button behaves."
+section: concepts
+order: 3
+---
+
+## The cache
+
+Pagefold keeps the HTML of every page it fetches in memory, keyed by its path and query. Visiting it again is instant and makes no request. Only `GET` requests that were not redirected are stored.
+
+```js
+const pagefold = new Pagefold({
+  cacheMax: 30,       // keep at most 30 pages, dropping the least recently used
+  cacheTtl: 60_000,   // forget pages after one minute
+})
+```
+
+Without these options the cache is unlimited and pages never expire.
+
+You can work with the cache directly:
+
+```js
+pagefold.cache.has('/about')
+pagefold.cache.get('/about')      // { url, html } or undefined
+pagefold.cache.delete('/about')
+pagefold.cache.prune((url) => url.startsWith('/account'))
+pagefold.cache.clear()
+```
+
+To skip it for one visit: `pagefold.navigate('/news', { cache: false })`, or `{ cache: { read: false } }` to refetch but still store the result. Turn it off for everything with `cache: false`.
+
+## History
+
+Each visit adds an entry to the browser history, so the back and forward buttons work. Pagefold stores its own state in each entry and ignores history entries it did not create.
+
+On back and forward visits:
+
+- the content is swapped without animation, because the browser itself restores the scroll position;
+- `visit.history.popstate` is `true` and `visit.history.direction` is `'backwards'` or `'forwards'`;
+- the `is-popstate` class is present.
+
+To animate them, set `animateHistoryBrowsing: true`. Pagefold then takes over scroll restoration and scrolls to the top.
+
+## Replacing instead of adding
+
+```js
+pagefold.navigate('/step-2', { history: 'replace' })
+```
+
+Or `data-pagefold-history="replace"` on the link.

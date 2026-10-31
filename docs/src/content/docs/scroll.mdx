@@ -1,0 +1,67 @@
+---
+title: "Scroll"
+description: "Smooth scrolling between pages, to anchors and to the top."
+section: plugins
+order: 7
+whenToUse: "When you want the page to glide to the top or to an anchor instead of jumping, or need an offset for a fixed header."
+options:
+  - name: "animateScroll"
+    type: "boolean | object"
+    default: "true"
+    description: "true animates every kind. An object picks which: betweenPages, samePageWithHash, samePage."
+  - name: "duration"
+    type: "number"
+    default: "600"
+    description: "Duration in milliseconds."
+  - name: "easing"
+    type: "(t: number) => number"
+    default: "easeInOutCubic"
+    description: "Maps progress from 0 to 1 onto distance from 0 to 1."
+  - name: "offset"
+    type: "number | (el) => number"
+    default: "0"
+    description: "Space to leave above the target, for example for a fixed header."
+  - name: "respectReducedMotion"
+    type: "boolean"
+    default: "true"
+    description: "Jump instead of animating when the user prefers reduced motion."
+---
+
+Import it from `pagefold/scroll` (about 1.3 KB minified and compressed, shared code included).
+
+```js
+import PagefoldScroll from 'pagefold/scroll'
+
+new Pagefold({
+  plugins: [
+    new PagefoldScroll({
+      duration: 800,
+      offset: () => document.querySelector('header').offsetHeight,
+      animateScroll: { betweenPages: false }, // jump between pages, glide to anchors
+    }),
+  ],
+})
+```
+
+## What it animates
+
+| Kind | Example |
+|---|---|
+| `betweenPages` | Going to another page: scrolls to the top, or to the anchor if the URL has one |
+| `samePageWithHash` | A link to `#section` on the same page |
+| `samePage` | A link to the page you are already on, which scrolls to the top |
+
+## Stopping
+
+The animation stops as soon as the user takes over (wheel, touch, key press or mouse down) or a new visit starts.
+
+## From code
+
+```js
+const scroll = new PagefoldScroll()
+await scroll.scrollTo(0)                   // animated
+await scroll.scrollTo(document.querySelector('#pricing'))
+await scroll.scrollTo(300, false)          // jump
+```
+
+It replaces the default behavior of the `scroll:top` and `scroll:anchor` hooks. Back and forward visits keep the browser's own scroll restoration.

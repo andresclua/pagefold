@@ -1,0 +1,51 @@
+---
+title: "Motion"
+description: "Animate page transitions with Motion (the engine behind Framer Motion), with a single function call per phase."
+section: guides
+order: 4
+---
+
+[Motion](https://motion.dev) is a small, MIT-licensed animation library. Its `animate` function returns something Pagefold can await, so you write each phase as one line.
+
+```bash
+npm install motion
+```
+
+```js
+import Pagefold from 'pagefold'
+import PagefoldJs from 'pagefold/js'
+import { animate } from 'motion'
+
+new Pagefold({
+  animationSelector: false,
+  plugins: [
+    new PagefoldJs({
+      animations: [
+        {
+          out: () => animate('#pagefold', { opacity: 0 }, { duration: 0.4 }),
+          in: () => animate('#pagefold', { opacity: [0, 1] }, { duration: 0.4 }),
+        },
+      ],
+    }),
+  ],
+})
+```
+
+Because the function returns the animation, Pagefold waits until it finishes. There is no `done` to call.
+
+## Springs and several elements
+
+```js
+in: () =>
+  animate(
+    '#pagefold h1, #pagefold p',
+    { opacity: [0, 1], transform: ['translateY(20px)', 'none'] },
+    { type: 'spring', stiffness: 200, damping: 20, delay: stagger(0.08) }
+  )
+```
+
+```js
+import { animate, stagger } from 'motion'
+```
+
+The two phases are tested in the project's browser tests with the same fade shown at the top.

@@ -1,0 +1,80 @@
+---
+title: "The Pagefold instance"
+description: "The methods and properties of the object you get from new Pagefold()."
+section: reference
+order: 3
+---
+
+## Methods
+
+### `navigate(url, options?)`
+
+Visit a URL from code. Returns a promise that resolves when the visit is over.
+
+```js
+await pagefold.navigate('/pricing')
+
+await pagefold.navigate('/search', {
+  method: 'POST',
+  body: new URLSearchParams({ q: 'cats' }),
+  cache: false,
+})
+```
+
+| Option | What it does |
+|---|---|
+| `animate` | `false` swaps the content without animating |
+| `animation` | An animation name |
+| `history` | `'push'` or `'replace'` |
+| `cache` | `false` skips the cache for this visit, or `{ read, write }` for each |
+| `meta` | Your own data, available as `visit.meta` |
+| `method`, `body`, `headers`, `timeout`, `signal` | Passed to the request |
+
+URLs that Pagefold would not handle (another origin, for example) load normally.
+
+### `use(plugin)`, `unuse(plugin or name)`, `findPlugin(plugin or name)`
+
+Add, remove and look up plugins after startup.
+
+### `fetchPage(url, options?, visit?)`
+
+Fetch a page and store it in the cache, without showing it. Pass your own visit to keep the request separate from the current navigation. This is how the Preload plugin works.
+
+### `replaceContent(visit?)`
+
+Replace the containers from `visit.to.document`. It returns whether all containers were replaced.
+
+### Others
+
+| Method | What it does |
+|---|---|
+| `getAnchorElement(hash)` | The element a hash points to |
+| `getCurrentUrl()` | Path and query of the address bar |
+| `resolveUrl(url)` | Apply the `resolveUrl` option |
+| `isSameResolvedUrl(a, b)` | Do two URLs resolve to the same page |
+| `shouldIgnoreVisit(href, { el, event })` | Would Pagefold leave this to the browser |
+| `createVisit({ to, ... })` | Build a visit object |
+| `enable()` | Start handling links. Runs on creation |
+| `destroy()` | Stop handling links, unmount plugins and remove all hook handlers |
+
+## Properties
+
+| Property | What it is |
+|---|---|
+| `version` | The library version |
+| `options` | The options in use |
+| `hooks` | The hook registry: `on`, `before`, `once`, `replace`, `off`, `call`, `callSync`, `create`, `exists`, `names`, `clear` |
+| `cache` | The page cache: `has`, `get`, `set`, `update`, `delete`, `clear`, `prune`, `size` |
+| `classes` | The state class manager: `add`, `remove`, `clear` |
+| `visit` | The current or last visit |
+| `location` | The page currently shown |
+| `plugins` | The installed plugins |
+| `log` | A function plugins use for debug messages. Does nothing until the Debug plugin replaces it |
+
+## Stopping Pagefold
+
+```js
+await pagefold.destroy()
+```
+
+Links go back to normal and the `pagefold-enabled` class is removed.

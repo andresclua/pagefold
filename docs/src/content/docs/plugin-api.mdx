@@ -1,0 +1,93 @@
+---
+title: "Writing a plugin"
+description: "Build your own plugin with the same base class the built-in ones use."
+section: reference
+order: 4
+---
+
+A plugin is a class that extends `Plugin`. It registers hooks when it is mounted and Pagefold removes them when it is unmounted.
+
+```js
+import { Plugin } from 'pagefold'
+
+export default class AnalyticsPlugin extends Plugin {
+  name = 'AnalyticsPlugin'
+
+  options
+  static defaults = { trackingId: null }
+
+  constructor(options = {}) {
+    super()
+    this.options = { ...AnalyticsPlugin.defaults, ...options }
+  }
+
+  mount() {
+    this.on('page:view', this.track)
+  }
+
+  track(visit, { url, title }) {
+    window.gtag?.('config', this.options.trackingId, { page_path: url, page_title: title })
+  }
+}
+```
+
+```js
+new Pagefold({ plugins: [new AnalyticsPlugin({ trackingId: 'G-XXXX' })] })
+```
+
+## What the base class gives you
+
+| Member | What it does |
+|---|---|
+| `this.pagefold` | The instance, available from `mount()` on |
+| `this.on(hook, handler, options?)` | Register a handler. It is bound to the plugin (`this` works) and removed on unmount |
+| `this.before`, `this.once`, `this.replace` | The same with the matching option |
+| `mount()` | Called when the plugin is installed. Register hooks, add listeners |
+| `unmount()` | Called when it is removed. The base class removes the hooks; if you add listeners or elements, remove them and call `super.unmount()` |
+| `requires` | `{ pagefold: '>=0.1' }`. Installing fails with a clear error when the version is too old. Only `>=` ranges are supported |
+
+Name the class and set `name`. It is used by `pagefold.findPlugin('AnalyticsPlugin')`.
+
+## A plugin that cleans up
+
+```js
+export default class ScrollSpy extends Plugin {
+  name = 'ScrollSpy'
+
+  mount() {
+    window.addEventListener('scroll', this.onScroll)
+    this.on('visit:start', this.reset)
+  }
+
+  unmount() {
+    window.removeEventListener('scroll', this.onScroll)
+    super.unmount()
+  }
+
+  onScroll = () => {}
+  reset = () => {}
+}
+```
+
+Use arrow functions as class fields for listeners you add yourself, so `removeEventListener` receives the same function.
+
+## Custom hooks
+
+```js
+mount() {
+  this.pagefold.hooks.create('my:hook')
+  this.on('visit:end', async (visit) => {
+    await this.pagefold.hooks.call('my:hook', visit, { some: 'data' })
+  })
+}
+```
+
+Other code can then listen with `pagefold.hooks.on('my:hook', ...)`. Custom hook names are not in the built-in type definitions, so in TypeScript cast the name.
+
+## Conventions the built-in plugins follow
+
+- **Defaults** as `static defaults`, options merged in the constructor.
+- **One export**, `export default class`, in its own module, so bundlers only include what is imported.
+- **Do not change what you do not own.** Add and remove only your own classes and elements.
+- **Everything optional.** A plugin with no options must do something useful.
+- **Say what you did** through `this.pagefold.log(message)`, which the Debug plugin shows.

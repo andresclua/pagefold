@@ -1,0 +1,57 @@
+---
+title: "A11y"
+description: "Announce the new page to screen readers, move focus to the content and respect reduced motion."
+section: plugins
+order: 6
+whenToUse: "On every site. A page that changes without a reload is silent to screen reader users and loses keyboard focus unless you handle it."
+options:
+  - name: "announce"
+    type: "boolean"
+    default: "true"
+    description: "Tell screen readers about the new page."
+  - name: "announcement"
+    type: "string"
+    default: "'Navigated to: {title}'"
+    description: "The message. {title} is the page heading and {url} the new path."
+  - name: "headingSelector"
+    type: "string"
+    default: "'h1'"
+    description: "Where to look for the heading. The document title is the fallback."
+  - name: "focus"
+    type: "boolean"
+    default: "true"
+    description: "Move focus to the new content after a visit."
+  - name: "contentSelector"
+    type: "string | undefined"
+    default: "undefined"
+    description: "The element to focus. Default: the first container."
+  - name: "respectReducedMotion"
+    type: "boolean"
+    default: "true"
+    description: "Skip animations when the user prefers reduced motion."
+---
+
+Import it from `pagefold/a11y` (about 1.3 KB minified and compressed, shared code included).
+
+```js
+import PagefoldA11y from 'pagefold/a11y'
+
+new Pagefold({ plugins: [new PagefoldA11y({ announcement: 'Ahora en: {title}' })] })
+```
+
+## What it does
+
+- **Announces** the page: a visually hidden live region (`role="status"`, `aria-live="polite"`) is filled with your message after each visit.
+- **Moves focus** to the new content, so keyboard and screen reader users start at the top of the new page and not on a link that no longer exists. Focus moves even when the link that was clicked has it.
+- **Respects reduced motion.** If the user asked for less motion, visits are not animated: Pagefold fires `animation:skip` and swaps the content straight away.
+- **Focuses anchors.** A link to `#section` on the same page moves focus to that section.
+
+## When it leaves focus alone
+
+If focus is in a text field, a select, a contenteditable element or inside something marked `data-pagefold-persist`, it stays there. People should not be interrupted while typing.
+
+The temporary `tabindex="-1"` it adds to the content is removed when focus leaves.
+
+## Tip
+
+Use a heading in each page's content. The announcement reads the first match of `headingSelector`, so a clear `h1` makes the message useful.

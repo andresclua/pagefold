@@ -1,0 +1,56 @@
+---
+title: "Content and scroll hooks"
+description: "The hooks that replace the content, scroll the page and announce that a new page is visible."
+section: hooks
+order: 3
+---
+
+## `content:replace`
+
+The new content is swapped in. Arguments: `{ page }`, with `page.html` and `page.url`.
+
+The default removes `is-leaving`, adds `is-rendering`, replaces every container and updates the title. It throws if a container is missing, which makes the visit fail and the browser load the page normally.
+
+The parsed incoming document is available as `visit.to.document` during this hook and the ones before it. Use `before` to prepare it, `on` to work with the new DOM:
+
+```js
+// Change the incoming content before it is inserted
+pagefold.hooks.before('content:replace', (visit) => {
+  visit.to.document.querySelectorAll('img').forEach((img) => (img.loading = 'lazy'))
+})
+
+// Work with the new content once it is in place
+pagefold.hooks.on('content:replace', () => {
+  initWidgets(document)
+})
+```
+
+To change which containers are replaced in a particular visit, change `visit.containers` before this hook.
+
+## `content:scroll`
+
+After the swap, the scroll position is updated. The default calls `scroll:anchor` if the URL has a hash and `scroll:top` otherwise. Arguments: none. Returns whether it scrolled.
+
+## `scroll:top` and `scroll:anchor`
+
+Arguments: `{ options }` for `scroll:top`, `{ hash, options }` for `scroll:anchor`. `options` are the `scrollIntoView` or `scrollTo` options. They return `true` if they scrolled.
+
+```js
+pagefold.hooks.on('scroll:anchor', (visit, args) => {
+  args.options.behavior = 'smooth'
+})
+```
+
+Visits with `visit.scroll.reset = false` (back and forward by default) do not scroll to the top. Set `visit.scroll.target` to a selector or hash to scroll somewhere else, or to `false` to not scroll to an anchor.
+
+## `page:view`
+
+The new page is on screen. Arguments: `{ url, title }`. Fires once per visit, after the content is replaced and the scroll is set, before the in-animation.
+
+This is where you send analytics page views.
+
+```js
+pagefold.hooks.on('page:view', (visit, { url, title }) => {
+  analytics.page({ path: url, title })
+})
+```

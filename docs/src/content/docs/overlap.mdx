@@ -1,0 +1,61 @@
+---
+title: "Overlap"
+description: "Animate the old page and the new page at the same time, with both in the DOM during the animation."
+section: plugins
+order: 4
+whenToUse: "For crossfades, slides where the new page pushes the old one out, or any effect that needs both pages visible together."
+options:
+  - name: "containers"
+    type: "string[]"
+    default: "[] (all containers of the visit)"
+    description: "Containers that overlap. Others are replaced normally."
+  - name: "keep"
+    type: "number | Record<string, number>"
+    default: "0"
+    description: "How many previous containers to keep after the animation, in total or per selector."
+---
+
+Import it from `pagefold/overlap` (about 1.4 KB minified and compressed, shared code included).
+
+```js
+import PagefoldOverlap from 'pagefold/overlap'
+
+new Pagefold({ plugins: [new PagefoldOverlap()] })
+```
+
+Normally the old content animates out, is replaced, and the new content animates in: one after the other. With Overlap the new container is **inserted next to the old one** and both animate together. When the visit ends, the old container is removed.
+
+## Classes
+
+| Class | On |
+|---|---|
+| `is-next-container` | the incoming container, briefly, so it can transition into place |
+| `is-previous-container` | the outgoing container |
+| `is-kept-container` | old containers kept by `keep` |
+| `is-removing-container` | old containers about to be removed |
+
+Every container also gets a custom property, `--pagefold-overlap-container`, with its position: `0` for the newest.
+
+```css
+#pagefold {
+  transition: opacity 0.4s;
+}
+#pagefold.is-next-container,
+#pagefold.is-previous-container {
+  opacity: 0;
+}
+```
+
+The previous container also gets `aria-hidden="true"`, so screen readers do not read two pages.
+
+## Turning it off for one visit
+
+```js
+pagefold.hooks.on('visit:start', (visit) => {
+  if (visit.to.url.startsWith('/checkout')) visit.animation.overlap = false
+})
+```
+
+## Hooks it adds
+
+`content:insert` and `content:remove` fire with the list of containers, and you can replace their default behavior to control how containers enter and leave the DOM.

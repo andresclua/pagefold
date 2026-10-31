@@ -1,0 +1,59 @@
+---
+title: "Troubleshooting"
+description: "The problems people hit most, with what is happening and how to fix it."
+section: guides
+order: 8
+---
+
+## The page does a full reload after a click
+
+Pagefold decided it could not do the visit and handed it to the browser. Check the console for one of these:
+
+- **Container mismatch**: a selector in `containers` is missing in the current or the new page. Every page needs every container. By default there is one: `#pagefold`.
+- A server error (`500`) or an empty response. See `failOnStatus`.
+- The link matches a rule in [Which links are handled](/docs/which-links): another origin, `target="_blank"`, `data-no-pagefold`, a modifier key.
+
+Add the [Debug plugin](/docs/debug) to see every hook and the reason in order.
+
+## Nothing animates
+
+- Your CSS needs an element whose class contains `transition-` with a `transition` or `animation` defined. The console warns when it does not find one.
+- If you animate with JavaScript, set `animationSelector: false`, so the two systems do not compete.
+
+## Scripts in the new page do not run
+
+Scripts that come in with new HTML do not run by themselves. Add the [Scripts plugin](/docs/scripts).
+
+## My analytics count only the first page
+
+Send a page view when a visit finishes:
+
+```js
+pagefold.hooks.on('page:view', (visit, { url, title }) => {
+  gtag('config', 'G-XXXX', { page_path: url, page_title: title })
+})
+```
+
+## The title, meta tags and stylesheets stay the same
+
+Only the containers are replaced. Add the [Head plugin](/docs/head).
+
+## My components stop working after a visit
+
+See [Initializing components](/docs/components).
+
+## My server answers differently to Pagefold
+
+Requests carry `X-Requested-With: pagefold`. If your server looks for another value, change it with the `requestHeaders` option.
+
+## A 404 page shows inside the transition
+
+By default only `500` fails a visit, so a `404` page is rendered like any other. To fall back to a normal load instead:
+
+```js
+new Pagefold({ failOnStatus: (status) => status >= 400 })
+```
+
+## Back button scrolls to the wrong place
+
+Back and forward visits let the browser restore scroll. If your content height changes after the page loads (images without dimensions), the browser restores it too early. Give images a width and height.

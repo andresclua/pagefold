@@ -1,10 +1,66 @@
 ---
-title: Getting started
-description: Install Pagefold and run your first transition.
+title: "Getting started"
+description: "Install Pagefold, mark up your page and run your first transition in a few minutes."
 section: start
 order: 1
 ---
 
-Pagefold is under construction and not published yet. The API is not available.
+Pagefold turns the links of a server-rendered site into page transitions. When someone clicks a link it fetches the next page, animates the old content out, swaps it for the new content, animates it in, and keeps the address bar, the back button and the scroll position working.
 
-This page will cover installation, the minimal markup and your first animated transition.
+> Pagefold is not published to npm yet. The commands below show how installation will work.
+
+## 1. Install
+
+```bash
+npm install pagefold
+```
+
+## 2. Mark up the page
+
+Pick the part of your page that changes between pages and give it an `id`. Everything outside it (header, footer, audio player) stays untouched.
+
+```html
+<body>
+  <header><!-- stays --></header>
+
+  <main id="pagefold" class="transition-fade">
+    <!-- replaced on every visit -->
+  </main>
+</body>
+```
+
+Every page of your site must contain that same element. Pagefold fetches the full HTML page and takes this element from it, so you do not need an API or special responses.
+
+## 3. Style the transition
+
+While a visit runs, Pagefold puts state classes on the `html` element. CSS does the animation:
+
+```css
+.transition-fade {
+  transition: opacity 0.3s;
+  opacity: 1;
+}
+
+html.is-animating .transition-fade {
+  opacity: 0;
+}
+```
+
+The class name only needs to contain `transition-`, which is what Pagefold looks for to know how long to wait.
+
+## 4. Start it
+
+```js
+import Pagefold from 'pagefold'
+
+const pagefold = new Pagefold()
+```
+
+That is all. Links on the same site now load without a page reload, with a fade.
+
+## What next
+
+- Understand what happens during a visit: [How it works](/docs/how-it-works).
+- Animate with a JavaScript library: [GSAP](/docs/gsap), [Motion](/docs/motion), [Web Animations](/docs/web-animations).
+- Add features with plugins: update the `<head>`, preload pages, show a progress bar, manage focus and more. See the Plugins section.
+- Change the defaults in [Options](/docs/options).

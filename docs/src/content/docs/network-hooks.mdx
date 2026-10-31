@@ -1,0 +1,42 @@
+---
+title: "Network and cache hooks"
+description: "Hooks around the request, its errors and the cache."
+section: hooks
+order: 4
+---
+
+## `fetch:request`
+
+Just before the request. Arguments: `{ url, options }`, where `options` are the `fetch` options (headers, method, body, signal). The default calls `fetch(url, options)` and returns the `Response`.
+
+Use `before` to change the request, or `replace` to use your own function:
+
+```js
+pagefold.hooks.before('fetch:request', (visit, { options }) => {
+  options.headers = { ...options.headers, Authorization: `Bearer ${token()}` }
+})
+```
+
+The `signal` in `options` is connected to the visit, so aborting the visit aborts the request.
+
+## `fetch:error`
+
+The response status counts as a failure (`failOnStatus`, by default only `500`). Arguments: `{ url, status, response }`. It is awaited before the visit fails.
+
+## `fetch:timeout`
+
+The request exceeded the `timeout` option (milliseconds, `0` means no limit). Arguments: `{ url }`. Awaited before the visit fails.
+
+## `cache:set` and `cache:clear`
+
+A page was stored in the cache: `{ page }`. The cache was emptied. These are not awaited.
+
+```js
+pagefold.hooks.on('cache:set', (visit, { page }) => {
+  console.log('cached', page.url)
+})
+```
+
+## Failing visits
+
+A visit that fails in `fetch:error`, `fetch:timeout` or a network error ends in `visit:fail`, and by default the browser loads the page normally. See [Visit hooks](/docs/visit-hooks).

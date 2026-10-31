@@ -1,0 +1,46 @@
+---
+title: "Initializing components"
+description: "Create sliders, maps and widgets when their page appears, and destroy them when it goes away."
+section: guides
+order: 7
+---
+
+Pagefold swaps the HTML but does not know about the JavaScript you attached to it. A slider on the old page keeps its listeners and timers after its element is gone, and the slider on the new page does not exist yet.
+
+You are responsible for creating and destroying your components, because only you know how. A small helper does the bookkeeping.
+
+```js
+/** Run `setup(el)` for each match, now and after every visit. `setup` may return a cleanup. */
+export function mount(pagefold, selector, setup) {
+  const cleanups = new Map()
+
+  const sync = () => {
+    // Elements that are gone: clean them up
+    for (const [el, cleanup] of cleanups) {
+      if (!el.isConnected) {
+        cleanup?.()
+        cleanups.delete(el)
+      }
+    }
+    // New elements: set them up
+    document.querySelectorAll(selector).forEach((el) => {
+      if (!cleanups.has(el)) cleanups.set(el, setup(el))
+    })
+  }
+
+  sync()
+  pagefold.hooks.on('content:replace', sync)
+}
+```
+
+Use it:
+
+```js
+mount(pagefold, '[data-slider]', (el) => {
+  const slider = new Slider(el)
+  return () => slider.destroy()
+})
+```
+
+- Elements kept with `data-pagefold-persist` are not set up twice, because they are the same element.
+- Cleanups run right after the content is replaced. If your cleanup needs the old element to still be in the page, use `content:replace.before` and run the cleanup there instead.

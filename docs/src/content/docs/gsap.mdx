@@ -1,0 +1,94 @@
+---
+title: "GSAP"
+description: "Animate page transitions with GSAP: a fade, a timeline, a different animation per page, and ScrollTrigger cleanup."
+section: guides
+order: 3
+---
+
+[GSAP](https://gsap.com) is the most common choice for page transitions. It works with Pagefold's [JS plugin](/docs/js). Pagefold does not include GSAP: install it yourself and check [its license](https://gsap.com/standard-license).
+
+```bash
+npm install gsap
+```
+
+## A fade
+
+```js
+import Pagefold from 'pagefold'
+import PagefoldJs from 'pagefold/js'
+import { gsap } from 'gsap'
+
+new Pagefold({
+  animationSelector: false,
+  plugins: [
+    new PagefoldJs({
+      animations: [
+        {
+          out: (done) =>
+            gsap.to('#pagefold', { opacity: 0, duration: 0.4, onComplete: done }),
+          in: (done) =>
+            gsap.fromTo('#pagefold', { opacity: 0 }, { opacity: 1, duration: 0.4, onComplete: done }),
+        },
+      ],
+    }),
+  ],
+})
+```
+
+Returning the tween is fine: GSAP tweens can be awaited, and calling `done` from `onComplete` is also fine. Either one finishes the step.
+
+## A timeline
+
+```js
+{
+  out: (done) => {
+    gsap
+      .timeline({ onComplete: done })
+      .to('#pagefold h1', { y: -30, opacity: 0, duration: 0.3 })
+      .to('#pagefold .content', { opacity: 0, duration: 0.3 }, '<')
+  },
+  in: (done) => {
+    gsap
+      .timeline({ onComplete: done })
+      .from('#pagefold h1', { y: 30, opacity: 0, duration: 0.4 })
+      .from('#pagefold .content', { opacity: 0, duration: 0.4 }, '<0.1')
+  },
+}
+```
+
+`from` sets the starting values immediately, so the new page does not flash before the animation starts.
+
+## Animation per page
+
+```js
+animations: [
+  { from: '/', to: '/work/:slug', out: expandOut, in: expandIn },
+  { name: 'curtain', out: curtainOut, in: curtainIn },
+  { out: fadeOut, in: fadeIn }, // default
+]
+```
+
+```html
+<a href="/about" data-pagefold-animation="curtain">About</a>
+```
+
+## Clean up ScrollTrigger
+
+Triggers created for the old page must be destroyed, and new ones created for the new page. Pagefold has no knowledge of ScrollTrigger, so do it with hooks:
+
+```js
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+const pagefold = new Pagefold({
+  hooks: {
+    'content:replace.before': () => ScrollTrigger.getAll().forEach((t) => t.kill()),
+    'page:view': () => initPageAnimations(), // your code that creates the new triggers
+  },
+})
+```
+
+This recipe is not covered by the project's tests.
+
+## Reduced motion
+
+GSAP does not read `prefers-reduced-motion`. Add the [A11y plugin](/docs/a11y) and Pagefold skips animations for visits made by people who asked for less motion.

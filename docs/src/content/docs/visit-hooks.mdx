@@ -1,0 +1,67 @@
+---
+title: "Visit hooks"
+description: "The hooks that mark the start, end, abort and failure of a visit, and the one that runs the transition."
+section: hooks
+order: 1
+---
+
+## `visit:start`
+
+A visit has been created and is about to load. Arguments: none.
+
+Use it to change the visit before anything happens: its animation name, whether it animates, whether it uses the cache.
+
+```js
+pagefold.hooks.on('visit:start', (visit) => {
+  if (visit.to.url.startsWith('/admin')) visit.animation.animate = false
+})
+```
+
+## `page:load`
+
+The page is loaded: from the cache if `visit.cache.read` is true and it is there, otherwise from the network. Arguments: `{ page?, cache?, options }`.
+
+- `page` is set by the default handler. `cache` says whether it came from the cache.
+- `options` are the fetch options (headers, method, body).
+- The default handler returns the page. A replacement must return `{ url, html }`.
+
+```js
+// Serve a custom response
+pagefold.hooks.replace('page:load', async (visit, args) => ({
+  url: visit.to.url,
+  html: await myLoader(visit.to.url),
+}))
+```
+
+## `visit:transition`
+
+The animation and the swap. The default handler runs the animation hooks and the content replacement. Arguments: none.
+
+Replace it to take over completely, for example to use your own transition system. Everything inside it (all `animation:*` and `content:*` hooks) is then your responsibility.
+
+## `visit:end`
+
+The visit completed. The default handler removes the state classes from the `html` element. Arguments: none.
+
+## `visit:abort`
+
+A new visit started while this one was still loading, so this one is cancelled. Its network request is aborted right after the handlers run. Arguments: none.
+
+## `visit:fail`
+
+Something went wrong: a network error, a server error, a container missing, an exception in a handler. Arguments: `{ error }`.
+
+The default handler logs the error and lets the browser load the page normally. Replace it to do something else, such as showing a message:
+
+```js
+pagefold.hooks.replace('visit:fail', (visit, { error }) => {
+  showToast('Could not load the page')
+  console.error(error)
+})
+```
+
+If you replace it, the visit does **not** fall back to a normal load.
+
+## `enable` and `disable`
+
+Pagefold starts and stops listening. The default adds and removes the `pagefold-enabled` class on the `html` element. Arguments: none.

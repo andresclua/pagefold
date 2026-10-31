@@ -1,0 +1,58 @@
+---
+title: "View Transitions"
+description: "Let the browser animate the swap with the View Transitions API, with a fallback in browsers without it."
+section: guides
+order: 6
+---
+
+The [View Transitions API](https://developer.mozilla.org/docs/Web/API/View_Transition_API) lets the browser take a snapshot of the old page and the new one and animate between them. Turn it on with one option:
+
+```js
+const pagefold = new Pagefold({ native: true })
+```
+
+When the browser supports `document.startViewTransition`, Pagefold performs the content swap inside it. Browsers without it, or visits with `native` off, use the normal flow. Pagefold adds `pagefold-native` to the `html` element when it is active, so your CSS can tell.
+
+## Customizing the transition
+
+The browser animates `::view-transition-*` pseudo-elements. Change them with CSS:
+
+```css
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.4s;
+}
+
+/* Keep a header in place instead of fading it */
+header {
+  view-transition-name: header;
+}
+```
+
+Elements with the same `view-transition-name` on the old and the new page morph into each other.
+
+## Using only the browser's animation
+
+Pagefold still runs its own phases around the native transition: the state classes are added and, by default, it waits for CSS transitions on `transition-` elements. If you want the native transition to be the only animation, turn that off:
+
+```js
+new Pagefold({ native: true, animationSelector: false })
+```
+
+## Reduced motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+```
+
+The [A11y plugin](/docs/a11y) can also turn animation off for those visits.
+
+## Tested
+
+The browser tests check that the option calls the API once per visit and sets the class. The look of the transition depends on your CSS.

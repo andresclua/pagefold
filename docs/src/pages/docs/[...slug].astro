@@ -2,36 +2,88 @@
 import { getCollection, render } from 'astro:content'
 import Base from '../../layouts/Base.astro'
 
+const SECTIONS = [
+  ['start', 'Start'],
+  ['concepts', 'Concepts'],
+  ['guides', 'Guides'],
+  ['plugins', 'Plugins'],
+  ['hooks', 'Hooks'],
+  ['reference', 'Reference'],
+] as const
+
 export async function getStaticPaths() {
   const docs = await getCollection('docs')
-  const sorted = [...docs].sort(
-    (a, b) => a.data.section.localeCompare(b.data.section) || a.data.order - b.data.order
-  )
+  const sorted = [...docs].sort((a, b) => a.data.order - b.data.order)
   return docs.map((entry) => ({ params: { slug: entry.id }, props: { entry, sorted } }))
 }
 
 const { entry, sorted } = Astro.props
 const { Content } = await render(entry)
+const { title, description, whenToUse, options } = entry.data
 ---
 
-<Base title={entry.data.title} description={entry.data.description}>
+<Base title={title} description={description}>
   <div class="layout">
     <nav aria-label="Docs">
-      <ul>
-        {
-          sorted.map((d) => (
-            <li>
-              <a href={`/docs/${d.id}`} aria-current={d.id === entry.id ? 'page' : undefined}>
-                {d.data.title}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      {
+        SECTIONS.map(([key, label]) => {
+          const items = sorted.filter((d) => d.data.section === key)
+          return items.length ? (
+            <section>
+              <h2>{label}</h2>
+              <ul>
+                {items.map((d) => (
+                  <li>
+                    <a href={`/docs/${d.id}`} aria-current={d.id === entry.id ? 'page' : undefined}>
+                      {d.data.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null
+        })
+      }
     </nav>
     <article>
-      <h1>{entry.data.title}</h1>
+      <h1>{title}</h1>
+      <p class="lead">{description}</p>
+      {
+        whenToUse && (
+          <aside>
+            <strong>When to use it</strong>
+            <p>{whenToUse}</p>
+          </aside>
+        )
+      }
       <Content />
+      {
+        options && (
+          <>
+            <h2 id="options">Options</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>What it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                {options.map((o) => (
+                  <tr>
+                    <td><code>{o.name}</code></td>
+                    <td><code>{o.type}</code></td>
+                    <td><code>{o.default}</code></td>
+                    <td>{o.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )
+      }
     </article>
   </div>
 </Base>
@@ -39,19 +91,45 @@ const { Content } = await render(entry)
 <style>
   .layout {
     display: grid;
-    grid-template-columns: 14rem 1fr;
-    gap: 2rem;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: 2.5rem;
     padding-block: 2rem;
+  }
+  nav section h2 {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 1.25rem 0 0.4rem;
   }
   nav ul {
     list-style: none;
     margin: 0;
     padding: 0;
   }
+  nav li a {
+    display: block;
+    padding: 0.15rem 0;
+    text-decoration: none;
+  }
   nav a[aria-current='page'] {
     font-weight: 700;
   }
-  @media (max-width: 40rem) {
+  .lead {
+    color: var(--muted);
+    font-size: 1.15rem;
+  }
+  aside {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  aside p {
+    margin: 0.25rem 0 0;
+  }
+  @media (max-width: 48rem) {
     .layout {
       grid-template-columns: 1fr;
     }

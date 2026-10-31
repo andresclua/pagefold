@@ -1,0 +1,48 @@
+---
+title: "How it works"
+description: "The life of a visit from the click to the end, which hooks fire and which classes appear."
+section: concepts
+order: 1
+---
+
+Every navigation is a **visit**: an object that carries everything about it (where from, where to, what triggered it, how it animates). Every hook handler receives it. See [The Visit object](/docs/visit).
+
+## The steps
+
+1. **Click.** A listener on the document catches clicks on links. Links that should not be handled are left to the browser (see [Which links are handled](/docs/which-links)). Hook: `link:click`.
+2. **Start.** `visit:start`. If another visit is still loading, it is aborted, including its network request.
+3. **Load.** `page:load` finds the page in the cache or fetches it (`fetch:request`). The address bar and history change right away.
+4. **Animate out.** `animation:out:start`, `animation:out:await`, `animation:out:end`. The default waits for CSS transitions and animations.
+5. **Replace.** `content:replace` swaps the containers. Then `content:scroll` and `page:view`.
+6. **Animate in.** `animation:in:start`, `animation:in:await`, `animation:in:end`.
+7. **End.** `visit:end` removes the state classes.
+
+If anything fails, `visit:fail` runs and, by default, the browser loads the page normally. A visit never leaves you on a broken page.
+
+Visits that are not animated skip steps 4 and 6 and fire `animation:skip` instead.
+
+## State classes
+
+CSS hooks into these classes on the `html` element:
+
+| Class | When |
+|---|---|
+| `is-changing` | During the whole transition |
+| `is-animating` | Animating out, and again right after the content is replaced; removed when animating in starts |
+| `is-leaving` | While the old content animates out |
+| `is-rendering` | After the content is replaced, until the visit ends |
+| `is-popstate` | On visits made with the back and forward buttons |
+| `to-<name>` | When the visit has an animation name, such as `to-slide` |
+
+All of them are removed in `visit:end`. Classes of your own, even ones that start with `to-` or `from-`, are never touched.
+
+Set `animationScope: 'containers'` to put the classes on the containers instead of the `html` element.
+
+## When a visit starts while another is running
+
+- If the running visit is still **loading**, it is aborted. Its request is cancelled and its content never appears.
+- If the running visit has **already replaced the content**, it finishes first. If several visits wait, only the last one runs.
+
+## Requests
+
+Pagefold fetches the destination page with `fetch`, sending `X-Requested-With: pagefold` and `Accept: text/html`. By default only a `500` response counts as a failure; a `404` page is shown like any other. Use [`failOnStatus`](/docs/options) to change that.

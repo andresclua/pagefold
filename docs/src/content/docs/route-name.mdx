@@ -1,0 +1,54 @@
+---
+title: "Route name"
+description: "Give pages names and use them to style a visit or choose its animation."
+section: plugins
+order: 10
+whenToUse: "When the transition depends on where you come from and where you go: home to a project, a list to a detail, any page to the contact page."
+options:
+  - name: "routes"
+    type: "Record<string, string | string[]>"
+    default: "{}"
+    description: "Named routes: a name and one or more path patterns."
+  - name: "animations"
+    type: "{ from?, to?, animation }[]"
+    default: "[]"
+    description: "Pick an animation by the route names a visit goes between. from and to take a name or a list; leave out for any."
+---
+
+Import it from `pagefold/route-name` (about 1.1 KB minified and compressed, shared code included).
+
+```js
+import PagefoldRouteName from 'pagefold/route-name'
+
+new Pagefold({
+  plugins: [
+    new PagefoldRouteName({
+      routes: {
+        home: '/',
+        work: '/work',
+        project: '/work/:slug',
+      },
+      animations: [
+        { from: 'work', to: 'project', animation: 'expand' },
+        { from: 'project', to: 'work', animation: 'collapse' },
+      ],
+    }),
+  ],
+})
+```
+
+## What a visit gets
+
+- `visit.from.route` and `visit.to.route`, the names of the pages, or `undefined`.
+- Classes while it runs: `from-route-home`, `to-route-project`. They are removed at the end.
+- If the visit has no animation name yet, the first matching entry in `animations` sets it, which also adds `to-expand` and works with the [JS plugin](/docs/js).
+
+```css
+html.from-route-home.to-route-project .transition-fade {
+  transform: scale(0.9);
+}
+```
+
+## Details
+
+Patterns use `:name` and `*` (see [JS](/docs/js#matching)). The first route that matches wins, so list specific routes before general ones. A name you set yourself (a link attribute or `navigate(url, { animation })`) is never overwritten.

@@ -1,0 +1,74 @@
+---
+title: "The Visit object"
+description: "What a visit holds, and what you can change about it from a hook."
+section: reference
+order: 2
+---
+
+Every hook handler receives the current visit as its first argument. Change it from an early hook, usually `visit:start`, to change how the visit behaves.
+
+```js
+pagefold.hooks.on('visit:start', (visit) => {
+  visit.animation.name = visit.to.url.startsWith('/work') ? 'zoom' : 'fade'
+})
+```
+
+## Fields
+
+| Field | Type | What it is |
+|---|---|---|
+| `id` | `number` | Unique per visit |
+| `state` | number | Where it is in its life: created, started, leaving, loaded, entering, completed, aborted, failed, ignored |
+| `from` | `{ url, hash, route? }` | The page being left |
+| `to` | `{ url, hash, route?, html?, document? }` | The page being entered. `html` and `document` are set once it is loaded and are available until the end of the visit |
+| `containers` | `string[]` | The containers that will be replaced |
+| `trigger` | `{ el?, event? }` | The link or form that started it |
+| `meta` | `object` | Your own data, from `navigate(url, { meta })` |
+| `controller` | `AbortController` | Cancels the request and the waiting of this visit |
+
+## `animation`
+
+| Field | Default | What it does |
+|---|---|---|
+| `animate` | `true` | Run the animation hooks. `false` swaps content immediately |
+| `wait` | `false` | Wait for the page to load before animating out |
+| `name` | none | Animation name: adds `to-<name>` to the html element and picks entries in the JS plugin |
+| `native` | the `native` option | Use the View Transitions API |
+| `scope` | the `animationScope` option | Where classes go: `'html'`, `'containers'`, or a list of selectors |
+| `selector` | the `animationSelector` option | What to wait for |
+| `overlap` | none | Set by the Overlap plugin. Set it to `false` to opt a visit out |
+
+## `cache`
+
+| Field | What it does |
+|---|---|
+| `read` | Use a cached copy if there is one |
+| `write` | Store the page after fetching it |
+
+## `history`
+
+| Field | What it is |
+|---|---|
+| `action` | `'push'` adds a history entry, `'replace'` replaces the current one |
+| `popstate` | `true` for back and forward visits |
+| `direction` | `'backwards'`, `'forwards'` or `undefined` |
+
+## `scroll`
+
+| Field | What it does |
+|---|---|
+| `reset` | Scroll to the top after the visit. `false` on back and forward |
+| `target` | A hash or selector to scroll to instead. `false` for no anchor |
+
+## Methods
+
+| Method | What it does |
+|---|---|
+| `visit.abort()` | Cancel the visit and its request |
+| `visit.ignore()` | Hand the visit to the browser, which loads the page normally |
+| `visit.done` | `true` once it completed, was aborted, failed or was ignored |
+| `visit.ignored` | `true` if it was handed to the browser |
+
+`visit.ignore()` works from any hook that runs before the content is replaced, including `link:click`.
+
+Plugins may add fields: the Fragment plugin sets `visit.fragment`, and Route name sets `visit.from.route` and `visit.to.route`.

@@ -69,3 +69,52 @@ pre {
   margin: 0 auto;
   padding: 0 1rem;
 }
+
+/* Code highlighting follows the color scheme */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-dark);
+}
+@media (prefers-color-scheme: light) {
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-light);
+  }
+}
+.astro-code {
+  background: var(--surface) !important;
+}
+
+code {
+  font-size: 0.9em;
+}
+:not(pre) > code {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.25rem 0;
+  font-size: 0.95rem;
+}
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  color: var(--muted);
+  font-weight: 600;
+}
+blockquote {
+  margin: 1rem 0;
+  padding: 0.1rem 1rem;
+  border-left: 3px solid var(--link);
+  color: var(--muted);
+}

@@ -1,0 +1,72 @@
+---
+title: "Progress"
+description: "A thin loading bar at the top of the page for visits that take a while."
+section: plugins
+order: 11
+whenToUse: "When pages can load slowly and you want people to know something is happening. Quick visits show nothing."
+options:
+  - name: "className"
+    type: "string"
+    default: "'pagefold-progress-bar'"
+    description: "Class of the bar element."
+  - name: "transition"
+    type: "number"
+    default: "300"
+    description: "Duration of the movement and the fade out, in milliseconds."
+  - name: "delay"
+    type: "number"
+    default: "300"
+    description: "Wait this long before showing the bar, so quick visits show nothing."
+  - name: "initialValue"
+    type: "number"
+    default: "0.25"
+    description: "Where the bar starts, from 0 to 1."
+  - name: "finishAnimation"
+    type: "boolean"
+    default: "true"
+    description: "Run to the end before hiding. If false it disappears."
+  - name: "styles"
+    type: "boolean"
+    default: "true"
+    description: "Apply basic inline styles. Turn off to style the class yourself."
+  - name: "color"
+    type: "string"
+    default: "'#1b1bff'"
+    description: "Color of the bar."
+  - name: "height"
+    type: "number"
+    default: "3"
+    description: "Height in pixels."
+---
+
+Import it from `pagefold/progress` (about 1.2 KB minified and compressed, shared code included).
+
+```js
+import PagefoldProgress from 'pagefold/progress'
+
+new Pagefold({ plugins: [new PagefoldProgress({ color: '#00ff9c' })] })
+```
+
+The bar appears if a visit takes longer than `delay`, starts at `initialValue`, and moves forward slower and slower, so it never looks finished before it is. When the page is shown it runs to the end and fades out. If the visit fails, it disappears.
+
+It is a `div` with `aria-hidden="true"`: it is decoration, not information.
+
+## Your own styles
+
+```js
+new PagefoldProgress({ styles: false })
+```
+
+```css
+.pagefold-progress-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1b1bff, #00ff9c);
+  transform-origin: 0 50%;
+  transition: transform 0.3s;
+  z-index: 9999;
+}
+```
+
+Pagefold sets the `transform: scaleX(...)` itself, from 0 to 1.

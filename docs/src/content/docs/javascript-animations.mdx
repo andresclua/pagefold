@@ -1,0 +1,78 @@
+---
+title: "Animating with JavaScript"
+description: "Use any animation library (GSAP, Motion, the Web Animations API) with the JS plugin."
+section: guides
+order: 2
+---
+
+CSS is enough for many sites. When you want timelines, springs, stagger or scroll-linked effects, use the **JS plugin** and an animation engine of your choice.
+
+```js
+import Pagefold from 'pagefold'
+import PagefoldJs from 'pagefold/js'
+
+new Pagefold({
+  animationSelector: false, // the engine does the waiting, not CSS
+  plugins: [
+    new PagefoldJs({
+      animations: [
+        {
+          out: (done) => {/* animate the old content, call done() at the end */},
+          in: (done) => {/* animate the new content, call done() at the end */},
+        },
+      ],
+    }),
+  ],
+})
+```
+
+Guides for specific engines: [GSAP](/docs/gsap), [Motion](/docs/motion) and the [Web Animations API](/docs/web-animations).
+
+## The contract
+
+`out` runs before the content is replaced and `in` after. Each is a function that finishes in one of three ways:
+
+| Your function | Pagefold waits until |
+|---|---|
+| Takes `done` and calls it | you call `done()` |
+| Returns a promise, or an object with `.then` | the promise resolves |
+| Takes no arguments and returns nothing | it does not wait |
+
+If you accept `done` you must call it, or the visit never finishes. If you throw or reject, the visit fails and the browser loads the page normally.
+
+Both functions also receive a second argument with what you need to decide what to do:
+
+```js
+out: (done, { visit, direction, from, to }) => {
+  // from.url, from.pattern, from.params, and the same for to
+}
+```
+
+## Choosing an animation
+
+`animations` is a list. The first entry whose `from` and `to` patterns match the visit runs. Both default to "any page".
+
+```js
+animations: [
+  // from the home page to any blog post
+  { from: '/', to: '/blog/:slug', out: fadeOut, in: slideIn },
+
+  // opt-in: only runs for links with data-pagefold-animation="zoom"
+  { name: 'zoom', out: zoomOut, in: zoomIn },
+
+  // everything else
+  { out: fadeOut, in: fadeIn },
+]
+```
+
+Patterns support `:name` parameters and `*` wildcards, ignore the query string and tolerate a trailing slash. An entry with a `name` only runs when the visit asks for that name (a link attribute, `navigate(url, { animation })`, or [Route name](/docs/route-name)).
+
+## What is tested
+
+The project's browser tests run the same fade with GSAP, Motion and the Web Animations API, and check the opacity is animated in between. Any engine that either calls a completion callback or returns a promise works the same way; those are the ones with a guide.
+
+## Tips
+
+- Select elements **when the function runs**, not when you create the plugin. The new content is different elements.
+- If your CSS also fades the page (`html.is-animating ...`), the two will fight. Use `animationSelector: false` and do not give the container a `transition-` class.
+- Animate with `fromTo` or an explicit starting value in `in`, so the new page never shows at full opacity first.

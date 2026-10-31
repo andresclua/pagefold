@@ -1,0 +1,24 @@
+---
+title: "Body class"
+description: "Copy the class of the body from the new page, so page-specific styling keeps working."
+section: plugins
+order: 8
+whenToUse: "When your CSS depends on a class on the body, such as page-home or template-blog, and that class differs between pages."
+options:
+  - name: "prefix"
+    type: "string"
+    default: "''"
+    description: "Only manage classes that start with this. Classes added by your scripts to the body are left alone. Default: all classes."
+---
+
+Import it from `pagefold/body-class` (about 0.7 KB minified and compressed, shared code included).
+
+```js
+import PagefoldBodyClass from 'pagefold/body-class'
+
+new Pagefold({ plugins: [new PagefoldBodyClass({ prefix: 'page-' })] })
+```
+
+Only the containers are replaced, so without this plugin the body would keep the class of the first page.
+
+Without a `prefix`, the whole `class` attribute is replaced with the new page's. Use a prefix when JavaScript adds classes to the body (`js-ready`, `menu-open`) that must survive a visit.

@@ -1,0 +1,55 @@
+---
+title: "Debug"
+description: "See every hook, its visit and how long it took, and get warnings about common setup mistakes."
+section: plugins
+order: 9
+whenToUse: "While developing, or whenever something does not behave as you expect."
+options:
+  - name: "log"
+    type: "(message, ...details) => void"
+    default: "console.log"
+    description: "Where messages go."
+  - name: "filter"
+    type: "(hook: string) => boolean"
+    default: "() => true"
+    description: "Return false to hide a hook."
+  - name: "checkContainers"
+    type: "boolean"
+    default: "true"
+    description: "Warn at startup about containers that are not on the page."
+---
+
+Import it from `pagefold/debug` (about 1.0 KB minified and compressed, shared code included).
+
+```js
+import PagefoldDebug from 'pagefold/debug'
+
+new Pagefold({ plugins: [/* your plugins */, new PagefoldDebug()] })
+```
+
+Install it **last**, so it sees the hooks other plugins create.
+
+## What you see
+
+```text
+visit:start · visit #3 / → /about +0ms
+page:load · visit #3 / → /about +2ms
+animation:out:start · visit #3 / → /about +3ms
+content:replace · visit #3 / → /about +312ms
+visit:end · visit #3 / → /about +640ms
+```
+
+Each line has the hook, the visit id, where it goes and the time since the visit started. The arguments of the hook are logged next to it.
+
+## Also
+
+- Replaces `pagefold.log`, which other plugins use for their own messages, and puts it back when unmounted.
+- Warns when a configured container is missing from the page.
+
+To only see the visit lifecycle:
+
+```js
+new PagefoldDebug({ filter: (hook) => hook.startsWith('visit:') })
+```
+
+Remove it from production builds.

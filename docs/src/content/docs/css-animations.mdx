@@ -1,0 +1,92 @@
+---
+title: "Animating with CSS"
+description: "The default way to animate: write CSS transitions and let Pagefold wait for them."
+section: guides
+order: 1
+---
+
+Out of the box Pagefold animates with CSS. It adds [state classes](/docs/how-it-works#state-classes) to the `html` element, you write the transition, and it waits for the transition to finish before moving on.
+
+## The basic fade
+
+```css
+.transition-fade {
+  transition: opacity 0.4s;
+}
+
+html.is-animating .transition-fade {
+  opacity: 0;
+}
+```
+
+Pagefold finds the elements to wait for with `animationSelector`, which defaults to `[class*="transition-"]`: any element whose class contains `transition-`. It reads their computed `transition` and `animation` duration and delay and resolves when they end.
+
+## A slide in one direction
+
+```css
+.transition-slide {
+  transition: transform 0.4s, opacity 0.4s;
+}
+
+html.is-animating .transition-slide {
+  transform: translateY(2rem);
+  opacity: 0;
+}
+```
+
+## Different animations for different links
+
+Give a link a name and Pagefold adds `to-<name>` to the `html` element:
+
+```html
+<a href="/gallery" data-pagefold-animation="zoom">Gallery</a>
+```
+
+```css
+html.to-zoom.is-animating .transition-fade {
+  transform: scale(0.95);
+}
+```
+
+You can also pick the animation by route, with [Route name](/docs/route-name), or in code: `pagefold.navigate('/gallery', { animation: 'zoom' })`.
+
+## Different animations going in and out
+
+`is-leaving` is only present while the old page animates out. After the content is replaced, `is-rendering` is present until the visit ends. Combine either with `is-animating`, which is what makes the page move:
+
+```css
+.transition-fade {
+  transition: transform 0.4s, opacity 0.4s;
+}
+
+html.is-animating .transition-fade {
+  opacity: 0;
+}
+
+/* Out: slide to the left */
+html.is-leaving.is-animating .transition-fade {
+  transform: translateX(-2rem);
+}
+
+/* In: start from the right, then settle when is-animating is removed */
+html.is-rendering.is-animating .transition-fade {
+  transform: translateX(2rem);
+}
+```
+
+If you wrote `html.is-rendering .transition-fade` without `is-animating`, the offset would stay after the animation, because `is-rendering` is only removed at the very end of the visit.
+
+## Back and forward
+
+History visits are not animated by default. Use `animateHistoryBrowsing: true` to animate them, and `html.is-popstate` to style them differently.
+
+## Disabling the wait
+
+Set `animationSelector: false` to make Pagefold not wait for anything, for example when another system does the animating.
+
+## Pagefold warns me about the selector
+
+You will see one of these in the console while developing:
+
+- *No elements match animationSelector*: no element on the page has a class that matches. Add one, or change the selector.
+- *No CSS animation duration defined*: an element matches but has no `transition` or `animation`. Add one, or the visit will not wait.

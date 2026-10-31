@@ -1,0 +1,55 @@
+---
+title: "Fragment"
+description: "Replace only some containers for some visits, such as the detail panel of a list, and leave the rest of the page alone."
+section: plugins
+order: 13
+whenToUse: "For master-detail layouts, tabs, modals loaded from a URL, or any page where a part must stay untouched, playing or scrolled."
+options:
+  - name: "rules"
+    type: "FragmentRule[]"
+    default: "[]"
+    description: "Rules, checked in order. Each has from, to, containers, and optionally name and scroll."
+---
+
+Import it from `pagefold/fragment` (about 1.2 KB minified and compressed, shared code included).
+
+```js
+import PagefoldFragment from 'pagefold/fragment'
+
+new Pagefold({
+  containers: ['#list', '#detail'],
+  plugins: [
+    new PagefoldFragment({
+      rules: [
+        { from: '/users', to: '/users/:id', containers: ['#detail'], name: 'detail' },
+        { from: '/users/:id', to: '/users', containers: ['#detail'] },
+      ],
+    }),
+  ],
+})
+```
+
+Going from `/users` to `/users/7` replaces only `#detail`. The list, with its scroll position and its state, is not touched. Because rules match on the page you leave **and** the page you enter, the way back needs a rule of its own, as in the second entry.
+
+## A rule
+
+| Field | What it does |
+|---|---|
+| `from`, `to` | Path patterns, or a list of them. `:name` and `*` work as in [JS](/docs/js#matching). |
+| `containers` | The only containers replaced by matching visits |
+| `name` | Becomes the animation name, as `data-pagefold-animation` would |
+| `scroll` | Scroll to the top after the visit. Fragment visits keep the scroll position unless this is `true` |
+
+## Animations
+
+The animation classes go on the fragment containers, not on the `html` element, so the rest of the page is not animated. Style it like any other visit:
+
+```css
+#detail.is-animating {
+  opacity: 0;
+}
+```
+
+## When it falls back
+
+A rule is only used if **every container is on the current page**. If the new page does not contain one of them, Pagefold replaces all the normal containers instead of leaving a broken page. `visit.fragment` tells you whether a visit is a fragment visit.
