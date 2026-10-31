@@ -1,0 +1,8 @@
+body { font-family: system-ui; margin: 1rem; }
+nav a { margin-right: 1rem; }
+/* The usual pattern: the page fades out while the html element is animating */
+.transition-fade { transition: opacity 300ms; opacity: 1; }
+html.is-animating .transition-fade { opacity: 0; }
+/* Overlap: the incoming and the outgoing container fade at the same time */
+#pagefold.transition-fade.is-next-container,
+#pagefold.transition-fade.is-previous-container { opacity: 0; }

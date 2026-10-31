@@ -1,0 +1,313 @@
+import { expect, test, type Page } from '@playwright/test'
+
+interface Config {
+  options?: Record<string, unknown>
+  plugins?: [string, Record<string, unknown>?][]
+  record?: boolean
+  failOnClientErrors?: boolean
+}
+
+/** Open a page with a Pagefold instance built from `config` (see fixtures/boot.js). */
+async function open(page: Page, path: string, config: Config = {}) {
+  await page.addInitScript((c) => {
+    window.__pf = c
+  }, config)
+  await page.goto(path)
+  await page.waitForFunction(() => window.__ready === true)
+}
+
+const heading = (page: Page) => page.locator('#pagefold h1')
+const link = (page: Page, href: string) => page.locator(`nav a[href="${href}"]`)
+const opacity = (page: Page) =>
+  page.evaluate(() => Number(getComputedStyle(document.querySelector('#pagefold')!).opacity))
+
+test.describe('navigation', () => {
+  test('changes the page without loading a new document', async ({ page }) => {
+    await open(page, '/')
+    await page.evaluate(() => {
+      window.__marker = 'same document'
+    })
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await expect(page).toHaveURL(/\/about$/)
+    await expect(page).toHaveTitle('About')
+    expect(await page.evaluate(() => window.__marker)).toBe('same document')
+  })
+
+  test('back and forward buttons work', async ({ page }) => {
+    await open(page, '/')
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await page.goBack()
+    await expect(heading(page)).toHaveText('Home')
+    await expect(page).toHaveURL(/\/$/)
+    await page.goForward()
+    await expect(heading(page)).toHaveText('About')
+  })
+
+  test('a page visited twice is requested once', async ({ page }) => {
+    const requests: string[] = []
+    page.on('request', (r) => {
+      if (r.resourceType() === 'fetch') requests.push(new URL(r.url()).pathname)
+    })
+    await open(page, '/')
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await link(page, '/').click()
+    await expect(heading(page)).toHaveText('Home')
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    expect(requests.filter((p) => p === '/about')).toHaveLength(1)
+  })
+
+  test('links that opt out are a normal page load', async ({ page }) => {
+    await open(page, '/')
+    await page.evaluate(() => {
+      window.__marker = 'same document'
+      document.querySelector('nav a[href="/about"]')!.setAttribute('data-no-pagefold', '')
+    })
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    expect(await page.evaluate(() => window.__marker)).toBeUndefined()
+  })
+
+  test('a server error falls back to a normal page load', async ({ page }) => {
+    await open(page, '/')
+    await link(page, '/boom').click()
+    await expect(page).toHaveURL(/\/boom$/)
+    await expect(page.locator('body')).toHaveText('server error')
+  })
+
+  test('failOnStatus can treat client errors as failures too', async ({ page }) => {
+    await open(page, '/', { failOnClientErrors: true })
+    await page.evaluate(() => {
+      document.querySelector('nav')!.insertAdjacentHTML('beforeend', '<a href="/missing">missing</a>')
+    })
+    await page.locator('nav a[href="/missing"]').click()
+    await expect(page).toHaveURL(/\/missing$/)
+    await expect(page.locator('h1')).toHaveText('Not found')
+  })
+
+  test('a visit that starts while another loads cancels its request', async ({ page }) => {
+    const failed: string[] = []
+    page.on('requestfailed', (r) => failed.push(r.url()))
+    await open(page, '/')
+    await link(page, '/slow?ms=1500').click()
+    await page.waitForTimeout(200)
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await expect.poll(() => failed.some((u) => u.includes('/slow'))).toBe(true)
+    await page.waitForTimeout(1600) // the slow page must not show up late
+    await expect(heading(page)).toHaveText('About')
+  })
+})
+
+test.describe('animation', () => {
+  test('waits for the CSS transition before replacing the content', async ({ page }) => {
+    await open(page, '/')
+    const start = Date.now()
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    expect(Date.now() - start).toBeGreaterThanOrEqual(250) // the 300 ms fade
+  })
+
+  test('state classes are on the html element during the visit and gone after', async ({ page }) => {
+    await open(page, '/')
+    await link(page, '/about').click()
+    await page.waitForFunction(() => document.documentElement.classList.contains('is-animating'))
+    await expect(heading(page)).toHaveText('About')
+    await expect(page.locator('html')).not.toHaveClass(/is-/)
+  })
+
+  test('hooks run in order', async ({ page }) => {
+    await open(page, '/', { record: true })
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await page.waitForFunction(() => window.__events.includes('visit:end'))
+    const events = await page.evaluate(() => window.__events)
+    const order = ['link:click', 'visit:start', 'page:load', 'animation:out:start', 'content:replace', 'page:view', 'animation:in:start', 'visit:end']
+    expect(order.map((e) => events.indexOf(e))).toEqual([...order.map((e) => events.indexOf(e))].sort((a, b) => a - b))
+    expect(order.every((e) => events.includes(e))).toBe(true)
+  })
+
+  test('reduced motion skips the animation', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await open(page, '/', { plugins: [['a11y']], record: true })
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    const events = await page.evaluate(() => window.__events)
+    expect(events).toContain('animation:skip')
+    expect(events).not.toContain('animation:out:start')
+  })
+
+  test('the View Transitions API is used when asked for', async ({ page }) => {
+    await page.addInitScript(() => {
+      const original = document.startViewTransition?.bind(document)
+      window.__vt = 0
+      if (original) {
+        document.startViewTransition = ((...args: Parameters<typeof original>) => {
+          window.__vt = (window.__vt ?? 0) + 1
+          return original(...args)
+        }) as typeof document.startViewTransition
+      }
+    })
+    await open(page, '/', { options: { native: true } })
+    await expect(page.locator('html')).toHaveClass(/pagefold-native/)
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    expect(await page.evaluate(() => window.__vt)).toBe(1)
+  })
+})
+
+test.describe('animating in JavaScript', () => {
+  for (const engine of ['waapi', 'gsap', 'motion']) {
+    test(`works with ${engine}`, async ({ page }) => {
+      await open(page, '/plain', { plugins: [['js', { engine }]], options: { animationSelector: false } })
+      await link(page, '/plain-b').click()
+      // caught mid-fade: the engine really is driving the opacity
+      await page.waitForFunction(() => {
+        const o = Number(getComputedStyle(document.querySelector('#pagefold')!).opacity)
+        return o > 0.05 && o < 0.95
+      })
+      await expect(heading(page)).toHaveText('Plain B')
+      await expect.poll(() => opacity(page)).toBe(1)
+    })
+  }
+})
+
+test.describe('plugins', () => {
+  test('overlap keeps both pages in the DOM while they animate', async ({ page }) => {
+    await open(page, '/', { plugins: [['overlap']] })
+    await link(page, '/about').click()
+    await page.waitForFunction(() => document.querySelectorAll('#pagefold').length === 2)
+    await expect(page.locator('#pagefold')).toHaveCount(1)
+    await expect(heading(page)).toHaveText('About')
+  })
+
+  test('preload fetches on hover and the click reuses it', async ({ page }) => {
+    const requests: string[] = []
+    page.on('request', (r) => {
+      if (r.resourceType() === 'fetch') requests.push(new URL(r.url()).pathname)
+    })
+    await open(page, '/', { plugins: [['preload', { hoverDelay: 0, preloadInitialPage: false }]] })
+    await link(page, '/about').hover()
+    await expect.poll(() => requests.includes('/about')).toBe(true)
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    expect(requests.filter((p) => p === '/about')).toHaveLength(1)
+  })
+
+  test('preload can fetch links that scroll into view', async ({ page }) => {
+    const requests: string[] = []
+    page.on('request', (r) => {
+      if (r.resourceType() === 'fetch') requests.push(new URL(r.url()).pathname)
+    })
+    await open(page, '/', {
+      plugins: [['preload', { preloadHoveredLinks: false, preloadInitialPage: false, preloadVisibleLinks: { delay: 100 } }]],
+    })
+    await expect.poll(() => requests.includes('/about')).toBe(true)
+  })
+
+  test('head updates meta tags and waits for new stylesheets', async ({ page }) => {
+    await open(page, '/head-a', { plugins: [['head', { awaitAssets: true }]] })
+    await page.evaluate(() => window.pagefold.navigate('/head-b'))
+    await page.waitForFunction(() => document.querySelector('#pagefold h1')?.textContent === 'Head B')
+    // already styled by the time the page is shown: it waited for the 500 ms stylesheet
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector('#pagefold')!).borderLeftColor)).toBe('rgb(0, 0, 255)')
+    await expect(page.locator('meta[name=description]')).toHaveAttribute('content', 'about b')
+    await expect(page).toHaveTitle('Head B')
+    await expect(page.locator('link[href="/css/a.css"]')).toHaveCount(0)
+  })
+
+  test('scripts in the new page run once per visit', async ({ page }) => {
+    await open(page, '/', { plugins: [['scripts']] })
+    await page.evaluate(() => window.pagefold.navigate('/scripts'))
+    await expect(heading(page)).toHaveText('Scripts')
+    expect(await page.evaluate(() => window.__ran)).toBe(1)
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await page.evaluate(() => window.pagefold.navigate('/scripts'))
+    await expect(heading(page)).toHaveText('Scripts')
+    expect(await page.evaluate(() => window.__ran)).toBe(2)
+  })
+
+  test('a11y announces the page and moves focus', async ({ page }) => {
+    await open(page, '/', { plugins: [['a11y']] })
+    await link(page, '/about').click()
+    await expect(page.locator('.pagefold-announcer')).toHaveText('Navigated to: About')
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe('pagefold')
+  })
+
+  test('body-class takes the class of the new page', async ({ page }) => {
+    await open(page, '/', { plugins: [['body-class']] })
+    await link(page, '/about').click()
+    await expect(page.locator('body')).toHaveClass('about-page')
+  })
+
+  test('progress shows a bar during a slow visit and removes it after', async ({ page }) => {
+    await open(page, '/', { plugins: [['progress', { delay: 100, transition: 100 }]] })
+    await link(page, '/slow?ms=1500').click()
+    await expect(page.locator('.pagefold-progress-bar')).toBeAttached()
+    await expect(heading(page)).toHaveText('Slow')
+    await expect(page.locator('.pagefold-progress-bar')).toHaveCount(0)
+  })
+
+  test('forms: a GET form becomes a visit', async ({ page }) => {
+    await open(page, '/form', { plugins: [['forms']] })
+    await page.locator('#get button').click()
+    await expect(heading(page)).toHaveText('Results')
+    await expect(page.locator('#q')).toHaveText('cats')
+    await expect(page).toHaveURL(/\/search\?q=cats$/)
+  })
+
+  test('forms: a POST form sends its fields', async ({ page }) => {
+    await open(page, '/form', { plugins: [['forms']] })
+    await page.locator('#post button').click()
+    await expect(page.locator('#method')).toHaveText('POST')
+    await expect(page.locator('#body')).toHaveText('note=hello')
+  })
+
+  test('fragment replaces only the detail panel', async ({ page }) => {
+    const rules = [
+      { from: '/list', to: '/detail/:id', containers: ['#detail'], name: 'detail' },
+      { from: '/detail/:id', to: '/list', containers: ['#detail'] },
+    ]
+    await open(page, '/list', { options: { containers: ['#list', '#detail'] }, plugins: [['fragment', { rules }]] })
+    await page.evaluate(() => document.querySelector('#list')!.setAttribute('data-keep', 'yes'))
+    await page.locator('#list a[href="/detail/1"]').click()
+    await expect(page.locator('#detail')).toHaveText('detail one')
+    // the list node was not replaced: it still has its marker and its original links
+    await expect(page.locator('#list')).toHaveAttribute('data-keep', 'yes')
+    await expect(page.locator('#list a[href="/detail/2"]')).toHaveCount(1)
+    await expect(page).toHaveURL(/\/detail\/1$/)
+  })
+})
+
+test.describe('scrolling', () => {
+  const scrollY = (page: Page) => page.evaluate(() => window.scrollY)
+
+  test('a new page starts at the top', async ({ page }) => {
+    await open(page, '/long')
+    await page.evaluate(() => window.scrollTo(0, 2000))
+    await page.evaluate(() => document.querySelector<HTMLElement>('nav a[href="/long"]')!.click())
+    await expect.poll(() => scrollY(page)).toBe(0)
+  })
+
+  test('the scroll plugin animates there', async ({ page }) => {
+    await open(page, '/long', { plugins: [['scroll', { duration: 800 }]] })
+    await page.evaluate(() => window.scrollTo(0, 2000))
+    await page.evaluate(() => document.querySelector<HTMLElement>('nav a[href="/long"]')!.click())
+    await page.waitForFunction(() => window.scrollY > 100 && window.scrollY < 1900) // in between
+    await expect.poll(() => scrollY(page)).toBe(0)
+  })
+
+  test('a link to an anchor on another page lands on it', async ({ page }) => {
+    await open(page, '/', { plugins: [['scroll', { duration: 300 }]] })
+    await page.locator('#to-long-hash').click()
+    await expect(page).toHaveURL(/\/long#bottom$/)
+    await page.waitForFunction(() => {
+      const target = document.querySelector('#bottom')
+      return !!target && Math.abs(target.getBoundingClientRect().top) < 5
+    })
+  })
+})

@@ -76,6 +76,21 @@ describe('PagefoldA11y', () => {
     expect(document.activeElement?.id).toBe('search')
   })
 
+  test('focus leaves the link that was clicked', async () => {
+    make()
+    document.querySelector<HTMLElement>('#link')?.focus()
+    await pf.navigate('/a')
+    expect(document.activeElement?.id).toBe('pagefold')
+  })
+
+  test('does not steal focus from an element marked as persistent', async () => {
+    document.body.insertAdjacentHTML('beforeend', '<div data-pagefold-persist="player"><button id="play">play</button></div>')
+    make()
+    document.querySelector<HTMLElement>('#play')?.focus()
+    await pf.navigate('/a')
+    expect(document.activeElement?.id).toBe('play')
+  })
+
   test('focus: false leaves focus alone', async () => {
     make({ focus: false })
     await pf.navigate('/a')

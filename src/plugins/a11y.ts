@@ -16,6 +16,9 @@ export interface A11yOptions {
   respectReducedMotion: boolean
 }
 
+/** Focus here stays where it is */
+const KEEP_FOCUS = 'input, textarea, select, [contenteditable], [data-pagefold-persist]'
+
 const HIDDEN =
   'position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0'
 
@@ -109,10 +112,12 @@ export default class PagefoldA11y extends Plugin {
     }, 100)
   }
 
-  /** Leave focus alone if it is already somewhere that survived the visit, such as a persisted player. */
+  /**
+   * Move focus to the content, except while the user is typing or is inside an element that
+   * persists across pages. The link that was clicked does not count: its focus should move on.
+   */
   private focusContent(fallbackSelector: string | undefined): void {
-    const active = document.activeElement
-    if (active && active !== document.body && document.contains(active)) return
+    if (document.activeElement?.closest(KEEP_FOCUS)) return
     const selector = this.options.contentSelector ?? fallbackSelector
     const content = selector ? document.querySelector<HTMLElement>(selector) : null
     if (content) focusElement(content)
