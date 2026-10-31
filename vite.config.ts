@@ -9,7 +9,7 @@ const entry = {
   head: 'src/plugins/head.ts',
   scripts: 'src/plugins/scripts.ts',
   js: 'src/plugins/js.ts',
-  parallel: 'src/plugins/parallel.ts',
+  overlap: 'src/plugins/overlap.ts',
 }
 
 export default defineConfig({

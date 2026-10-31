@@ -42,10 +42,10 @@
       "import": "./dist/js.js",
       "require": "./dist/js.cjs"
     },
-    "./parallel": {
-      "types": "./dist/plugins/parallel.d.ts",
-      "import": "./dist/parallel.js",
-      "require": "./dist/parallel.cjs"
+    "./overlap": {
+      "types": "./dist/plugins/overlap.d.ts",
+      "import": "./dist/overlap.js",
+      "require": "./dist/overlap.cjs"
     }
   },
   "files": [

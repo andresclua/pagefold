@@ -23,8 +23,8 @@ declare module '../hooks' {
   }
 }
 
-export interface ParallelOptions {
-  /** Containers animated in parallel. Default: all containers of the visit */
+export interface OverlapOptions {
+  /** Containers whose old and new versions overlap. Default: all containers of the visit */
   containers: string[]
   /** How many previous containers to keep after the animation, in total or per selector */
   keep: number | Record<string, number>
@@ -33,20 +33,20 @@ export interface ParallelOptions {
 /**
  * Animate the old and the new page at the same time. The new container is inserted next to
  * the old one, both stay in the DOM while the animation runs, and the old one is removed after.
- * Disable it for a visit with `visit.animation.parallel = false` in a `visit:start` handler.
+ * Disable it for a visit with `visit.animation.overlap = false` in a `visit:start` handler.
  */
-export default class PagefoldParallel extends Plugin {
-  name = 'PagefoldParallel'
+export default class PagefoldOverlap extends Plugin {
+  name = 'PagefoldOverlap'
 
-  options: ParallelOptions
-  static defaults: ParallelOptions = { containers: [], keep: 0 }
+  options: OverlapOptions
+  static defaults: OverlapOptions = { containers: [], keep: 0 }
 
   private sets: ContainerSet[] = []
   private originalContainers: string[] | undefined
 
-  constructor(options: Partial<ParallelOptions> = {}) {
+  constructor(options: Partial<OverlapOptions> = {}) {
     super()
-    this.options = { ...PagefoldParallel.defaults, ...options }
+    this.options = { ...PagefoldOverlap.defaults, ...options }
   }
 
   override mount(): void {
@@ -68,25 +68,25 @@ export default class PagefoldParallel extends Plugin {
 
   private markVisit: HookHandler<'visit:start'> = (visit) => {
     this.originalContainers = undefined
-    if (visit.animation.parallel === false) return
+    if (visit.animation.overlap === false) return
     if (this.selectorsFor(visit).some((s) => document.querySelector(s))) {
       visit.animation.wait = true // the new page must be loaded before it can be inserted
-      visit.animation.parallel = true
+      visit.animation.overlap = true
     }
   }
 
   private skipOutAnimation: HookHandler<'animation:out:await'> = (visit, args) => {
-    if (visit.animation.parallel) args.skip = true
+    if (visit.animation.overlap) args.skip = true
   }
 
   private insertContainers: HookHandler<'content:replace'> = async (visit) => {
-    if (!visit.animation.parallel) return
+    if (!visit.animation.overlap) return
     const sets = this.buildSets(visit)
     this.sets = sets
 
     await this.pagefold.hooks.call('content:insert', { containers: sets }, () => {
       for (const { all, next, previous, keep, remove } of sets) {
-        all.forEach((el, i) => el.style.setProperty('--pagefold-parallel-container', String(i)))
+        all.forEach((el, i) => el.style.setProperty('--pagefold-overlap-container', String(i)))
         previous.setAttribute('aria-hidden', 'true')
         previous.before(next)
 
@@ -133,7 +133,7 @@ export default class PagefoldParallel extends Plugin {
       const existing = Array.from(document.querySelectorAll<HTMLElement>(selector))
       const previous = existing[0]
       if (!next || !previous) {
-        console.warn(`[pagefold] Parallel container ${selector} not found`)
+        console.warn(`[pagefold] Overlap container ${selector} not found`)
         continue
       }
       const count = Math.max(0, Number(typeof keepOption === 'object' ? keepOption[selector] ?? 0 : keepOption))

@@ -53,7 +53,7 @@ export class Visit {
     scope: 'html' | 'containers' | string[]
     selector: string | false
     /** Plugins may add their own flags */
-    parallel?: boolean
+    overlap?: boolean
   }
   trigger: { el?: Element | undefined; event?: Event | undefined }
   cache: { read: boolean; write: boolean }

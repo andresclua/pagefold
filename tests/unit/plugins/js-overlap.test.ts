@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { Pagefold } from '../../../src/pagefold'
 import PagefoldJs from '../../../src/plugins/js'
 import { matchPath } from '../../../src/plugins/match-path'
-import PagefoldParallel from '../../../src/plugins/parallel'
+import PagefoldOverlap from '../../../src/plugins/overlap'
 import { page, resetDom, stubFetch } from './helpers'
 
 let pf: Pagefold
@@ -119,7 +119,7 @@ describe('PagefoldJs', () => {
   })
 })
 
-describe('PagefoldParallel', () => {
+describe('PagefoldOverlap', () => {
   beforeEach(() => {
     resetDom('<div id="pagefold">old</div>')
     stubFetch({ '/a': page('', 'new') })
@@ -129,7 +129,7 @@ describe('PagefoldParallel', () => {
 
   test('keeps both containers while the page animates in, then removes the old one', async () => {
     let release!: () => void
-    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldParallel()] })
+    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldOverlap()] })
     pf.hooks.replace('animation:in:await', () => new Promise<void>((r) => (release = r)), { once: true })
 
     const visit = pf.navigate('/a')
@@ -148,7 +148,7 @@ describe('PagefoldParallel', () => {
   })
 
   test('skips the out animation (both run at once)', async () => {
-    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldParallel()] })
+    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldOverlap()] })
     const skip = vi.fn()
     pf.hooks.on('animation:out:await', (_v, args) => skip(args.skip), { priority: 2 })
     await pf.navigate('/a')
@@ -156,7 +156,7 @@ describe('PagefoldParallel', () => {
   })
 
   test('keep leaves the previous containers in place', async () => {
-    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldParallel({ keep: 1 })] })
+    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldOverlap({ keep: 1 })] })
     await pf.navigate('/a')
     expect(containers()).toHaveLength(2)
     expect(containers()[0]?.textContent).toBe('new')
@@ -165,9 +165,9 @@ describe('PagefoldParallel', () => {
   })
 
   test('can be disabled per visit', async () => {
-    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldParallel()] })
+    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldOverlap()] })
     pf.hooks.on('visit:start', (visit) => {
-      visit.animation.parallel = false
+      visit.animation.overlap = false
     })
     await pf.navigate('/a')
     expect(containers()).toHaveLength(1)
@@ -180,7 +180,7 @@ describe('PagefoldParallel', () => {
     pf = new Pagefold({
       animationSelector: false,
       containers: ['#pagefold', '#aside'],
-      plugins: [new PagefoldParallel({ containers: ['#pagefold'] })],
+      plugins: [new PagefoldOverlap({ containers: ['#pagefold'] })],
     })
     await pf.navigate('/a')
     expect(document.querySelector('#aside')?.textContent).toBe('new aside')
