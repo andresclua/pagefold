@@ -37,6 +37,8 @@ async function engineAnimations(engine) {
   ]
 }
 
+if (cfg.alpine) await loadScript('/vendor/alpine.js')
+
 const plugins = []
 for (const [name, options = {}] of cfg.plugins ?? []) {
   const { default: Plugin } = await import(`/dist/${name}.js`)

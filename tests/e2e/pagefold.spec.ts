@@ -4,6 +4,7 @@ interface Config {
   options?: Record<string, unknown>
   plugins?: [string, Record<string, unknown>?][]
   record?: boolean
+  alpine?: boolean
   failOnClientErrors?: boolean
 }
 
@@ -170,6 +171,28 @@ test.describe('animation', () => {
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
     expect(await page.evaluate(() => window.__vt)).toBe(1)
+  })
+})
+
+test.describe('Alpine.js', () => {
+  test('components in a new page start working, and the old ones are gone', async ({ page }) => {
+    await open(page, '/alpine-a', { alpine: true })
+    const counter = page.locator('#n')
+    await page.locator('#inc').click()
+    await page.locator('#inc').click()
+    await expect(counter).toHaveText('2')
+
+    await page.evaluate(() => void window.pagefold.navigate('/alpine-b'))
+    await expect(heading(page)).toHaveText('Alpine B')
+    await expect(counter).toHaveText('10') // initialized by Alpine, nothing for us to do
+    await page.locator('#inc').click()
+    await expect(counter).toHaveText('11')
+
+    await page.goBack()
+    await expect(heading(page)).toHaveText('Alpine A')
+    await expect(counter).toHaveText('0') // a fresh component from the cached page
+    await page.locator('#inc').click()
+    await expect(counter).toHaveText('1')
   })
 })
 

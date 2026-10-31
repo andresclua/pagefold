@@ -27,6 +27,8 @@ const pages = {
   '/long': { title: 'Long', body: long },
   '/slide-a': { title: 'Slide A', body: '<h1>Slide A</h1>', cls: 'transition-slide', head: '<link rel="stylesheet" href="/dist/css/slide.css">' },
   '/slide-b': { title: 'Slide B', body: '<h1>Slide B</h1>', cls: 'transition-slide', head: '<link rel="stylesheet" href="/dist/css/slide.css">' },
+  '/alpine-a': { title: 'Alpine A', body: '<h1>Alpine A</h1><div x-data="{ n: 0 }"><button id="inc" @click="n++">+</button> <span id="n" x-text="n"></span></div>' },
+  '/alpine-b': { title: 'Alpine B', body: '<h1>Alpine B</h1><div x-data="{ n: 10 }"><button id="inc" @click="n++">+</button> <span id="n" x-text="n"></span></div>' },
   '/plain': { title: 'Plain', body: '<h1>Plain</h1>', cls: '' },
   '/plain-b': { title: 'Plain B', body: '<h1>Plain B</h1>', cls: '' },
   '/head-a': {
@@ -80,6 +82,7 @@ createServer(async (req, res) => {
   if (pathname.startsWith('/dist/')) return serveFile(res, ROOT + pathname.slice(1))
   if (pathname.startsWith('/fixtures/')) return serveFile(res, ROOT + 'tests/e2e' + pathname)
   if (pathname === '/vendor/gsap.js') return serveFile(res, ROOT + 'node_modules/gsap/dist/gsap.min.js')
+  if (pathname === '/vendor/alpine.js') return serveFile(res, ROOT + 'node_modules/alpinejs/dist/cdn.min.js')
   if (pathname === '/vendor/motion.js') return serveFile(res, ROOT + 'node_modules/motion/dist/motion.js')
 
   if (pathname.startsWith('/css/')) {
