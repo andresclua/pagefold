@@ -51,6 +51,16 @@
       "types": "./dist/plugins/preload.d.ts",
       "import": "./dist/preload.js",
       "require": "./dist/preload.cjs"
+    },
+    "./a11y": {
+      "types": "./dist/plugins/a11y.d.ts",
+      "import": "./dist/a11y.js",
+      "require": "./dist/a11y.cjs"
+    },
+    "./scroll": {
+      "types": "./dist/plugins/scroll.d.ts",
+      "import": "./dist/scroll.js",
+      "require": "./dist/scroll.cjs"
     }
   },
   "files": [

@@ -11,6 +11,8 @@ const entry = {
   js: 'src/plugins/js.ts',
   overlap: 'src/plugins/overlap.ts',
   preload: 'src/plugins/preload.ts',
+  a11y: 'src/plugins/a11y.ts',
+  scroll: 'src/plugins/scroll.ts',
 }
 
 export default defineConfig({
