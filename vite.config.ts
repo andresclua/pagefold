@@ -3,16 +3,26 @@ import { defineConfig } from 'vite'
 
 const { version } = JSON.parse(readFileSync('./package.json', 'utf8')) as { version: string }
 
-// Single entry for now; add one entry per module (head, preload...) as they land
+// One entry per module, so bundlers only include what you import
+const entry = {
+  index: 'src/index.ts',
+  head: 'src/plugins/head.ts',
+  scripts: 'src/plugins/scripts.ts',
+  js: 'src/plugins/js.ts',
+  parallel: 'src/plugins/parallel.ts',
+}
+
 export default defineConfig({
   define: { __VERSION__: JSON.stringify(version) },
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry,
       formats: ['es', 'cjs'],
-      fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
+      fileName: (format, name) => `${name}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     sourcemap: true,
     target: 'es2020',
+    // CommonJS users read the class from `.default`, the same shape for every module
+    rollupOptions: { output: { exports: 'named' } },
   },
 })

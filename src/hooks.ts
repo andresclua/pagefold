@@ -1,8 +1,8 @@
 import type { FetchOptions, PageData } from './types'
 import { Visit } from './visit'
 
-/** Arguments of every hook. Plugins add their own by augmenting this interface. */
-export interface HookDefinitions {
+/** Built-in hooks. */
+interface CoreHooks {
   'animation:out:start': undefined
   'animation:out:await': { skip: boolean }
   'animation:out:end': undefined
@@ -34,6 +34,10 @@ export interface HookDefinitions {
   'visit:end': undefined
   'visit:fail': { error: unknown }
 }
+
+/** Arguments of every hook. Plugins add their own by augmenting this interface. */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface HookDefinitions extends CoreHooks {}
 
 /** Hooks whose default handler returns something useful. */
 export interface HookReturnValues {
@@ -79,7 +83,7 @@ export type HookInitOptions = {
 }
 
 // Typed as a Record so the compiler fails when a hook is added to HookDefinitions but not here.
-const hookNames: Record<HookName, true> = {
+const hookNames: Record<keyof CoreHooks, true> = {
   'animation:out:start': true,
   'animation:out:await': true,
   'animation:out:end': true,
