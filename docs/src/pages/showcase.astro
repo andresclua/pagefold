@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content'
+import { Image } from 'astro:assets'
+import Base from '../layouts/Base.astro'
+
+const projects = (await getCollection('showcase')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+)
+---
+
+<Base title="Showcase" description="Sites built with Pagefold.">
+  <h1>Showcase</h1>
+  {
+    projects.length ? (
+      <ul class="grid">
+        {projects.map((p) => (
+          <li>
+            <a href={p.data.url}>
+              <Image src={p.data.cover} alt="" width={640} />
+              <strong>{p.data.title}</strong>
+            </a>
+            <span>by {p.data.author}</span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>
+        Nothing here yet. Built something with Pagefold?{' '}
+        <a href="https://github.com/andresclua/pagefold/blob/main/CONTRIBUTING.md#showcase">
+          Add it with a pull request.
+        </a>
+      </p>
+    )
+  }
+</Base>
+
+<style>
+  .grid {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1.5rem;
+  }
+  li {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--surface);
+  }
+  img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  span {
+    display: block;
+    color: var(--muted);
+  }
+</style>

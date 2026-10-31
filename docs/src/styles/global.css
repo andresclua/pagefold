@@ -1,0 +1,71 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+/* Brand tokens. Dark is the brand default; the light palette follows the OS setting. */
+:root {
+  --bg: #0a0a0a;
+  --surface: #1a1a1a;
+  --border: #2c2c2c;
+  --text: #fafaf8;
+  --muted: #a3a39e;
+  --primary: #1b1bff;
+  --accent: #00ff9c;
+  --link: var(--accent); /* primary on dark is only ~2.5:1, so links use the accent */
+  --on-primary: #fafaf8;
+  --font-head: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --font-body: 'Inter Variable', system-ui, sans-serif;
+  color-scheme: dark light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #fafaf8;
+    --surface: #f0f0ec;
+    --border: #e0e0d9;
+    --text: #0a0a0a;
+    --muted: #5c5c57;
+    --link: var(--primary); /* ~7.6:1 on the light background */
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.65 var(--font-body);
+}
+
+h1,
+h2,
+h3,
+code,
+pre {
+  font-family: var(--font-head);
+}
+
+a {
+  color: var(--link);
+}
+
+:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.wrap {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}

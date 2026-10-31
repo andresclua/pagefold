@@ -1,0 +1,52 @@
+---
+import '../styles/global.css'
+
+interface Props {
+  title: string
+  description?: string
+}
+const { title, description = 'Page transitions for server-rendered websites.' } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title} · Pagefold</title>
+  </head>
+  <body>
+    <header class="wrap bar">
+      <a href="/" class="brand">Pagefold</a>
+      <nav aria-label="Main">
+        <a href="/docs/getting-started">Docs</a>
+        <a href="/showcase">Showcase</a>
+        <a href="https://github.com/andresclua/pagefold">GitHub</a>
+      </nav>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style>
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    font-family: var(--font-head);
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+  nav {
+    display: flex;
+    gap: 1.25rem;
+  }
+</style>
