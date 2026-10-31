@@ -42,8 +42,14 @@ let nextId = 0
 export class Visit {
   readonly id = ++nextId
   state: VisitState = VisitState.CREATED
-  from: { url: string; hash?: string | undefined }
-  to: { url: string; hash?: string | undefined; html?: string; document?: Document }
+  from: { url: string; hash?: string | undefined; route?: string | undefined }
+  to: {
+    url: string
+    hash?: string | undefined
+    route?: string | undefined
+    html?: string
+    document?: Document
+  }
   containers: string[]
   animation: {
     animate: boolean

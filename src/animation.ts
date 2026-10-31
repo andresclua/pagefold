@@ -4,10 +4,14 @@ import { queryAll } from './utils'
 const END = { transition: 'transitionend', animation: 'animationend' } as const
 type Kind = keyof typeof END
 
-const MANAGED = /^(to-.+|is-(animating|changing|leaving|rendering|popstate))$/
+/** State classes Pagefold always manages. Anything else it adds is tracked. */
+const STATE_CLASSES = ['is-animating', 'is-changing', 'is-leaving', 'is-rendering', 'is-popstate']
 
 /** Adds and removes the state classes (`is-animating`, `to-blog`...) that CSS hooks into. */
 export class Classes {
+  /** Classes added through `add`, so `clear` never touches the page's own classes */
+  private added = new Set<string>()
+
   constructor(private owner: { visit: Visit }) {}
 
   private targets(): Element[] {
@@ -18,6 +22,7 @@ export class Classes {
   }
 
   add(...classes: string[]): void {
+    classes.forEach((c) => this.added.add(c))
     this.targets().forEach((el) => el.classList.add(...classes))
   }
 
@@ -25,11 +30,11 @@ export class Classes {
     this.targets().forEach((el) => el.classList.remove(...classes))
   }
 
-  /** Remove every class Pagefold manages. */
+  /** Remove every class Pagefold added. */
   clear(): void {
-    this.targets().forEach((el) => {
-      el.classList.remove(...Array.from(el.classList).filter((c) => MANAGED.test(c)))
-    })
+    const all = [...STATE_CLASSES, ...this.added]
+    this.targets().forEach((el) => el.classList.remove(...all))
+    this.added.clear()
   }
 }
 

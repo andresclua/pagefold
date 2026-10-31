@@ -13,6 +13,12 @@ const entry = {
   preload: 'src/plugins/preload.ts',
   a11y: 'src/plugins/a11y.ts',
   scroll: 'src/plugins/scroll.ts',
+  'body-class': 'src/plugins/body-class.ts',
+  'debug': 'src/plugins/debug.ts',
+  'route-name': 'src/plugins/route-name.ts',
+  'progress': 'src/plugins/progress.ts',
+  'forms': 'src/plugins/forms.ts',
+  'fragment': 'src/plugins/fragment.ts',
 }
 
 export default defineConfig({

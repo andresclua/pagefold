@@ -61,6 +61,36 @@
       "types": "./dist/plugins/scroll.d.ts",
       "import": "./dist/scroll.js",
       "require": "./dist/scroll.cjs"
+    },
+    "./body-class": {
+      "types": "./dist/plugins/body-class.d.ts",
+      "import": "./dist/body-class.js",
+      "require": "./dist/body-class.cjs"
+    },
+    "./debug": {
+      "types": "./dist/plugins/debug.d.ts",
+      "import": "./dist/debug.js",
+      "require": "./dist/debug.cjs"
+    },
+    "./route-name": {
+      "types": "./dist/plugins/route-name.d.ts",
+      "import": "./dist/route-name.js",
+      "require": "./dist/route-name.cjs"
+    },
+    "./progress": {
+      "types": "./dist/plugins/progress.d.ts",
+      "import": "./dist/progress.js",
+      "require": "./dist/progress.cjs"
+    },
+    "./forms": {
+      "types": "./dist/plugins/forms.d.ts",
+      "import": "./dist/forms.js",
+      "require": "./dist/forms.cjs"
+    },
+    "./fragment": {
+      "types": "./dist/plugins/fragment.d.ts",
+      "import": "./dist/fragment.js",
+      "require": "./dist/fragment.cjs"
     }
   },
   "files": [

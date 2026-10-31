@@ -1,5 +1,5 @@
 // Fails when the minified + gzipped core exceeds the budget. Also reports each module.
-import { readdirSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { gzipSync } from 'node:zlib'
 import { build } from 'esbuild'
 
@@ -21,8 +21,9 @@ const core = await sizeOf('dist/index.js')
 console.log(`core: ${core} B minified+gzip (budget ${BUDGET} B)`)
 
 // Standalone size of each module, including the shared code it pulls in
-for (const file of readdirSync('dist').filter((f) => f.endsWith('.js') && f !== 'index.js' && !f.includes('-'))) {
-  console.log(`${file.replace('.js', '')}: ${await sizeOf(`dist/${file}`)} B`)
+const { exports } = JSON.parse(readFileSync('package.json', 'utf8'))
+for (const name of Object.keys(exports).filter((k) => k !== '.')) {
+  console.log(`${name.slice(2)}: ${await sizeOf(`dist/${name.slice(2)}.js`)} B`)
 }
 
 if (core > BUDGET) {

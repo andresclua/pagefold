@@ -141,6 +141,11 @@ export class Hooks {
     return this.registry.has(hook)
   }
 
+  /** Names of all hooks, built-in and custom. */
+  names(): string[] {
+    return [...this.registry.keys()]
+  }
+
   on<T extends HookName>(
     hook: T,
     handler: HookHandler<T>,
