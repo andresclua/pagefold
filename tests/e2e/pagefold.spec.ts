@@ -71,6 +71,20 @@ test.describe('navigation', () => {
     expect(await page.evaluate(() => window.__marker)).toBeUndefined()
   })
 
+  test('visit.ignore() in link:click hands the visit to the browser', async ({ page }) => {
+    await open(page, '/')
+    await page.evaluate(() => {
+      window.__marker = 'same document'
+      window.pagefold.hooks.before('link:click', (visit) => {
+        visit.ignore()
+      })
+    })
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await expect(page).toHaveURL(/\/about$/)
+    expect(await page.evaluate(() => window.__marker)).toBeUndefined() // a full page load
+  })
+
   test('a server error falls back to a normal page load', async ({ page }) => {
     await open(page, '/')
     await link(page, '/boom').click()

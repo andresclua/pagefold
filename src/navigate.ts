@@ -120,7 +120,7 @@ export async function performNavigation(
 
   try {
     await p.hooks.call('visit:start', visit, undefined)
-    visit.state = VisitState.STARTED
+    visit.advance(VisitState.STARTED) // never undo an ignore() made before this point
 
     const loading = p.hooks.call('page:load', visit, { options }, async (v, args) => {
       const cached = v.cache.read ? p.cache.get(v.to.url) : undefined
