@@ -1,0 +1,48 @@
+---
+title: "Using Pagefold with Alpine.js"
+description: "Alpine components in a new page start by themselves. Nothing to wire up."
+section: guides
+order: 11
+---
+
+[Alpine.js](https://alpinejs.dev) watches the page for new elements and initializes them. That is exactly what happens when Pagefold inserts a new page, so **it works without any code**.
+
+```js
+import Alpine from 'alpinejs'
+import Pagefold from 'pagefold'
+
+window.Alpine = Alpine
+Alpine.start()
+
+new Pagefold()
+```
+
+```html
+<main id="pagefold">
+  <div x-data="{ open: false }">
+    <button @click="open = !open">Menu</button>
+    <nav x-show="open">...</nav>
+  </div>
+</main>
+```
+
+## What you get
+
+- Components in the **new page** are initialized when the content is inserted.
+- Components in the **old page** are destroyed by Alpine when their elements are removed.
+- Going back to a cached page builds a **fresh** component: its state starts again from `x-data`.
+- Components **outside** the container, such as a header menu, keep their state across visits.
+
+## Keeping state across pages
+
+State lives in the component, so it is lost when the element is replaced. To keep it, either put the component outside the container, mark the element with `data-pagefold-persist="name"`, or use a store:
+
+```js
+Alpine.store('cart', { items: [] })
+```
+
+Stores live outside the DOM and survive every visit.
+
+## Checked
+
+The project's browser tests cover this in Chromium, Firefox and WebKit: a counter in the first page, a different one in the second, and a fresh one after going back.

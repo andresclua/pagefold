@@ -1,0 +1,62 @@
+---
+title: "Using Pagefold with Astro"
+description: "Add page transitions to an Astro site, with a layout, a script and the plugins you need."
+section: guides
+order: 10
+---
+
+Astro builds pages that are plain HTML, which is what Pagefold expects. This documentation site is built exactly like this, and it navigates with Pagefold.
+
+## 1. The layout
+
+Put what changes in an element with an `id`, and what stays outside it:
+
+```astro
+---
+// src/layouts/Base.astro
+import 'pagefold/css/fade.css'
+---
+
+<html lang="en">
+  <head>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <header><!-- stays --></header>
+
+    <main id="pagefold" class="transition-fade">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<script>
+  import Pagefold from 'pagefold'
+  import PagefoldHead from 'pagefold/head'
+  import PagefoldA11y from 'pagefold/a11y'
+
+  new Pagefold({
+    plugins: [new PagefoldHead({ awaitAssets: true }), new PagefoldA11y()],
+  })
+</script>
+```
+
+Astro bundles that script for the browser. Because the layout is shared, it is on every page and runs once.
+
+## 2. Why these plugins
+
+- **Head**: Astro gives every page its own title, description and, depending on its styles, its own stylesheets. Without it, they would not change. `awaitAssets: true` waits for new stylesheets, so a page never appears unstyled.
+- **A11y**: announces the page and moves focus.
+
+Add [Preload](/docs/preload), [Scroll](/docs/scroll) and [Progress](/docs/progress) the same way.
+
+## Things to know
+
+- **Do not use Astro's own `<ClientRouter />` at the same time.** Both would try to handle the same clicks.
+- **Scripts of your own pages.** Astro publishes a page's `<script>` as a module, and the browser runs a module only once per document, even if its tag appears again. Code that must run on every visit belongs in a function that you call from the `page:view` hook.
+- **Components that initialize in JavaScript** need the pattern in [Initializing components](/docs/components).
+
+## Checked
+
+The documentation site you are reading is the check: the layout above, with Head, A11y, Scroll and Preload, was exercised in a browser. Links navigate without a reload, the title and description change, focus moves, the page is announced, the menu highlights the current page, and the back button works.

@@ -1,0 +1,56 @@
+---
+title: "Analytics"
+description: "Report a page view to Google Analytics 4, Google Tag Manager, Matomo or your own function after every visit."
+section: plugins
+order: 14
+whenToUse: "On any site that counts page views. With pages that change without a reload, an analytics snippet only sees the first page."
+options:
+  - name: "provider"
+    type: "'gtag' | 'gtm' | 'matomo' | (view) => void"
+    default: "'gtag'"
+    description: "Where page views go. A function receives the page view and does what it wants."
+  - name: "eventName"
+    type: "string"
+    default: "'pageview'"
+    description: "Name of the event pushed to the Tag Manager data layer (provider gtm)."
+---
+
+Import it from `pagefold/analytics` (about 1 KB minified and compressed, shared code included).
+
+```js
+import PagefoldAnalytics from 'pagefold/analytics'
+
+new Pagefold({ plugins: [new PagefoldAnalytics({ provider: 'gtag' })] })
+```
+
+Keep your analytics snippet on the page as usual. It reports the **first** page. Pagefold reports every page it navigates to, after the content is on screen.
+
+## What each provider receives
+
+| Provider | What is sent |
+|---|---|
+| `gtag` (GA4) | `gtag('event', 'page_view', { page_title, page_location, page_path })`. Requires `window.gtag` |
+| `gtm` | Pushes `{ event, page_title, page_location, page_path }` to `window.dataLayer`. Create a trigger in Tag Manager for the event name |
+| `matomo` | Pushes `setReferrerUrl`, `setCustomUrl`, `setDocumentTitle` and `trackPageView` to `_paq` |
+| a function | Receives `{ url, title, location, referrer }` |
+
+`referrer` is the full address of the page that was left.
+
+```js
+new PagefoldAnalytics({
+  provider: ({ url, title }) => plausible('pageview', { u: location.href, props: { title } }),
+})
+```
+
+## If the snippet is missing
+
+With `gtag` and no `window.gtag`, it warns once in the console and keeps working. Pages are not sent until the snippet exists.
+
+## Sending by hand
+
+```js
+const analytics = new PagefoldAnalytics()
+analytics.send({ url: '/virtual', title: 'Virtual page', location: location.href, referrer: document.referrer })
+```
+
+If you prefer no plugin, the [Troubleshooting](/docs/troubleshooting) page has a three-line `page:view` handler that does the same.

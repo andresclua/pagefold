@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import 'pagefold/css/fade.css'
 
 interface Props {
   title: string
@@ -25,11 +26,29 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
         <a href="https://github.com/andresclua/pagefold">GitHub</a>
       </nav>
     </header>
-    <main class="wrap">
+    <main id="pagefold" class="wrap transition-fade">
       <slot />
     </main>
   </body>
 </html>
+
+<script>
+  // This site navigates with Pagefold itself
+  import Pagefold from 'pagefold'
+  import PagefoldA11y from 'pagefold/a11y'
+  import PagefoldHead from 'pagefold/head'
+  import PagefoldPreload from 'pagefold/preload'
+  import PagefoldScroll from 'pagefold/scroll'
+
+  new Pagefold({
+    plugins: [
+      new PagefoldHead({ awaitAssets: true }),
+      new PagefoldA11y(),
+      new PagefoldScroll({ duration: 400 }),
+      new PagefoldPreload(),
+    ],
+  })
+</script>
 
 <style>
   .bar {

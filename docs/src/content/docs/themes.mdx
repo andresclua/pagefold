@@ -1,0 +1,56 @@
+---
+title: "Ready-made CSS themes"
+description: "Two drop-in stylesheets for common transitions: fade and slide."
+section: guides
+order: 9
+---
+
+A theme is a CSS file. Import it, give your container the theme's class, and you are done.
+
+```js
+import 'pagefold/css/fade.css'   // or slide.css
+```
+
+Or in HTML:
+
+```html
+<link rel="stylesheet" href="/node_modules/pagefold/dist/css/slide.css" />
+```
+
+```html
+<main id="pagefold" class="transition-slide">...</main>
+```
+
+## Fade
+
+Class: `transition-fade`. The page fades out and the new one fades in.
+
+## Slide
+
+Class: `transition-slide`. The page leaves to the left while fading and the new page comes in from the right. On back and forward visits it goes the other way. For that to happen, animate history visits:
+
+```js
+new Pagefold({ animateHistoryBrowsing: true })
+```
+
+## Customizing
+
+Both read CSS custom properties, so you do not have to rewrite them:
+
+| Property | Default | Used by |
+|---|---|---|
+| `--pagefold-duration` | `0.4s` | fade, slide |
+| `--pagefold-distance` | `3rem` | slide |
+
+```css
+:root {
+  --pagefold-duration: 0.6s;
+  --pagefold-distance: 6rem;
+}
+```
+
+## They are small on purpose
+
+Each file is a dozen rules that use the [state classes](/docs/how-it-works#state-classes). When you need something different, copy the file and edit it: [Animating with CSS](/docs/css-animations) explains each rule.
+
+The slide theme, including the reversed direction on back, is checked in the project's browser tests. A theme that needs extra markup, such as a full-screen overlay, cannot be a plain stylesheet, so it is not included. A CSS-only version is possible with a pseudo-element on `html`; for a measured transition, animate the container as well so Pagefold has something to wait for.
