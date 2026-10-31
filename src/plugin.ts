@@ -1,11 +1,5 @@
-import type { HookDefaultHandler, HookHandler, HookName, HookOptions, HookUnregister, Hooks } from './hooks'
-
-/** What a plugin needs from the instance that mounts it. */
-export interface PluginHost {
-  version: string
-  hooks: Hooks
-  log: (message: string, context?: unknown) => void
-}
+import type { HookDefaultHandler, HookHandler, HookName, HookOptions, HookUnregister } from './hooks'
+import type { Pagefold } from './pagefold'
 
 /** Does `version` satisfy a `>=x.y.z` requirement? Other range types are not supported yet. */
 export function satisfies(version: string, range: string): boolean {
@@ -27,7 +21,8 @@ export function satisfies(version: string, range: string): boolean {
 export abstract class Plugin {
   abstract name: string
   readonly isPagefoldPlugin = true
-  pagefold!: PluginHost
+  /** The instance that mounted this plugin, set before `mount()` */
+  pagefold!: Pagefold
   version?: string
   /** Version requirements, e.g. `{ pagefold: '>=1' }` */
   requires: Record<string, string> = {}

@@ -10,6 +10,7 @@ const entry = {
   scripts: 'src/plugins/scripts.ts',
   js: 'src/plugins/js.ts',
   overlap: 'src/plugins/overlap.ts',
+  preload: 'src/plugins/preload.ts',
 }
 
 export default defineConfig({

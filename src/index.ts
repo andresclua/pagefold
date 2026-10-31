@@ -23,7 +23,6 @@ export type {
 } from './hooks'
 export { Location } from './location'
 export { Plugin, satisfies } from './plugin'
-export type { PluginHost } from './plugin'
 export type { FetchOptions, PageData } from './types'
 export { Visit, VisitState } from './visit'
 export type { HistoryAction, HistoryDirection, VisitContext, VisitInit } from './visit'

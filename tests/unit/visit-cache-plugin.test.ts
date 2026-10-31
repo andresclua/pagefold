@@ -1,6 +1,6 @@
-import { describe, expect, test, vi } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import { Cache } from '../../src/cache'
-import { Hooks } from '../../src/hooks'
+import { Pagefold } from '../../src/pagefold'
 import { Plugin, satisfies } from '../../src/plugin'
 import { Visit, VisitState } from '../../src/visit'
 
@@ -106,10 +106,15 @@ describe('Plugin', () => {
       })
     }
   }
+  const hosts: Pagefold[] = []
   const host = (version: string) => {
-    const hooks = new Hooks({ visit: new Visit(ctx, { to: '/a' }) })
-    return { version, hooks, log: () => {} }
+    const instance = Object.assign(new Pagefold(), { version })
+    hosts.push(instance)
+    return instance
   }
+  afterEach(async () => {
+    await Promise.all(hosts.splice(0).map((h) => h.destroy()))
+  })
 
   test('hooks registered with this.on are removed on unmount', async () => {
     const plugin = new Demo()

@@ -46,6 +46,11 @@
       "types": "./dist/plugins/overlap.d.ts",
       "import": "./dist/overlap.js",
       "require": "./dist/overlap.cjs"
+    },
+    "./preload": {
+      "types": "./dist/plugins/preload.d.ts",
+      "import": "./dist/preload.js",
+      "require": "./dist/preload.cjs"
     }
   },
   "files": [

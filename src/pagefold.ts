@@ -187,8 +187,9 @@ export class Pagefold {
     return navigate(this, url, options, init)
   }
 
-  fetchPage(url: string, options: FetchOptions = {}) {
-    return fetchPage(this, url, options)
+  /** Fetch a page. Pass your own visit to keep the request apart from the current navigation. */
+  fetchPage(url: string, options: FetchOptions = {}, visit?: Visit) {
+    return fetchPage(this, url, options, visit)
   }
 
   replaceContent(visit: Visit = this.visit): boolean {
