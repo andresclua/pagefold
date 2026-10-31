@@ -173,6 +173,24 @@ test.describe('animation', () => {
   })
 })
 
+test.describe('themes', () => {
+  const offset = (page: Page) =>
+    page.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('#pagefold')!).transform).m41)
+
+  test('the slide theme moves the page, and goes the other way on back', async ({ page }) => {
+    await open(page, '/slide-a', { options: { animateHistoryBrowsing: true } })
+    await page.evaluate(() => void window.pagefold.navigate('/slide-b'))
+    await page.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector('#pagefold')!).transform).m41 < -1) // leaves to the left
+    await expect(heading(page)).toHaveText('Slide B')
+    await expect.poll(() => offset(page)).toBe(0)
+
+    await page.goBack()
+    await page.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector('#pagefold')!).transform).m41 > 1) // leaves to the right
+    await expect(heading(page)).toHaveText('Slide A')
+    await expect.poll(() => offset(page)).toBe(0)
+  })
+})
+
 test.describe('animating in JavaScript', () => {
   for (const engine of ['waapi', 'gsap', 'motion']) {
     test(`works with ${engine}`, async ({ page }) => {

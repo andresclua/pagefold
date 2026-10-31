@@ -25,6 +25,8 @@ const pages = {
   '/': { title: 'Home', body: '<h1>Home</h1><a id="to-long-hash" href="/long#bottom">bottom</a>' },
   '/about': { title: 'About', body: '<h1>About</h1>', bodyClass: 'about-page' },
   '/long': { title: 'Long', body: long },
+  '/slide-a': { title: 'Slide A', body: '<h1>Slide A</h1>', cls: 'transition-slide', head: '<link rel="stylesheet" href="/dist/css/slide.css">' },
+  '/slide-b': { title: 'Slide B', body: '<h1>Slide B</h1>', cls: 'transition-slide', head: '<link rel="stylesheet" href="/dist/css/slide.css">' },
   '/plain': { title: 'Plain', body: '<h1>Plain</h1>', cls: '' },
   '/plain-b': { title: 'Plain B', body: '<h1>Plain B</h1>', cls: '' },
   '/head-a': {

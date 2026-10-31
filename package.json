@@ -91,7 +91,13 @@
       "types": "./dist/plugins/fragment.d.ts",
       "import": "./dist/fragment.js",
       "require": "./dist/fragment.cjs"
-    }
+    },
+    "./analytics": {
+      "types": "./dist/plugins/analytics.d.ts",
+      "import": "./dist/analytics.js",
+      "require": "./dist/analytics.cjs"
+    },
+    "./css/*": "./dist/css/*"
   },
   "files": [
     "dist"
@@ -101,7 +107,7 @@
     "provenance": true
   },
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json",
+    "build": "vite build && tsc -p tsconfig.build.json && node scripts/copy-css.mjs",
     "dev": "vite build --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests --ext .ts",

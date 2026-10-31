@@ -1,0 +1,11 @@
+/*
+ * Fade theme. Give the container the class `transition-fade`.
+ * Customize with --pagefold-duration (default 0.4s).
+ */
+.transition-fade {
+  transition: opacity var(--pagefold-duration, 0.4s) ease;
+}
+
+html.is-animating .transition-fade {
+  opacity: 0;
+}

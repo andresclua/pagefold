@@ -1,0 +1,31 @@
+/*
+ * Slide theme. Give the container the class `transition-slide`.
+ * The page leaves to the left and the new one comes in from the right;
+ * back and forward visits go the other way.
+ * Customize with --pagefold-duration (default 0.4s) and --pagefold-distance (default 3rem).
+ */
+.transition-slide {
+  transition:
+    transform var(--pagefold-duration, 0.4s) ease,
+    opacity var(--pagefold-duration, 0.4s) ease;
+}
+
+html.is-animating .transition-slide {
+  opacity: 0;
+}
+
+html.is-leaving.is-animating .transition-slide {
+  transform: translateX(calc(var(--pagefold-distance, 3rem) * -1));
+}
+
+html.is-rendering.is-animating .transition-slide {
+  transform: translateX(var(--pagefold-distance, 3rem));
+}
+
+html.is-popstate.is-leaving.is-animating .transition-slide {
+  transform: translateX(var(--pagefold-distance, 3rem));
+}
+
+html.is-popstate.is-rendering.is-animating .transition-slide {
+  transform: translateX(calc(var(--pagefold-distance, 3rem) * -1));
+}

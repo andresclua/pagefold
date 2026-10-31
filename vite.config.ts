@@ -19,6 +19,7 @@ const entry = {
   'progress': 'src/plugins/progress.ts',
   'forms': 'src/plugins/forms.ts',
   'fragment': 'src/plugins/fragment.ts',
+  analytics: 'src/plugins/analytics.ts',
 }
 
 export default defineConfig({
