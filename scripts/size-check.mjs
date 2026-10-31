@@ -22,7 +22,8 @@ console.log(`core: ${core} B minified+gzip (budget ${BUDGET} B)`)
 
 // Standalone size of each module, including the shared code it pulls in
 const { exports } = JSON.parse(readFileSync('package.json', 'utf8'))
-for (const name of Object.keys(exports).filter((k) => k !== '.')) {
+// Only the JavaScript modules: skip the main entry and patterns such as ./css/*
+for (const name of Object.keys(exports).filter((k) => k !== '.' && !k.includes('*'))) {
   console.log(`${name.slice(2)}: ${await sizeOf(`dist/${name.slice(2)}.js`)} B`)
 }
 
