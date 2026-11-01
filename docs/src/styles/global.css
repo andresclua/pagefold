@@ -88,6 +88,11 @@ pre {
 code {
   font-size: 0.9em;
 }
+/* Show code as it is typed: no => or === turning into single symbols */
+code,
+pre {
+  font-variant-ligatures: none;
+}
 :not(pre) > code {
   background: var(--surface);
   border: 1px solid var(--border);
