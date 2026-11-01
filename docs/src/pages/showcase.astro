@@ -9,6 +9,7 @@ const projects = (await getCollection('showcase')).sort(
 ---
 
 <Base title="Showcase" description="Sites built with Pagefold.">
+  <div class="wrap page">
   <h1>Showcase</h1>
   {
     projects.length ? (
@@ -32,9 +33,13 @@ const projects = (await getCollection('showcase')).sort(
       </p>
     )
   }
+  </div>
 </Base>
 
 <style>
+  .page {
+    padding-block: 3rem 0;
+  }
   .grid {
     list-style: none;
     padding: 0;

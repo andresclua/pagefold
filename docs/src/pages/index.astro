@@ -1,38 +1,450 @@
 ---
+import { Code } from 'astro:components'
 import Base from '../layouts/Base.astro'
+
+const themes = { light: 'github-light', dark: 'github-dark' }
+
+const features = [
+  {
+    title: 'Works with the HTML you have',
+    text: 'No API and no special responses. Pagefold fetches your pages and swaps one container.',
+    icon: 'M4 5h16v14H4zM4 9h16M8 13h5',
+  },
+  {
+    title: 'Cancels what nobody needs',
+    text: 'Click twice, and the first request is aborted, not left running in the background.',
+    icon: 'M12 3a9 9 0 100 18 9 9 0 000-18zM9 9l6 6M15 9l-6 6',
+  },
+  {
+    title: 'Small and modular',
+    text: 'A 6.7 KB core with no dependencies. Every module is its own import, so you ship what you use.',
+    icon: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
+  },
+  {
+    title: 'Animate with anything',
+    text: 'CSS, GSAP, Motion, the Web Animations API or the View Transitions API. Your choice.',
+    icon: 'M5 19L19 5M14 5h5v5M5 9V5M9 5H5M19 15v4M15 19h4',
+  },
+  {
+    title: 'Accessible by default',
+    text: 'Announces the new page, moves focus, and skips motion when people ask for less of it.',
+    icon: 'M12 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM5 9l7 1 7-1M12 10v4m0 0l-3 6m3-6l3 6',
+  },
+  {
+    title: 'A hook at every step',
+    text: 'Fully typed, awaited, replaceable. Plugins use the same API you do.',
+    icon: 'M9 3v5M15 3v5M7 8h10v3a5 5 0 01-10 0zM12 16v5',
+  },
+]
+
+const modules = [
+  ['head', 'Head'],
+  ['scripts', 'Scripts'],
+  ['js', 'JS'],
+  ['overlap', 'Overlap'],
+  ['preload', 'Preload'],
+  ['a11y', 'A11y'],
+  ['scroll', 'Scroll'],
+  ['body-class', 'Body class'],
+  ['debug', 'Debug'],
+  ['route-name', 'Route name'],
+  ['progress', 'Progress'],
+  ['forms', 'Forms'],
+  ['fragment', 'Fragment'],
+  ['analytics', 'Analytics'],
+]
 ---
 
 <Base title="Page transitions">
-  <section>
-    <h1>Pagefold</h1>
-    <p class="lead">Page transitions for server-rendered websites.</p>
-    <p>Work in progress. Follow along on GitHub.</p>
-    <p>
-      <a class="btn" href="/docs/getting-started">Read the docs</a>
-      <a href="/showcase">See the showcase</a>
-    </p>
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="copy">
+        <p class="eyebrow"><span class="dot"></span> v0.1 · MIT</p>
+        <h1>Pages that <em>fold</em> into each other.</h1>
+        <p class="lead">
+          Page transitions for server-rendered websites. Keep your HTML, add one container and one
+          line of JavaScript.
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="/docs/getting-started">Get started</a>
+          <a class="btn ghost" href="https://github.com/andresclua/pagefold">GitHub</a>
+        </div>
+        <button class="install" data-copy="npm install pagefold" aria-label="Copy install command">
+          <span class="prompt">$</span> npm install pagefold
+          <span class="hint"><span class="idle">copy</span><span class="done">copied</span></span>
+        </button>
+      </div>
+
+      <div class="stage" aria-hidden="true">
+        <div class="sheet s3"><i></i><i></i><i></i></div>
+        <div class="sheet s2"><i></i><i></i><i></i></div>
+        <div class="sheet s1"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap block">
+    <ul class="features">
+      {
+        features.map((f) => (
+          <li>
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d={f.icon} />
+            </svg>
+            <h3>{f.title}</h3>
+            <p>{f.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="wrap block">
+    <h2>Up and running in three pieces</h2>
+    <div class="steps">
+      <div>
+        <span class="num">1</span>
+        <h3>Mark the container</h3>
+        <Code code={'<main id="pagefold" class="transition-fade">\n  ...\n</main>'} lang="html" themes={themes} defaultColor={false} />
+      </div>
+      <div>
+        <span class="num">2</span>
+        <h3>Style the transition</h3>
+        <Code code={'.transition-fade { transition: opacity .3s }\nhtml.is-animating .transition-fade {\n  opacity: 0\n}'} lang="css" themes={themes} defaultColor={false} />
+      </div>
+      <div>
+        <span class="num">3</span>
+        <h3>Start it</h3>
+        <Code code={"import Pagefold from 'pagefold'\n\nnew Pagefold()"} lang="js" themes={themes} defaultColor={false} />
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap block">
+    <h2>Add only what you need</h2>
+    <p class="sub">Every module is a separate import. Nothing you do not use reaches your bundle.</p>
+    <ul class="modules">
+      {modules.map(([slug, name]) => <li><a href={`/docs/${slug}`}>{name}</a></li>)}
+    </ul>
   </section>
 </Base>
 
 <style>
-  section {
-    padding-block: 4rem;
+  /* Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: -20% -10% auto auto;
+    width: 60vw;
+    height: 60vw;
+    max-width: 760px;
+    max-height: 760px;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 38%, transparent), transparent);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: auto auto -30% -10%;
+    width: 40vw;
+    height: 40vw;
+    max-width: 520px;
+    max-height: 520px;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
+    pointer-events: none;
+  }
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 3rem;
+    align-items: center;
+    padding-block: 5.5rem 6rem;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    font-family: var(--font-head);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--link);
   }
   h1 {
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
-    margin: 0 0 0.5rem;
+    font-size: clamp(2.4rem, 5.6vw, 4.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.25rem;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--link);
   }
   .lead {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     color: var(--muted);
+    max-width: 34rem;
+    margin: 0 0 2rem;
+  }
+  .cta {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
   }
   .btn {
     display: inline-block;
-    margin-right: 1rem;
-    padding: 0.6rem 1.1rem;
-    border-radius: 8px;
+    padding: 0.7rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  .primary {
     background: var(--primary);
     color: var(--on-primary);
+  }
+  .ghost {
+    border-color: var(--border);
+    color: var(--text);
+    background: var(--surface);
+  }
+  .install {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font: 0.92rem var(--font-head);
+    cursor: pointer;
+  }
+  .prompt {
+    color: var(--link);
+  }
+  .hint {
+    margin-left: 0.5rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+  .hint .done,
+  .install[data-copied] .idle {
+    display: none;
+  }
+  .install[data-copied] .done {
+    display: inline;
+    color: var(--link);
+  }
+
+  /* The stage: three pages that swap, like a visit would */
+  .stage {
+    position: relative;
+    height: 22rem;
+    perspective: 900px;
+  }
+  .sheet {
+    position: absolute;
+    inset: 0 12% 0 0;
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 14px;
+    clip-path: polygon(0 0, calc(100% - 44px) 0, 100% 44px, 100% 100%, 0 100%);
+    box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.5);
+  }
+  .sheet::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    background: var(--link);
+    /* the flap of the fold: a clean triangle, not a gradient with a hard edge */
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+  }
+  .sheet i {
+    display: block;
+    height: 0.7rem;
+    border-radius: 4px;
+    background: var(--border);
+  }
+  .sheet i:first-child {
+    width: 55%;
+    height: 1.2rem;
+    background: color-mix(in srgb, var(--text) 70%, transparent);
+  }
+  .sheet i:nth-child(2) {
+    width: 92%;
+  }
+  .sheet i:nth-child(3) {
+    width: 72%;
+  }
+  .s3 {
+    transform: translate(2.6rem, -1.4rem) scale(0.94);
+    opacity: 0.45;
+  }
+  .s2 {
+    transform: translate(1.3rem, -0.7rem) scale(0.97);
+    opacity: 0.75;
+  }
+  .s1 {
+    animation: swap 5.5s ease-in-out infinite;
+  }
+  .s2 {
+    animation: rise 5.5s ease-in-out infinite;
+  }
+  @keyframes swap {
+    0%, 38% { transform: none; opacity: 1; }
+    58% { transform: translateX(-3rem) rotate(-3deg); opacity: 0; }
+    59%, 62% { transform: translate(2.6rem, -1.4rem) scale(0.94); opacity: 0; }
+    100% { transform: none; opacity: 1; }
+  }
+  @keyframes rise {
+    0%, 38% { transform: translate(1.3rem, -0.7rem) scale(0.97); opacity: 0.75; }
+    60%, 100% { transform: none; opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .s1,
+    .s2 {
+      animation: none;
+    }
+  }
+
+  /* Sections */
+  .block {
+    padding-top: 5rem;
+  }
+  .block h2 {
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    letter-spacing: -0.02em;
+    margin: 0 0 0.6rem;
+  }
+  .sub {
+    color: var(--muted);
+    margin: 0 0 1.75rem;
+  }
+  .features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .features li {
+    padding: 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .features li:hover {
+    border-color: color-mix(in srgb, var(--link) 60%, var(--border));
+    transform: translateY(-2px);
+  }
+  .features svg {
+    color: var(--link);
+  }
+  .features h3 {
+    margin: 0.9rem 0 0.4rem;
+    font-size: 1.02rem;
+  }
+  .features p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .steps h3 {
+    margin: 0.4rem 0 0.7rem;
+    font-size: 1.02rem;
+  }
+  .num {
+    display: inline-grid;
+    place-items: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--on-primary);
+    font: 700 0.85rem var(--font-head);
+  }
+  .steps :global(pre) {
+    margin: 0;
+    font-size: 0.82rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .steps :global(pre code) {
+    white-space: inherit;
+  }
+  .modules {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .modules a {
+    display: block;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
     text-decoration: none;
+    font: 0.88rem var(--font-head);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .modules a:hover {
+    border-color: var(--link);
+    color: var(--link);
+  }
+
+  @media (max-width: 52rem) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+      padding-block: 3.5rem 4rem;
+    }
+    .stage {
+      height: 15rem;
+    }
+    .features,
+    .steps {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

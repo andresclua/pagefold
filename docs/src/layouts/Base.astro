@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css'
 import 'pagefold/css/fade.css'
+import Logo from '../components/Logo.astro'
 
 interface Props {
   title: string
@@ -15,20 +16,29 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title} · Pagefold</title>
   </head>
   <body>
-    <header class="wrap bar">
-      <a href="/" class="brand">Pagefold</a>
-      <nav aria-label="Main">
-        <a href="/docs/getting-started">Docs</a>
-        <a href="/showcase">Showcase</a>
-        <a href="https://github.com/andresclua/pagefold">GitHub</a>
-      </nav>
+    <header class="bar">
+      <div class="wrap bar-inner">
+        <a href="/" class="brand"><Logo size={26} /><span>Pagefold</span></a>
+        <nav aria-label="Main">
+          <a href="/docs/getting-started">Docs</a>
+          <a href="/showcase">Showcase</a>
+          <a href="https://github.com/andresclua/pagefold" class="gh">GitHub</a>
+        </nav>
+      </div>
     </header>
-    <main id="pagefold" class="wrap transition-fade">
+    <main id="pagefold" class="transition-fade">
       <slot />
     </main>
+    <footer class="foot">
+      <div class="wrap foot-inner">
+        <span>MIT licensed. This site navigates with Pagefold.</span>
+        <a href="https://github.com/andresclua/pagefold">GitHub</a>
+      </div>
+    </footer>
   </body>
 </html>
 
@@ -48,24 +58,74 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
       new PagefoldPreload(),
     ],
   })
+
+  // One listener on the document: a script that belongs to a single page would not run again
+  // when that page is reached by a visit, so the copy buttons are wired up here.
+  document.addEventListener('click', async (event) => {
+    const button = (event.target as Element).closest<HTMLElement>('[data-copy]')
+    if (!button) return
+    try {
+      await navigator.clipboard.writeText(button.dataset.copy ?? '')
+      button.dataset.copied = 'true'
+      setTimeout(() => delete button.dataset.copied, 1600)
+    } catch {
+      /* clipboard not available: the text is selectable anyway */
+    }
+  })
 </script>
 
 <style>
   .bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-block: 1.25rem;
-    border-bottom: 1px solid var(--border);
+    padding-block: 0.9rem;
   }
   .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
     font-family: var(--font-head);
     font-weight: 700;
+    font-size: 1.05rem;
     color: var(--text);
     text-decoration: none;
   }
   nav {
     display: flex;
-    gap: 1.25rem;
+    gap: 1.4rem;
+    align-items: center;
+  }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  nav a:hover {
+    color: var(--text);
+  }
+  .foot {
+    border-top: 1px solid var(--border);
+    margin-top: 5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .foot-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-block: 1.5rem;
+  }
+  .foot a {
+    color: var(--muted);
   }
 </style>

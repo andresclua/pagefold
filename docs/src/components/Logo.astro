@@ -1,0 +1,22 @@
+---
+// A page with its corner folded. The fold takes the accent color of the theme.
+interface Props {
+  size?: number
+}
+const { size = 28 } = Astro.props
+---
+
+<svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true" class="logo">
+  <path d="M7 4h11l7 7v17H7z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+  <path d="M18 4v7h7z" class="fold" stroke-width="2.2" stroke-linejoin="round" />
+</svg>
+
+<style>
+  .logo {
+    display: block;
+  }
+  .fold {
+    fill: var(--link);
+    stroke: var(--link);
+  }
+</style>

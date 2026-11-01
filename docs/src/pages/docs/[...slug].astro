@@ -23,7 +23,7 @@ const { title, description, whenToUse, options } = entry.data
 ---
 
 <Base title={title} description={description}>
-  <div class="layout">
+  <div class="wrap layout">
     <nav aria-label="Docs">
       {
         SECTIONS.map(([key, label]) => {
@@ -109,11 +109,20 @@ const { title, description, whenToUse, options } = entry.data
   }
   nav li a {
     display: block;
-    padding: 0.15rem 0;
+    padding: 0.2rem 0 0.2rem 0.75rem;
+    margin-left: -0.75rem;
+    border-left: 2px solid transparent;
+    color: var(--muted);
     text-decoration: none;
+    font-size: 0.95rem;
+  }
+  nav li a:hover {
+    color: var(--text);
   }
   nav a[aria-current='page'] {
-    font-weight: 700;
+    color: var(--link);
+    font-weight: 600;
+    border-left-color: var(--link);
   }
   .lead {
     color: var(--muted);
