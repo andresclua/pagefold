@@ -51,6 +51,12 @@ const pages = {
       <form id="get" data-pagefold-form action="/search" method="get"><input name="q" value="cats"><button>go</button></form>
       <form id="post" data-pagefold-form action="/echo" method="post"><input name="note" value="hello"><button>send</button></form>`,
   },
+  '/admin': { title: 'Admin', body: '<h1>Admin</h1>' },
+  '/persist-a': { title: 'Persist A', body: '<h1>Persist A</h1><audio id="player" data-pagefold-persist="player" controls></audio>' },
+  '/persist-b': { title: 'Persist B', body: '<h1>Persist B</h1><audio id="player" data-pagefold-persist="player" controls></audio>' },
+  '/outside-a': { title: 'Outside A', split: '<audio id="player" controls></audio><div id="pagefold" class="transition-fade"><h1>Outside A</h1></div>' },
+  '/outside-b': { title: 'Outside B', split: '<audio id="player" controls></audio><div id="pagefold" class="transition-fade"><h1>Outside B</h1></div>' },
+  '/no-container': { title: 'No container', split: '<p id="other">this page has no container</p>' },
   '/list': {
     title: 'List',
     split: `<div id="list">users: <a href="/detail/1">one</a> <a href="/detail/2">two</a></div><div id="detail" class="transition-fade">pick one</div>`,
@@ -107,6 +113,15 @@ createServer(async (req, res) => {
   if (pathname === '/slow') {
     await sleep(ms)
     return html(res, 200, shell({ title: 'Slow', body: '<h1>Slow</h1>' }))
+  }
+  if (pathname === '/redirect') {
+    res.writeHead(302, { location: '/about' })
+    return res.end()
+  }
+  if (pathname === '/empty') return html(res, 200, '')
+  if (pathname === '/whoami') {
+    const who = /(?:^|; )user=([^;]*)/.exec(req.headers.cookie ?? '')?.[1] ?? 'nobody'
+    return html(res, 200, shell({ title: 'Who', body: `<h1>Who</h1><p id="who">${who}</p>` }))
   }
   if (pathname === '/boom') return html(res, 500, 'server error')
   if (pathname === '/search') {
