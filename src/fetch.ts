@@ -39,6 +39,9 @@ export async function fetchPage(
   const forward = () => controller.abort()
   if (visit.controller.signal.aborted) controller.abort()
   visit.controller.signal.addEventListener('abort', forward)
+  // A signal passed to navigate() cancels the request too
+  if (options.signal?.aborted) controller.abort()
+  options.signal?.addEventListener('abort', forward)
 
   let timedOut = false
   const timer =
@@ -75,6 +78,7 @@ export async function fetchPage(
   } finally {
     clearTimeout(timer)
     visit.controller.signal.removeEventListener('abort', forward)
+    options.signal?.removeEventListener('abort', forward)
   }
 
   const { status, url: responseUrl } = response
