@@ -1,6 +1,5 @@
 ---
 import '../styles/global.css'
-import 'pagefold/css/fade.css'
 import Logo from '../components/Logo.astro'
 
 interface Props {
@@ -30,7 +29,7 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
         </nav>
       </div>
     </header>
-    <main id="pagefold" class="transition-fade">
+    <main id="pagefold" class="transition-fold">
       <slot />
     </main>
     <footer class="foot">

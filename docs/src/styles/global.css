@@ -123,3 +123,80 @@ blockquote {
   border-left: 3px solid var(--link);
   color: var(--muted);
 }
+
+/*
+ * The page transition of this site: a fold sweeps in from the top-right corner, three bands of
+ * color following each other (accent, primary, then the page color), and unfolds again to show the
+ * new page. It is only CSS, hooked to the classes Pagefold puts on the html element.
+ *
+ * `main` has a transition of its own with the same total time, which is what Pagefold waits for.
+ */
+:root {
+  --fold-t: 0.26s; /* duration of each band */
+  --fold-d1: 0.06s; /* how far the second band lags the first */
+  --fold-d2: 0.12s; /* and the third */
+}
+
+html::before,
+html::after,
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  /* hidden: a triangle with no area, in the corner */
+  clip-path: polygon(100% 0, 100% 0, 100% 0);
+  transition: clip-path var(--fold-t) cubic-bezier(0.65, 0, 0.25, 1);
+}
+html::before {
+  z-index: 1000;
+  background: var(--accent);
+  transition-delay: var(--fold-d2); /* unfolding: the first band is the last to leave */
+}
+html::after {
+  z-index: 1001;
+  background: var(--primary);
+  transition-delay: var(--fold-d1);
+}
+body::before {
+  z-index: 1002;
+  background: var(--bg);
+  transition-delay: 0s;
+}
+
+/* folding: a triangle big enough to cover the whole screen, the first band leading */
+html.is-animating::before,
+html.is-animating::after,
+html.is-animating body::before {
+  clip-path: polygon(100% 0, -150% 0, 100% 250vh);
+}
+html.is-animating::before {
+  transition-delay: 0s;
+}
+html.is-animating::after {
+  transition-delay: var(--fold-d1);
+}
+html.is-animating body::before {
+  transition-delay: var(--fold-d2);
+}
+
+main.transition-fold {
+  transition:
+    opacity var(--fold-t) ease var(--fold-d2),
+    transform var(--fold-t) ease var(--fold-d2);
+}
+html.is-animating main.transition-fold {
+  opacity: 0;
+  transform: translateY(0.75rem) scale(0.995);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html::before,
+  html::after,
+  body::before {
+    display: none;
+  }
+  main.transition-fold {
+    transition: none;
+  }
+}
