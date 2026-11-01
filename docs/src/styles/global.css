@@ -24,7 +24,8 @@
     --border: #e0e0d9;
     --text: #0a0a0a;
     --muted: #5c5c57;
-    --link: var(--primary); /* ~7.6:1 on the light background */
+    /* The brand blue, a little deeper so it reads calmly as text (about 9:1 on this background) */
+    --link: color-mix(in srgb, var(--primary) 80%, #0a0a0a);
   }
 }
 
@@ -47,8 +48,27 @@ pre {
   font-family: var(--font-head);
 }
 
+/* Links: the color of the theme, with a quiet underline that gets stronger on hover */
 a {
   color: var(--link);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--link) 38%, transparent);
+  transition:
+    text-decoration-color 0.15s,
+    text-decoration-thickness 0.15s,
+    color 0.15s;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+  text-decoration-color: currentColor;
+}
+/* Code inside a link takes its color and a soft frame of it */
+a > code {
+  color: inherit;
+  border-color: color-mix(in srgb, var(--link) 35%, var(--border));
+  background: color-mix(in srgb, var(--link) 8%, var(--surface));
 }
 
 :focus-visible {
@@ -198,5 +218,14 @@ html.is-animating main.transition-fold {
   }
   main.transition-fold {
     transition: none;
+  }
+}
+
+/* On narrow screens a wide table scrolls inside itself instead of widening the page */
+@media (max-width: 48rem) {
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }

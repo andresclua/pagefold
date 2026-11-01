@@ -138,9 +138,22 @@ const { title, description, whenToUse, options } = entry.data
   aside p {
     margin: 0.25rem 0 0;
   }
+  article {
+    min-width: 0; /* let wide code and tables scroll instead of widening the page */
+  }
   @media (max-width: 48rem) {
     .layout {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+    /* 40 links would push the page far down: a box that scrolls instead */
+    nav {
+      max-height: 12rem;
+      overflow-y: auto;
+      padding: 0.25rem 1rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
     }
   }
 </style>
