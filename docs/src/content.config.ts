@@ -26,6 +26,11 @@ const docs = defineCollection({
     }),
 })
 
+const MODULES = [
+  'head', 'scripts', 'js', 'overlap', 'preload', 'a11y', 'scroll', 'body-class',
+  'debug', 'route-name', 'progress', 'forms', 'fragment', 'analytics',
+] as const
+
 // Entries live in /showcase at the repo root so contributors find them easily.
 const showcase = defineCollection({
   loader: glob({ pattern: ['*/index.md', '!_*/**'], base: '../showcase' }),
@@ -33,10 +38,15 @@ const showcase = defineCollection({
     z.object({
       title: z.string(),
       url: z.url(),
-      author: z.string(),
+      // Who designed and built it. Give credit to everyone, the agency and the freelancers.
+      credits: z
+        .array(z.object({ name: z.string(), role: z.string().optional(), url: z.url().optional() }))
+        .min(1),
       repo: z.url().optional(),
+      // The size, shape and weight of the image are checked by scripts/check-showcase.mjs,
+      // because Astro only knows the image's dimensions after the fields are validated.
       cover: image(),
-      plugins: z.array(z.string()).default([]),
+      plugins: z.array(z.enum(MODULES)).default([]),
       date: z.coerce.date(),
     }),
 })

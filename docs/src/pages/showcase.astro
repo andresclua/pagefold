@@ -11,26 +11,52 @@ const projects = (await getCollection('showcase')).sort(
 <Base title="Showcase" description="Sites built with Pagefold.">
   <div class="wrap page">
   <h1>Showcase</h1>
+  <p class="intro">
+    Sites built with Pagefold. Seeing it in real projects is the best way to judge what you can do
+    with it, and which modules to combine.
+  </p>
+  <aside class="join">
+    <div>
+      <strong>Built something with Pagefold?</strong>
+      <p>
+        Add it here with a screenshot and a link. It takes about ten minutes and needs no code: a
+        text file and a 1600 x 1000 image.
+      </p>
+    </div>
+    <a class="btn" href="https://github.com/andresclua/pagefold/blob/main/CONTRIBUTING.md#showcase">
+      How to add yours
+    </a>
+  </aside>
   {
     projects.length ? (
       <ul class="grid">
         {projects.map((p) => (
           <li>
-            <a href={p.data.url}>
-              <Image src={p.data.cover} alt="" width={640} />
-              <strong>{p.data.title}</strong>
+            <a class="shot" href={p.data.url}>
+              <Image src={p.data.cover} alt={`Screenshot of ${p.data.title}`} width={800} />
             </a>
-            <span>by {p.data.author}</span>
+            <div class="meta">
+              <a href={p.data.url}><strong>{p.data.title}</strong></a>
+              <span>
+                by{' '}
+                {p.data.credits.map((c, i) => (
+                  <>
+                    {i > 0 && ', '}
+                    {c.url ? <a href={c.url}>{c.name}</a> : c.name}
+                  </>
+                ))}
+              </span>
+              {p.data.plugins.length > 0 && (
+                <ul class="tags">
+                  {p.data.plugins.map((m) => <li><a href={`/docs/${m}`}>{m}</a></li>)}
+                </ul>
+              )}
+            </div>
           </li>
         ))}
       </ul>
     ) : (
-      <p>
-        Nothing here yet. Built something with Pagefold?{' '}
-        <a href="https://github.com/andresclua/pagefold/blob/main/CONTRIBUTING.md#showcase">
-          Add it with a pull request.
-        </a>
-      </p>
+      <p class="empty">No sites yet. Yours could be the first.</p>
     )
   }
   </div>
@@ -40,26 +66,100 @@ const projects = (await getCollection('showcase')).sort(
   .page {
     padding-block: 3rem 0;
   }
+  .intro {
+    color: var(--muted);
+    font-size: 1.1rem;
+    max-width: 38rem;
+  }
+  .join {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin: 2rem 0;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--link);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .join p {
+    margin: 0.3rem 0 0;
+    color: var(--muted);
+    max-width: 36rem;
+  }
+  .btn {
+    padding: 0.65rem 1.1rem;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
   .grid {
     list-style: none;
     padding: 0;
+    margin: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
     gap: 1.5rem;
   }
-  li {
+  .grid > li {
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1rem;
+    border-radius: 14px;
+    overflow: hidden;
     background: var(--surface);
   }
-  img {
-    width: 100%;
-    height: auto;
-    border-radius: 4px;
-  }
-  span {
+  .shot {
     display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .shot :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s;
+  }
+  .shot:hover :global(img) {
+    transform: scale(1.03);
+  }
+  .meta {
+    padding: 0.9rem 1rem 1rem;
+    display: grid;
+    gap: 0.2rem;
+  }
+  .meta > a {
+    color: var(--text);
+    text-decoration: none;
+  }
+  .meta span {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .meta span a {
+    color: inherit;
+  }
+  .tags {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .tags a {
+    padding: 0.1rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font: 0.75rem var(--font-head);
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .empty {
     color: var(--muted);
   }
 </style>

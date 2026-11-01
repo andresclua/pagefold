@@ -196,7 +196,8 @@
     "docs:build": "pnpm --filter pagefold-docs build",
     "prepare": "husky",
     "test:e2e": "pnpm build && playwright test -c tests/e2e/playwright.config.ts",
-    "check:package": "attw --pack ."
+    "check:package": "attw --pack .",
+    "check:showcase": "node scripts/check-showcase.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
