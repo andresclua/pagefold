@@ -5,6 +5,8 @@ section: concepts
 order: 1
 ---
 
+import Timeline from '../../components/Timeline.astro'
+
 Every navigation is a **visit**: an object that carries everything about it (where from, where to, what triggered it, how it animates). Every hook handler receives it. See [The Visit object](/docs/visit).
 
 ## The steps
@@ -20,6 +22,12 @@ Every navigation is a **visit**: an object that carries everything about it (whe
 If anything fails, `visit:fail` runs and, by default, the browser loads the page normally. A visit never leaves you on a broken page.
 
 Visits that are not animated skip steps 4 and 6 and fire `animation:skip` instead.
+
+## The visit as a timeline
+
+The same steps, in order, with the classes on the `html` element at each moment. The animation hooks are highlighted.
+
+<Timeline />
 
 ## State classes
 

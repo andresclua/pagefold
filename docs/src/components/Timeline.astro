@@ -1,0 +1,228 @@
+---
+import { phases, visitSteps } from './timelines'
+
+interface Props {
+  /** `animation` dims every hook that is not one of the six animation hooks */
+  highlight?: 'animation' | 'all'
+}
+const { highlight = 'all' } = Astro.props
+
+// For each step: which classes appeared and which disappeared since the step before
+let previous: string[] = []
+const groups = phases.map((phase) => ({
+  ...phase,
+  steps: visitSteps
+    .filter((s) => s.phase === phase.id)
+    .map((step) => {
+      const added = step.classes.filter((c) => !previous.includes(c))
+      const removed = previous.filter((c) => !step.classes.includes(c))
+      previous = step.classes
+      return { ...step, added, removed }
+    }),
+}))
+---
+
+<ol class="timeline" aria-label="The hooks of an animated visit, in order">
+  {
+    groups.map((phase, i) => (
+      <li class="phase">
+        <header>
+          <span class="num">{i + 1}</span>
+          <div>
+            <h3>{phase.title}</h3>
+            <p>{phase.note}</p>
+          </div>
+        </header>
+        <ol class="steps">
+          {phase.steps.map((s) => (
+            <li class:list={['step', s.kind, { dim: highlight === 'animation' && s.kind !== 'animation' }]}>
+              <span class="dot" aria-hidden="true" />
+              <div class="body">
+                <div class="head">
+                  <code class="hook">{s.hook}</code>
+                  {s.waits && <span class="waits">waits</span>}
+                </div>
+                <p>{s.text}</p>
+                <div class="classes">
+                  <span class="label">html</span>
+                  {s.classes.length === 0 && s.removed.length === 0 && <span class="none">no classes</span>}
+                  {s.classes.map((c) => (
+                    <code class:list={['pill', { added: s.added.includes(c) }]}>{c}</code>
+                  ))}
+                  {s.removed.map((c) => (
+                    <code class="pill removed" title="removed here">{c}</code>
+                  ))}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .timeline,
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .timeline {
+    margin: 1.75rem 0 2.25rem;
+    border-left: 2px solid var(--border);
+    margin-left: 0.9rem;
+  }
+  .phase {
+    position: relative;
+    padding: 0 0 1.75rem 1.9rem;
+  }
+  .phase:last-child {
+    padding-bottom: 0;
+  }
+  .phase > header {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    margin-bottom: 0.9rem;
+  }
+  .num {
+    position: absolute;
+    left: -0.95rem;
+    top: -0.1rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--on-primary);
+    font: 700 0.8rem var(--font-head);
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+  .phase h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .phase header p {
+    margin: 0.1rem 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .steps {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .step {
+    position: relative;
+    display: flex;
+    gap: 0.8rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .step.animation {
+    border-color: color-mix(in srgb, var(--link) 45%, var(--border));
+  }
+  .step.dim {
+    opacity: 0.5;
+    background: transparent;
+  }
+  .dot {
+    flex: none;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-top: 0.4rem;
+    border-radius: 50%;
+    border: 2px solid var(--muted);
+  }
+  .animation .dot {
+    border-color: var(--link);
+    background: var(--link);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--link) 22%, transparent);
+  }
+  .body {
+    min-width: 0;
+    flex: 1;
+  }
+  .head {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .hook {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .animation .hook {
+    color: var(--link);
+  }
+  .waits {
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font: 0.7rem var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .body > p {
+    margin: 0.3rem 0 0.65rem;
+    font-size: 0.95rem;
+  }
+  .classes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+  }
+  .label {
+    font: 0.7rem var(--font-head);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-right: 0.15rem;
+  }
+  .none {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+  .pill {
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .pill.added {
+    color: var(--link);
+    border-color: var(--link);
+    background: color-mix(in srgb, var(--link) 12%, var(--bg));
+  }
+  .pill.added::before {
+    content: '+ ';
+  }
+  .pill.removed {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+  .pill.removed::before {
+    content: '− ';
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  @media (max-width: 40rem) {
+    .phase {
+      padding-left: 1.4rem;
+    }
+    .step {
+      padding: 0.75rem;
+    }
+  }
+</style>

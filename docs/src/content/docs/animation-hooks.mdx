@@ -5,7 +5,19 @@ section: hooks
 order: 2
 ---
 
-An animated visit runs these six hooks. The first and the fourth set up the state classes; the middle ones are where the waiting happens.
+import Timeline from '../../components/Timeline.astro'
+
+An animated visit runs these six hooks. They are highlighted below, in the context of the whole visit, so you can see where each one sits, what Pagefold waits for, and which classes are on the `html` element at each moment.
+
+## The visit, step by step
+
+<Timeline highlight="animation" />
+
+Classes in green appear at that step. Struck through, they are removed there. Steps marked **waits** are where Pagefold holds the visit until the animation is done.
+
+## In detail
+
+The first and the fourth hooks set up the state classes; the middle ones are where the waiting happens.
 
 | Hook | When | Default |
 |---|---|---|
