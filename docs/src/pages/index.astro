@@ -38,20 +38,20 @@ const features = [
 ]
 
 const modules = [
-  ['head', 'Head'],
-  ['scripts', 'Scripts'],
-  ['js', 'JS'],
-  ['overlap', 'Overlap'],
-  ['preload', 'Preload'],
-  ['a11y', 'A11y'],
-  ['scroll', 'Scroll'],
-  ['body-class', 'Body class'],
-  ['debug', 'Debug'],
-  ['route-name', 'Route name'],
-  ['progress', 'Progress'],
-  ['forms', 'Forms'],
-  ['fragment', 'Fragment'],
-  ['analytics', 'Analytics'],
+  { slug: 'head', name: 'Head', size: '1.3', text: 'Keeps the title, meta tags and stylesheets in sync with each page.', icon: 'M4 5h16v4H4zM4 13h10M4 17h7' },
+  { slug: 'scripts', name: 'Scripts', size: '0.9', text: 'Runs the scripts of the new page, in order and only once.', icon: 'M8 7l-5 5 5 5M16 7l5 5-5 5' },
+  { slug: 'js', name: 'JS', size: '1.2', text: 'Animate with GSAP, Motion or any JavaScript animation library.', icon: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z' },
+  { slug: 'overlap', name: 'Overlap', size: '1.4', text: 'The old and the new page animate at the same time: crossfades and pushes.', icon: 'M3 5h12v12H3zM9 9h12v12H9z' },
+  { slug: 'preload', name: 'Preload', size: '2.2', text: 'Fetches pages on hover or as links scroll into view, so clicks feel instant.', icon: 'M13 3L5 14h6l-1 7 8-11h-6z' },
+  { slug: 'a11y', name: 'A11y', size: '1.3', text: 'Announces the new page, moves focus and respects reduced motion.', icon: 'M12 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM5 9l7 1 7-1M12 10v4m0 0l-3 6m3-6l3 6' },
+  { slug: 'scroll', name: 'Scroll', size: '1.3', text: 'Smooth scrolling to the top and to anchors, with room for a fixed header.', icon: 'M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4' },
+  { slug: 'body-class', name: 'Body class', size: '0.7', text: 'Copies the body class of the new page so page-specific styles keep working.', icon: 'M20 12l-8 8-9-9V3h8zM7.5 7.5h.01' },
+  { slug: 'route-name', name: 'Route name', size: '1.1', text: 'Names your pages and picks the animation by where you come from and where you go.', icon: 'M12 21s-6-5.5-6-10a6 6 0 0112 0c0 4.5-6 10-6 10zM12 8.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z' },
+  { slug: 'progress', name: 'Progress', size: '1.2', text: 'A thin loading bar for the visits that take a while.', icon: 'M4 9h16v6H4zM6 11h8v2H6z' },
+  { slug: 'forms', name: 'Forms', size: '1.2', text: 'Submits forms without a reload, with the same transitions as links.', icon: 'M4 4h16v16H4zM8 9h8M8 13h8M8 17h4' },
+  { slug: 'fragment', name: 'Fragment', size: '1.2', text: 'Replaces only part of the page, like a detail panel, and leaves the rest alone.', icon: 'M4 4h7v7H4zM13 4h7v4h-7zM13 12h7v8h-7zM4 13h7v7H4z' },
+  { slug: 'analytics', name: 'Analytics', size: '1.0', text: 'Sends a page view to GA4, Tag Manager or Matomo after every visit.', icon: 'M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6' },
+  { slug: 'debug', name: 'Debug', size: '1.0', text: 'Logs every hook with its timing while you build.', icon: 'M9 9h6v8a3 3 0 01-6 0zM9 5l1.5 2M15 5l-1.5 2M5 11h4M15 11h4M5 17h4M15 17h4' },
 ]
 ---
 
@@ -122,10 +122,27 @@ const modules = [
 
   <section class="wrap block">
     <h2>Add only what you need</h2>
-    <p class="sub">Every module is a separate import. Nothing you do not use reaches your bundle.</p>
+    <p class="sub">Every module is a separate import, and the sizes below are what each one adds. Nothing you do not use reaches your bundle.</p>
     <ul class="modules">
-      {modules.map(([slug, name]) => <li><a href={`/docs/${slug}`}>{name}</a></li>)}
+      {
+        modules.map((m) => (
+          <li>
+            <a class="module" href={`/docs/${m.slug}`}>
+              <div class="top">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d={m.icon} />
+                </svg>
+                <h3>{m.name}</h3>
+                <span class="size">{m.size} KB</span>
+              </div>
+              <p>{m.text}</p>
+              <code class="path">pagefold/{m.slug}</code>
+            </a>
+          </li>
+        ))
+      }
     </ul>
+    <p class="more">Every module has its own page with when to use it and every option. <a href="/docs/getting-started">Start with the guide</a>.</p>
   </section>
 </Base>
 
@@ -414,24 +431,65 @@ const modules = [
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 1rem;
   }
-  .modules a {
-    display: block;
-    padding: 0.45rem 0.9rem;
+  .module {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    height: 100%;
+    padding: 1.15rem 1.25rem;
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 14px;
     background: var(--surface);
     color: var(--text);
     text-decoration: none;
-    font: 0.88rem var(--font-head);
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
   }
-  .modules a:hover {
-    border-color: var(--link);
+  .module:hover {
+    border-color: color-mix(in srgb, var(--link) 60%, var(--border));
+    transform: translateY(-2px);
+  }
+  .module .top {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .module svg {
+    flex: none;
     color: var(--link);
+  }
+  .module h3 {
+    margin: 0;
+    font-size: 1rem;
+    flex: 1;
+  }
+  .size {
+    padding: 0.05rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font: 0.72rem var(--font-head);
+  }
+  .module p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.93rem;
+    flex: 1;
+  }
+  .path {
+    color: var(--muted);
+    font-size: 0.78rem;
+    transition: color 0.2s;
+  }
+  .module:hover .path {
+    color: var(--link);
+  }
+  .more {
+    margin: 1.5rem 0 0;
+    color: var(--muted);
   }
 
   @media (max-width: 52rem) {
