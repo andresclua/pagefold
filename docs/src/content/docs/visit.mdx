@@ -5,6 +5,8 @@ section: reference
 order: 2
 ---
 
+import Strips from '../../components/Strips.astro'
+
 Every hook handler receives the current visit as its first argument. Change it from an early hook, usually `visit:start`, to change how the visit behaves.
 
 ```js
@@ -12,6 +14,18 @@ pagefold.hooks.on('visit:start', (visit) => {
   visit.animation.name = visit.to.url.startsWith('/work') ? 'zoom' : 'fade'
 })
 ```
+
+## Its life
+
+`state` only moves forward. A visit never goes back to an earlier step:
+
+<Strips
+  rows={[
+    { label: 'A normal visit', items: [{ text: 'created' }, { text: 'started' }, { text: 'leaving' }, { text: 'loaded' }, { text: 'entering' }, { text: 'completed', tone: 'new' }] },
+    { label: 'It can end early', items: [{ text: 'aborted', tone: 'moved' }, { text: 'failed', tone: 'moved' }, { text: 'ignored', tone: 'moved' }] },
+  ]}
+  caption="Aborted: another visit took over or you called abort(). Failed: the request or a hook failed. Ignored: you called ignore() and the browser loads the page. All four endings count as done."
+/>
 
 ## Fields
 

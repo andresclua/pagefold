@@ -5,6 +5,8 @@ section: guides
 order: 6
 ---
 
+import Lanes from '../../components/Lanes.astro'
+
 The [View Transitions API](https://developer.mozilla.org/docs/Web/API/View_Transition_API) lets the browser take a snapshot of the old page and the new one and animate between them. Turn it on with one option:
 
 ```js
@@ -12,6 +14,25 @@ const pagefold = new Pagefold({ native: true })
 ```
 
 When the browser supports `document.startViewTransition`, Pagefold performs the content swap inside it. Browsers without it, or visits with `native` off, use the normal flow. Pagefold adds `pagefold-native` to the `html` element when it is active, so your CSS can tell.
+
+## What changes
+
+<Lanes
+  total={100}
+  rows={[
+    { label: 'Normal flow', segments: [
+      { from: 0, to: 35, text: 'old page out', tone: 'out' },
+      { from: 35, to: 42, text: 'swap', tone: 'load' },
+      { from: 42, to: 80, text: 'new page in', tone: 'in' },
+    ] },
+    { label: 'native: true', segments: [
+      { from: 0, to: 10, text: 'snapshot', tone: 'load' },
+      { from: 10, to: 17, text: 'swap', tone: 'load' },
+      { from: 17, to: 65, text: 'browser animates old to new', tone: 'in' },
+    ] },
+  ]}
+  caption="With the native transition the browser keeps a picture of the old page and animates it into the new one, so the two can morph together. Without browser support, the normal flow runs."
+/>
 
 ## Customizing the transition
 

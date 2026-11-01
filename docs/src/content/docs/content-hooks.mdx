@@ -5,6 +5,18 @@ section: hooks
 order: 3
 ---
 
+import Strips from '../../components/Strips.astro'
+
+## The order
+
+<Strips
+  rows={[
+    { label: 'After the old content is out', items: [{ text: 'content:replace', tone: 'new' }, { text: 'content:scroll', tone: 'new' }, { text: 'page:view', tone: 'new' }] },
+    { label: 'content:scroll runs', items: [{ text: 'URL has a #hash: scroll:anchor' }, { text: 'no hash: scroll:top' }] },
+  ]}
+  caption="Then the new content animates in. page:view fires before that, as soon as the page is in place."
+/>
+
 ## `content:replace`
 
 The new content is swapped in. Arguments: `{ page }`, with `page.html` and `page.url`.

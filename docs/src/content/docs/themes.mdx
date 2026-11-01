@@ -5,6 +5,8 @@ section: guides
 order: 9
 ---
 
+import Strips from '../../components/Strips.astro'
+
 A theme is a CSS file. Import it, give your container the theme's class, and you are done.
 
 ```js
@@ -20,6 +22,17 @@ Or in HTML:
 ```html
 <main id="pagefold" class="transition-slide">...</main>
 ```
+
+## What they do
+
+<Strips
+  rows={[
+    { label: 'Fade', items: [{ text: 'old page fades out', tone: 'gone' }, { text: 'new page fades in', tone: 'new' }] },
+    { label: 'Slide, forward', items: [{ text: 'old leaves to the left', tone: 'gone' }, { text: 'new comes from the right', tone: 'new' }] },
+    { label: 'Slide, back', items: [{ text: 'old leaves to the right', tone: 'gone' }, { text: 'new comes from the left', tone: 'new' }] },
+  ]}
+  caption="Slide goes the other way on the back button, as long as animateHistoryBrowsing is on."
+/>
 
 ## Fade
 

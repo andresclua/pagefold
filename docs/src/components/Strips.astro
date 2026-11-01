@@ -1,11 +1,11 @@
 ---
 interface Item { text: string; tone?: 'new' | 'moved' | 'gone' }
-interface Props { rows: { label: string; items: Item[] }[]; caption?: string }
-const { rows, caption } = Astro.props
+interface Props { rows: { label: string; items: Item[] }[]; caption?: string; hint?: [string, string] }
+const { rows, caption, hint } = Astro.props
 ---
 
 <figure class="strips">
-  <div class="hint"><span>← least recently used</span><span>most recent →</span></div>
+  {hint && <div class="hint"><span>{hint[0]}</span><span>{hint[1]}</span></div>}
   {
     rows.map((r) => (
       <div class="row">

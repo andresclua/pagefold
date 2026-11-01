@@ -23,6 +23,7 @@ Without these options the cache is unlimited and pages never expire.
 This is how `cacheMax: 3` behaves. Reading a page counts as using it, so it moves to the most recent end. When a fourth page arrives, the one at the other end is dropped:
 
 <Strips
+  hint={['← least recently used', 'most recent →']}
   rows={[
     { label: 'Visit /a, /b, /c', items: [{ text: '/a' }, { text: '/b' }, { text: '/c', tone: 'new' }] },
     { label: 'Visit /a again', items: [{ text: '/b' }, { text: '/c' }, { text: '/a', tone: 'moved' }] },

@@ -1,0 +1,59 @@
+---
+interface Pane { name: string; text?: string; state?: 'kept' | 'replaced' }
+interface Props {
+  /** The page before and after, each as a row of containers */
+  before: { url: string; panes: Pane[] }
+  after: { url: string; panes: Pane[] }
+  /** CSS grid columns of the containers, for example "1fr 2fr" */
+  columns?: string
+  caption?: string
+}
+const { before, after, columns = '1fr 1fr', caption } = Astro.props
+const frames = [
+  { label: 'Before', ...before },
+  { label: 'After', ...after },
+]
+---
+
+<figure class="panes">
+  <div class="pair">
+    {
+      frames.map((f, i) => (
+        <>
+          {i === 1 && <span class="arrow" aria-hidden="true">→</span>}
+          <div class="frame">
+            <div class="bar"><span>{f.label}</span><code>{f.url}</code></div>
+            <div class="grid" style={`grid-template-columns:${columns}`}>
+              {f.panes.map((p) => (
+                <div class={`pane ${f.label === 'After' ? (p.state ?? '') : ''}`}>
+                  <code>{p.name}</code>
+                  {p.text && <span>{p.text}</span>}
+                  {f.label === 'After' && p.state === 'kept' && <em>untouched</em>}
+                  {f.label === 'After' && p.state === 'replaced' && <em>replaced</em>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      ))
+    }
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .panes { margin: 1.5rem 0; }
+  .pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.75rem; align-items: center; }
+  .arrow { font: 1.4rem var(--font-head); color: var(--muted); }
+  .frame { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .bar { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--muted); }
+  .grid { display: grid; gap: 0.5rem; padding: 0.6rem; min-height: 7.5rem; }
+  .pane { display: grid; align-content: space-between; gap: 0.25rem; padding: 0.6rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font-size: 0.85rem; }
+  .pane code { justify-self: start; }
+  .pane span { color: var(--muted); }
+  .pane em { font-style: normal; font: 0.7rem var(--font-head); color: var(--muted); }
+  .kept { border-style: dashed; }
+  .replaced { border-color: color-mix(in srgb, var(--accent) 70%, var(--border)); background: color-mix(in srgb, var(--accent) 28%, var(--surface)); }
+  figcaption { margin-top: 0.6rem; color: var(--muted); font-size: 0.9rem; }
+  @media (max-width: 40rem) { .pair { grid-template-columns: 1fr; } .arrow { transform: rotate(90deg); justify-self: center; } }
+</style>

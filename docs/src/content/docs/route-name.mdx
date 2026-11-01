@@ -15,6 +15,8 @@ options:
     description: "Pick an animation by the route names a visit goes between. from and to take a name or a list; leave out for any."
 ---
 
+import Strips from '../../components/Strips.astro'
+
 Import it from `pagefold/route-name` (about 1.1 KB minified and compressed, shared code included).
 
 ```js
@@ -38,6 +40,17 @@ new Pagefold({
 ```
 
 ## What a visit gets
+
+For a visit from `/work` to `/work/hello` with the configuration above:
+
+<Strips
+  rows={[
+    { label: 'The URLs', items: [{ text: '/work' }, { text: '/work/hello' }] },
+    { label: 'The route names', items: [{ text: 'work' }, { text: 'project' }] },
+    { label: 'Classes on html', items: [{ text: 'from-route-work', tone: 'new' }, { text: 'to-route-project', tone: 'new' }, { text: 'to-expand', tone: 'new' }] },
+  ]}
+  caption="to-expand comes from the first entry in animations that matches work to project. All three classes are removed when the visit ends."
+/>
 
 - `visit.from.route` and `visit.to.route`, the names of the pages, or `undefined`.
 - Classes while it runs: `from-route-home`, `to-route-project`. They are removed at the end.

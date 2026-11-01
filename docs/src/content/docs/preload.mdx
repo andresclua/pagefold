@@ -35,6 +35,8 @@ options:
     description: "Do nothing on slow connections (2G) or when the user asked to save data."
 ---
 
+import Lanes from '../../components/Lanes.astro'
+
 Import it from `pagefold/preload` (about 2.2 KB minified and compressed, shared code included).
 
 ```js
@@ -45,6 +47,32 @@ new Pagefold({ plugins: [preload] })
 ```
 
 Preloaded pages go into the [cache](/docs/caching-and-history), so a later visit makes no request.
+
+## What it saves
+
+The click happens at the same moment in all three rows. Without Preload the visitor waits for the request after clicking. With it, the request started earlier, while the pointer rested on the link:
+
+<Lanes
+  total={90}
+  marks={[{ at: 30, label: 'click' }]}
+  rows={[
+    { label: 'No preload', segments: [
+      { from: 0, to: 30, text: 'pointer on the link', tone: 'wait' },
+      { from: 30, to: 65, text: 'click, then request', tone: 'load' },
+      { from: 65, to: 90, text: 'swap + in', tone: 'in' },
+    ] },
+    { label: 'Hovered first', segments: [
+      { from: 0, to: 30, text: 'hover: page preloads', tone: 'load' },
+      { from: 30, to: 55, text: 'swap + in', tone: 'in' },
+    ] },
+    { label: 'Click comes first', segments: [
+      { from: 0, to: 30, text: 'hover: request starts', tone: 'load' },
+      { from: 30, to: 47, text: 'same request', tone: 'wait' },
+      { from: 47, to: 72, text: 'swap + in', tone: 'in' },
+    ] },
+  ]}
+  caption="Third row: the click arrives before the request ends. The visit waits for that request instead of starting a second one."
+/>
 
 ## If the click comes first
 

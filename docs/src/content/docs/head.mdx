@@ -27,6 +27,8 @@ options:
     description: "Give up waiting for assets after this many milliseconds."
 ---
 
+import Strips from '../../components/Strips.astro'
+
 Import it from `pagefold/head` (about 1.3 KB minified and compressed, shared code included).
 
 ```js
@@ -43,6 +45,14 @@ The new page's `<head>` is compared tag by tag with the current one.
 - Tags that are **identical** are left exactly as they are. The browser does not reload them.
 - **New** tags are inserted in the order the new page has them.
 - Tags that only the old page has are **removed**, unless `persistTags` says to keep them.
+
+<Strips
+  rows={[
+    { label: 'Old <head>', items: [{ text: 'style.css' }, { text: 'analytics.js' }, { text: 'home.css', tone: 'gone' }] },
+    { label: 'New <head>', items: [{ text: 'style.css' }, { text: 'analytics.js' }, { text: 'blog.css', tone: 'new' }] },
+  ]}
+  caption="Identical tags are left alone, so nothing reloads. home.css is removed (crossed out) and blog.css is inserted (green)."
+/>
 
 The `lang` and `dir` attributes of the `html` element are copied too. Add more with `attributes`, using names or patterns such as `/^data-/`.
 

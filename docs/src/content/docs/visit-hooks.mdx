@@ -5,6 +5,19 @@ section: hooks
 order: 1
 ---
 
+import Strips from '../../components/Strips.astro'
+
+## The order
+
+<Strips
+  rows={[
+    { label: 'A normal visit', items: [{ text: 'visit:start', tone: 'new' }, { text: 'page:load + visit:transition', tone: 'new' }, { text: 'visit:end', tone: 'new' }] },
+    { label: 'Another click while loading', items: [{ text: 'visit:start', tone: 'new' }, { text: 'visit:abort', tone: 'moved' }] },
+    { label: 'Something goes wrong', items: [{ text: 'visit:start', tone: 'new' }, { text: 'visit:fail', tone: 'moved' }, { text: 'browser loads the page' }] },
+  ]}
+  caption="page:load and visit:transition run together: the page loads while the old content animates out. visit:transition holds all the animation and content hooks."
+/>
+
 ## `visit:start`
 
 A visit has been created and is about to load. Arguments: none.

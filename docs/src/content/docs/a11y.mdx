@@ -31,6 +31,8 @@ options:
     description: "Skip animations when the user prefers reduced motion."
 ---
 
+import Flow from '../../components/Flow.astro'
+
 Import it from `pagefold/a11y` (about 1.3 KB minified and compressed, shared code included).
 
 ```js
@@ -45,6 +47,20 @@ new Pagefold({ plugins: [new PagefoldA11y({ announcement: 'Ahora en: {title}' })
 - **Moves focus** to the new content, so keyboard and screen reader users start at the top of the new page and not on a link that no longer exists. Focus moves even when the link that was clicked has it.
 - **Respects reduced motion.** If the user asked for less motion, visits are not animated: Pagefold fires `animation:skip` and swaps the content straight away.
 - **Focuses anchors.** A link to `#section` on the same page moves focus to that section.
+
+## Where focus goes
+
+After the content is replaced, Pagefold asks this for the focused element:
+
+<Flow
+  yesLabel="stays"
+  checks={[
+    { q: 'Is focus in a text field, a select or a contenteditable element?' },
+    { q: 'Is it inside something marked data-pagefold-persist?' },
+  ]}
+  stop="Focus is left where it is. People should not be interrupted while typing."
+  end="Focus moves to the start of the new content."
+/>
 
 ## When it leaves focus alone
 

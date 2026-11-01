@@ -5,6 +5,8 @@ section: guides
 order: 10
 ---
 
+import Panes from '../../components/Panes.astro'
+
 Astro builds pages that are plain HTML, which is what Pagefold expects. This documentation site is built exactly like this, and it navigates with Pagefold.
 
 ## 1. The layout
@@ -43,6 +45,15 @@ import 'pagefold/css/fade.css'
 ```
 
 Astro bundles that script for the browser. Because the layout is shared, it is on every page and runs once.
+
+## What happens on each click
+
+<Panes
+  columns="1fr"
+  before={{ url: '/', panes: [{ name: '<head>', text: 'title, description, styles' }, { name: '<header>', state: 'kept' }, { name: '<main id="pagefold">', text: 'home' }] }}
+  after={{ url: '/about', panes: [{ name: '<head>', text: 'merged by Head', state: 'replaced' }, { name: '<header>', state: 'kept' }, { name: '<main id="pagefold">', text: 'about', state: 'replaced' }] }}
+  caption="Pagefold swaps the container, the Head plugin merges the head, and the layout script is not run again because it never left."
+/>
 
 ## 2. Why these plugins
 

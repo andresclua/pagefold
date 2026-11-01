@@ -5,6 +5,8 @@ section: reference
 order: 4
 ---
 
+import Strips from '../../components/Strips.astro'
+
 A plugin is a class that extends `Plugin`. It registers hooks when it is mounted and Pagefold removes them when it is unmounted.
 
 ```js
@@ -34,6 +36,16 @@ export default class AnalyticsPlugin extends Plugin {
 ```js
 new Pagefold({ plugins: [new AnalyticsPlugin({ trackingId: 'G-XXXX' })] })
 ```
+
+## Its life
+
+<Strips
+  rows={[
+    { label: 'In your code', items: [{ text: 'new Plugin(options)' }, { text: 'plugins: [plugin] or pagefold.use()', tone: 'moved' }] },
+    { label: 'Pagefold calls', items: [{ text: 'mount()', tone: 'new' }, { text: 'your hooks run on every visit' }, { text: 'unmount()', tone: 'moved' }] },
+  ]}
+  caption="unmount() runs on unuse() or destroy(). The hooks registered with this.on are removed for you."
+/>
 
 ## What the base class gives you
 

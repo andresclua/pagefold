@@ -5,6 +5,21 @@ section: hooks
 order: 5
 ---
 
+import Strips from '../../components/Strips.astro'
+
+## What fires for each click
+
+<Strips
+  rows={[
+    { label: 'A normal link', items: [{ text: 'link:click', tone: 'new' }, { text: 'visit starts' }] },
+    { label: 'A #section link, same page', items: [{ text: 'link:click', tone: 'new' }, { text: 'link:anchor', tone: 'new' }] },
+    { label: 'A link to this page', items: [{ text: 'link:click', tone: 'new' }, { text: 'link:self', tone: 'new' }] },
+    { label: 'Cmd, Ctrl, Shift or Alt click', items: [{ text: 'link:newtab', tone: 'moved' }, { text: 'browser takes over' }] },
+    { label: 'Back or forward button', items: [{ text: 'history:popstate', tone: 'new' }, { text: 'visit starts' }] },
+  ]}
+  caption="link:anchor and link:self run inside the default of link:click. If you replace link:click, they do not fire."
+/>
+
 ## `link:click`
 
 A click on a link that Pagefold may handle. Arguments: `{ el, event }`. The default prevents the browser's navigation and starts the visit.

@@ -5,6 +5,8 @@ section: guides
 order: 12
 ---
 
+import Strips from '../../components/Strips.astro'
+
 If your site has no build step, use the UMD files: one per module, each a single minified file that puts a global variable on the page.
 
 ```html
@@ -19,6 +21,13 @@ If your site has no build step, use the UMD files: one per module, each a single
   })
 </script>
 ```
+
+<Strips
+  rows={[
+    { label: 'Order of the tags', items: [{ text: 'gsap.js (if you use it)' }, { text: 'pagefold.js', tone: 'new' }, { text: 'head.js, a11y.js…', tone: 'moved' }, { text: 'new Pagefold({…})', tone: 'new' }] },
+  ]}
+  caption="Each file defines a global. new Pagefold needs all of them to exist, so it goes last."
+/>
 
 Load `pagefold.js` first and the plugins after it. Pin a version in the URL, so an update never changes your site without you knowing.
 

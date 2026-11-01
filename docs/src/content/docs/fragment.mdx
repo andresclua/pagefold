@@ -11,6 +11,8 @@ options:
     description: "Rules, checked in order. Each has from, to, containers, and optionally name and scroll."
 ---
 
+import Panes from '../../components/Panes.astro'
+
 Import it from `pagefold/fragment` (about 1.2 KB minified and compressed, shared code included).
 
 ```js
@@ -30,6 +32,15 @@ new Pagefold({
 ```
 
 Going from `/users` to `/users/7` replaces only `#detail`. The list, with its scroll position and its state, is not touched. Because rules match on the page you leave **and** the page you enter, the way back needs a rule of its own, as in the second entry.
+
+Here is what the visit does to the page, with `#list` and `#detail` as containers:
+
+<Panes
+  columns="1fr 2fr"
+  before={{ url: '/users', panes: [{ name: '#list', text: 'scrolled, filtered' }, { name: '#detail', text: 'nothing selected' }] }}
+  after={{ url: '/users/7', panes: [{ name: '#list', text: 'scrolled, filtered', state: 'kept' }, { name: '#detail', text: 'user 7', state: 'replaced' }] }}
+  caption="Only #detail changes. The list keeps its scroll position, its filter and anything playing in it."
+/>
 
 ## A rule
 
@@ -52,4 +63,13 @@ The animation classes go on the fragment containers, not on the `html` element, 
 
 ## When it falls back
 
-A rule is only used if **every container is on the current page**. If the new page does not contain one of them, Pagefold replaces all the normal containers instead of leaving a broken page. `visit.fragment` tells you whether a visit is a fragment visit.
+A rule is only used if **every container is on the current page**. If the new page does not contain one of them, Pagefold replaces all the normal containers instead of leaving a broken page.
+
+<Panes
+  columns="1fr 2fr"
+  before={{ url: '/users/7', panes: [{ name: '#list' }, { name: '#detail', text: 'user 7' }] }}
+  after={{ url: '/dashboard', panes: [{ name: '#list', state: 'replaced' }, { name: '#detail', text: 'no #detail here', state: 'replaced' }] }}
+  caption="The new page has no #detail, so the rule is skipped and every container is replaced."
+/>
+
+ `visit.fragment` tells you whether a visit is a fragment visit.

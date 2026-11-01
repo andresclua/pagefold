@@ -19,6 +19,8 @@ options:
     description: "Run only scripts marked data-pagefold-reload-script, on every visit."
 ---
 
+import Flow from '../../components/Flow.astro'
+
 Import it from `pagefold/scripts` (about 0.9 KB minified and compressed, shared code included).
 
 ```js
@@ -28,6 +30,20 @@ new Pagefold({ plugins: [new PagefoldScripts()] })
 ```
 
 Scripts that come in with fetched HTML do not run by themselves, which is how browsers treat them. This plugin replaces each new script with a fresh copy, which does run, **in the order they appear**.
+
+## Does a script run?
+
+With the default settings, each script in the new content is checked in this order:
+
+<Flow
+  yesLabel="not run"
+  checks={[
+    { q: 'Was it already on the page?', note: 'Like the script that started Pagefold, or a head tag that is identical on both pages.' },
+    { q: 'Does it have data-pagefold-ignore-script?' },
+  ]}
+  stop="The script is skipped."
+  end="It runs, in the order it appears in the page."
+/>
 
 ## Only new scripts
 

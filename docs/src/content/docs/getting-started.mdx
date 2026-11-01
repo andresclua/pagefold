@@ -5,6 +5,8 @@ section: start
 order: 1
 ---
 
+import Panes from '../../components/Panes.astro'
+
 Pagefold turns the links of a server-rendered site into page transitions. When someone clicks a link it fetches the next page, animates the old content out, swaps it for the new content, animates it in, and keeps the address bar, the back button and the scroll position working.
 
 > Pagefold is not published to npm yet. The commands below show how installation will work.
@@ -28,6 +30,13 @@ Pick the part of your page that changes between pages and give it an `id`. Every
   </main>
 </body>
 ```
+
+<Panes
+  columns="1fr"
+  before={{ url: '/', panes: [{ name: '<header>', state: 'kept' }, { name: '<main id="pagefold">', text: 'home' }, { name: '<footer>', state: 'kept' }] }}
+  after={{ url: '/about', panes: [{ name: '<header>', state: 'kept' }, { name: '<main id="pagefold">', text: 'about', state: 'replaced' }, { name: '<footer>', state: 'kept' }] }}
+  caption="On every click only the element with the id is replaced. The header, the footer and anything playing in them stay as they are."
+/>
 
 Every page of your site must contain that same element. Pagefold fetches the full HTML page and takes this element from it, so you do not need an API or special responses.
 

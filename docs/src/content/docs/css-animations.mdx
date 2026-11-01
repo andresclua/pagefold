@@ -5,7 +5,29 @@ section: guides
 order: 1
 ---
 
+import Lanes from '../../components/Lanes.astro'
+
 Out of the box Pagefold animates with CSS. It adds [state classes](/docs/how-it-works#state-classes) to the `html` element, you write the transition, and it waits for the transition to finish before moving on.
+
+## The classes over time
+
+Each bar is a class on the `html` element. The bottom row is what your CSS above does to the content:
+
+<Lanes
+  total={100}
+  rows={[
+    { label: 'is-changing', segments: [{ from: 0, to: 80, text: 'the whole transition', tone: 'out' }] },
+    { label: 'is-animating', segments: [{ from: 0, to: 42, text: 'until the page animates in', tone: 'out' }] },
+    { label: 'is-leaving', segments: [{ from: 0, to: 35, text: 'old page out', tone: 'out' }] },
+    { label: 'is-rendering', segments: [{ from: 35, to: 80, text: 'until the end', tone: 'out' }] },
+    { label: 'The content', segments: [
+      { from: 0, to: 35, text: 'fades out', tone: 'in' },
+      { from: 35, to: 42, text: 'swap', tone: 'load' },
+      { from: 42, to: 80, text: 'fades in', tone: 'in' },
+    ] },
+  ]}
+  caption="The content fades out while is-animating is on, and back in when it is removed. That is all the basic fade needs."
+/>
 
 ## The basic fade
 

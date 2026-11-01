@@ -6,8 +6,10 @@ interface Props {
   stop: string
   /** What happens when every check is "no" */
   end: string
+  /** The destination of a "yes" in the small badge. Default: browser */
+  yesLabel?: string
 }
-const { checks, stop, end } = Astro.props
+const { checks, stop, end, yesLabel = 'browser' } = Astro.props
 ---
 
 <ol class="flow" aria-label="Decision flow, top to bottom">
@@ -18,7 +20,7 @@ const { checks, stop, end } = Astro.props
           <strong>{c.q}</strong>
           {c.note && <span>{c.note}</span>}
         </div>
-        <div class="yes"><b>Yes</b> → browser</div>
+        <div class="yes"><b>Yes</b> → {yesLabel}</div>
         <div class="no" aria-hidden="true">No ↓</div>
       </li>
     ))

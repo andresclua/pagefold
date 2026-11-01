@@ -5,11 +5,14 @@ interface Props {
   /** The time axis runs from 0 to this value (arbitrary units) */
   total?: number
   caption?: string
+  /** Vertical lines across all rows, for a moment such as a click */
+  marks?: { at: number; label: string }[]
 }
-const { rows, total = 100, caption } = Astro.props
+const { rows, total = 100, caption, marks = [] } = Astro.props
 ---
 
 <figure class="lanes">
+  <div class="body">
   {
     rows.map((r) => (
       <div class="row">
@@ -25,12 +28,17 @@ const { rows, total = 100, caption } = Astro.props
       </div>
     ))
   }
+  {marks.map((m) => <span class="mark" style={`--at:${m.at / total}`}><i>{m.label}</i></span>)}
+  </div>
   <div class="axis" aria-hidden="true"><span>time →</span></div>
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
 <style>
-  .lanes { margin: 1.5rem 0; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); display: grid; gap: 0.7rem; }
+  .lanes { margin: 1.5rem 0; padding: 1.6rem 1rem 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); display: grid; gap: 0.7rem; }
+  .body { position: relative; display: grid; gap: 0.7rem; }
+  .mark { position: absolute; top: -0.3rem; bottom: -0.3rem; left: calc(7.25rem + (100% - 7.25rem) * var(--at)); border-left: 2px dashed var(--text); pointer-events: none; }
+  .mark i { position: absolute; top: -1.15rem; left: 0; transform: translateX(-50%); font: 0.7rem var(--font-head); color: var(--text); white-space: nowrap; font-style: normal; }
   .row { display: grid; grid-template-columns: 6.5rem 1fr; gap: 0.75rem; align-items: center; }
   .label { font: 0.8rem var(--font-head); color: var(--muted); }
   .track { position: relative; height: 2.1rem; border-radius: 6px; background: color-mix(in srgb, var(--border) 45%, transparent); }
@@ -42,5 +50,5 @@ const { rows, total = 100, caption } = Astro.props
   .abort { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--muted) 35%, transparent) 6px 8px); color: var(--muted); border-style: dashed; }
   .axis { padding-left: 7.25rem; font: 0.72rem var(--font-head); color: var(--muted); text-align: right; border-top: 1px solid var(--border); padding-top: 0.3rem; }
   figcaption { color: var(--muted); font-size: 0.9rem; }
-  @media (max-width: 40rem) { .row { grid-template-columns: 1fr; gap: 0.25rem; } .axis { padding-left: 0; } }
+  @media (max-width: 40rem) { .mark { display: none; } .row { grid-template-columns: 1fr; gap: 0.25rem; } .axis { padding-left: 0; } }
 </style>

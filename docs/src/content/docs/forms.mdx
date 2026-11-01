@@ -11,6 +11,8 @@ options:
     description: "Which forms are handled. By default, only forms with data-pagefold-form. Use \"form\" for all."
 ---
 
+import Flow from '../../components/Flow.astro'
+
 Import it from `pagefold/forms` (about 1.2 KB minified and compressed, shared code included).
 
 ```js
@@ -25,6 +27,22 @@ new Pagefold({ plugins: [new PagefoldForms()] })
   <button>Search</button>
 </form>
 ```
+
+## Which forms it handles
+
+A submit goes through these questions in order. The first "yes" leaves the form to the browser:
+
+<Flow
+  checks={[
+    { q: 'Did something already cancel the submit?', note: 'Another listener called preventDefault().' },
+    { q: 'Does the form not match formSelector?', note: 'By default only forms with data-pagefold-form.' },
+    { q: 'Is the method neither GET nor POST?', note: 'For example method="dialog".' },
+    { q: 'Does it have target="_blank"?' },
+    { q: 'Is it to another origin, or does ignoreVisit return true?' },
+  ]}
+  stop="The browser submits the form normally."
+  end="Pagefold submits it as a visit, with the transition."
+/>
 
 ## GET and POST
 

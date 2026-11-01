@@ -39,6 +39,8 @@ options:
     description: "Height in pixels."
 ---
 
+import Lanes from '../../components/Lanes.astro'
+
 Import it from `pagefold/progress` (about 1.2 KB minified and compressed, shared code included).
 
 ```js
@@ -48,6 +50,23 @@ new Pagefold({ plugins: [new PagefoldProgress({ color: '#00ff9c' })] })
 ```
 
 The bar appears if a visit takes longer than `delay`, starts at `initialValue`, and moves forward slower and slower, so it never looks finished before it is. When the page is shown it runs to the end and fades out. If the visit fails, it disappears.
+
+Two visits with the default settings:
+
+<Lanes
+  total={100}
+  rows={[
+    { label: 'Quick visit', segments: [{ from: 0, to: 25, text: 'under 300 ms: no bar', tone: 'wait' }] },
+    { label: 'Slow visit', segments: [
+      { from: 0, to: 25, text: 'delay: no bar', tone: 'wait' },
+      { from: 25, to: 45, text: '25%', tone: 'out' },
+      { from: 45, to: 70, text: 'slower and slower', tone: 'out' },
+      { from: 70, to: 85, text: 'to 100%', tone: 'in' },
+      { from: 85, to: 100, text: 'fade', tone: 'in' },
+    ] },
+  ]}
+  caption="The bar never reaches the end by itself. It only runs to 100% when the new page is shown."
+/>
 
 It is a `div` with `aria-hidden="true"`: it is decoration, not information.
 

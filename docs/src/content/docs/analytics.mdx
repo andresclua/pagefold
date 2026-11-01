@@ -15,6 +15,8 @@ options:
     description: "Name of the event pushed to the Tag Manager data layer (provider gtm)."
 ---
 
+import Strips from '../../components/Strips.astro'
+
 Import it from `pagefold/analytics` (about 1 KB minified and compressed, shared code included).
 
 ```js
@@ -24,6 +26,17 @@ new Pagefold({ plugins: [new PagefoldAnalytics({ provider: 'gtag' })] })
 ```
 
 Keep your analytics snippet on the page as usual. It reports the **first** page. Pagefold reports every page it navigates to, after the content is on screen.
+
+## Who sends what
+
+<Strips
+  rows={[
+    { label: 'Open the site', items: [{ text: 'your snippet sends page_view for /', tone: 'moved' }] },
+    { label: 'Click to /about', items: [{ text: 'Pagefold sends page_view for /about', tone: 'new' }] },
+    { label: 'Click to /blog', items: [{ text: 'Pagefold sends page_view for /blog', tone: 'new' }] },
+  ]}
+  caption="Without the plugin only the first row happens: the analytics tool would think the visitor never left the first page."
+/>
 
 ## What each provider receives
 
