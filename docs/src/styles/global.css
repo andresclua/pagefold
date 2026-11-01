@@ -24,8 +24,8 @@
     --border: #e0e0d9;
     --text: #0a0a0a;
     --muted: #5c5c57;
-    /* The brand blue, a little deeper so it reads calmly as text (about 9:1 on this background) */
-    --link: color-mix(in srgb, var(--primary) 80%, #0a0a0a);
+    /* The brand blue pulled toward the text color: a calm indigo instead of an electric blue (about 12:1) */
+    --link: color-mix(in srgb, var(--primary) 58%, #0a0a0a);
   }
 }
 
@@ -54,7 +54,7 @@ a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
-  text-decoration-color: color-mix(in srgb, var(--link) 38%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--link) 50%, transparent);
   transition:
     text-decoration-color 0.15s,
     text-decoration-thickness 0.15s,
@@ -64,11 +64,20 @@ a:hover {
   text-decoration-thickness: 2px;
   text-decoration-color: currentColor;
 }
-/* Code inside a link takes its color and a soft frame of it */
+/* A link that is only code: the chip's bottom edge is the underline, so the two do not stack */
+a:has(> code:only-child) {
+  text-decoration: none;
+}
+a > code:only-child {
+  border-bottom: 2px solid color-mix(in srgb, var(--link) 50%, transparent);
+}
+a:hover > code:only-child {
+  border-bottom-color: var(--link);
+}
 a > code {
   color: inherit;
-  border-color: color-mix(in srgb, var(--link) 35%, var(--border));
-  background: color-mix(in srgb, var(--link) 8%, var(--surface));
+  border-color: var(--border);
+  background: var(--surface);
 }
 
 :focus-visible {

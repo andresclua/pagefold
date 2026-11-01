@@ -18,15 +18,74 @@ const pagefold = new Pagefold({
 
 Without these options the cache is unlimited and pages never expire.
 
-You can work with the cache directly:
+### Why not keep everything?
+
+Instant revisits are tempting, so it is easy to think "the bigger the cache the better". It is not free:
+
+| Problem | What happens |
+|---|---|
+| **Memory** | Each entry is the whole HTML of the page. 200 pages of 100 KB are about 20 MB held until the tab closes, and more if your pages are heavy. Phones and old laptops feel it first |
+| **Stale content** | A cached page is a photograph. Prices, stock, "3 new comments" or a logged-in header stay as they were when it was fetched, and the visitor sees the old version for as long as it stays cached |
+| **Wrong state after login or logout** | A page cached while logged out keeps showing the "Sign in" button after the visitor signs in |
+| **Hidden bugs** | "It works after a reload" is the classic sign of a stale cache, and it is hard to reproduce because it depends on the path the visitor took |
+
+The cache lives in memory, so a full page reload always starts empty. That caps the damage, but a long session can go a long way.
+
+`cacheTtl` and `cacheMax` do different jobs. **`cacheTtl` is about freshness**: an expired page is ignored the next time it is requested, but it is only removed from memory at that moment, so a page nobody visits again stays in memory. **`cacheMax` is about memory**: it is the only one that puts a ceiling on how many pages are held. Use both on a site that changes.
+
+How to choose:
+
+| Your site | Suggested settings |
+|---|---|
+| Mostly static: portfolio, docs, blog | `cacheMax: 50`, no `cacheTtl` |
+| Content that changes during the day: news, shop, listings | `cacheMax: 30`, `cacheTtl: 60_000` (one minute) |
+| Personalised or live data: dashboards, accounts | `cache: false` to turn it off everywhere, or a short `cacheTtl` plus `pagefold.cache.clear()` when the user changes |
+
+These are starting points, not rules. Start small and raise the numbers only if you can see revisits that should have been instant.
+
+## Working with the cache directly
+
+`pagefold.cache` is the same store the library uses, so you can read it and change it. You need this less often than you might think, because the options above cover most sites. It is for the moments when **your code knows something Pagefold cannot**: that the visitor changed something, or that a page is about to be needed.
+
+| Method | What it does | When it is useful |
+|---|---|---|
+| `has(url)` | `true` if the page is stored | Decide what to show: skip a loading hint when the page is already there |
+| `get(url)` | `{ url, html }` or `undefined` | Read a stored page without visiting it, for example to take its `<title>` for a tooltip |
+| `delete(url)` | Forget one page | You changed what that page shows |
+| `prune(fn)` | Forget every page for which `fn(url, page)` returns `true` | You changed a whole area of the site |
+| `clear()` | Forget everything | The visitor's identity or language changed |
+
+### Examples
+
+**You changed data, so the page is out of date.** After adding an item to the cart, the cached `/cart` page is wrong. Forget it and the next visit fetches a fresh one:
 
 ```js
-pagefold.cache.has('/about')
-pagefold.cache.get('/about')      // { url, html } or undefined
-pagefold.cache.delete('/about')
-pagefold.cache.prune((url) => url.startsWith('/account'))
-pagefold.cache.clear()
+async function addToCart(id) {
+  await fetch('/api/cart', { method: 'POST', body: JSON.stringify({ id }) })
+  pagefold.cache.delete('/cart')
+}
 ```
+
+**An area of the site changed.** After editing a profile, every page under `/account` may show the old name:
+
+```js
+pagefold.cache.prune((url) => url.startsWith('/account'))
+```
+
+**Everything is different now.** Signing in, signing out or switching language changes the header of every page, so drop them all:
+
+```js
+logoutButton.addEventListener('click', () => pagefold.cache.clear())
+```
+
+**Show something only when the page needs fetching.** If the page is stored the visit is instant, so a loading hint would only flicker:
+
+```js
+if (!pagefold.cache.has('/reports')) showSpinner()
+await pagefold.navigate('/reports')
+```
+
+If you only need one visit to be fresh, you do not need any of this. Skip the cache for that visit instead:
 
 To skip it for one visit: `pagefold.navigate('/news', { cache: false })`, or `{ cache: { read: false } }` to refetch but still store the result. Turn it off for everything with `cache: false`.
 
