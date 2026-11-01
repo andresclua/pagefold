@@ -73,16 +73,21 @@ Use arrow functions as class fields for listeners you add yourself, so `removeEv
 
 ## Custom hooks
 
+A plugin can offer hooks of its own, so that other code can extend what it does:
+
 ```js
 mount() {
   this.pagefold.hooks.create('my:hook')
-  this.on('visit:end', async (visit) => {
-    await this.pagefold.hooks.call('my:hook', visit, { some: 'data' })
+}
+
+run() {
+  return this.pagefold.hooks.call('my:hook', undefined, { some: 'data' }, (visit, args) => {
+    // what happens by default
   })
 }
 ```
 
-Other code can then listen with `pagefold.hooks.on('my:hook', ...)`. Custom hook names are not in the built-in type definitions, so in TypeScript cast the name.
+Anyone can then listen with `pagefold.hooks.on('my:hook', ...)`, run before the default with `before`, or take over with `replace`. [Using hooks](/docs/using-hooks#custom-hooks) has a complete example, what each argument of `call` is, and how to type the hook in TypeScript.
 
 ## Conventions the built-in plugins follow
 

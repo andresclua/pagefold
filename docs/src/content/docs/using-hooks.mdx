@@ -86,7 +86,105 @@ The arguments object is the same for every handler of a hook, so changing it is 
 
 ## Custom hooks
 
-Plugins can add their own with `pagefold.hooks.create('my:hook')` and fire them with `pagefold.hooks.call`. They are not part of the built-in type definitions, so in TypeScript you need a cast.
+Your own code, or a plugin, can have hooks too. They work like the built-in ones, and anyone can listen to them the same way. A hook is useful when something your code does should be **extendable**: other code can run before it, after it, or in place of it.
+
+A small example: a `Cart` plugin whose `add()` is a hook.
+
+```js
+import { Plugin } from 'pagefold'
+
+export default class Cart extends Plugin {
+  name = 'Cart'
+  items = []
+
+  mount() {
+    // 1. Register the hook name. Do it once, before anyone listens.
+    this.pagefold.hooks.create('cart:add')
+  }
+
+  add(id, quantity = 1) {
+    const args = { id, quantity }
+
+    // 2. Fire it. The last function is what happens by default.
+    return this.pagefold.hooks.call('cart:add', undefined, args, (visit, args) => {
+      this.items.push({ id: args.id, quantity: args.quantity })
+      return this.items.length // the value `call` gives back
+    })
+  }
+}
+```
+
+Then anyone can listen, with the same methods as for any other hook:
+
+```js
+const cart = new Cart()
+const pagefold = new Pagefold({ plugins: [cart] })
+
+// Before the default: change the arguments, or stop it by throwing
+pagefold.hooks.before('cart:add', (visit, args) => {
+  if (args.quantity > 10) args.quantity = 10
+})
+
+// After the default: react to it
+pagefold.hooks.on('cart:add', (visit, args) => {
+  analytics.track('add_to_cart', args)
+})
+
+// Instead of the default: take over, and call the original if you want it
+pagefold.hooks.replace('cart:add', (visit, args, original) => {
+  return original(visit, args)
+})
+
+const count = await cart.add('sku-1', 50)
+// the quantity was reduced to 10, the item was added, the event was sent,
+// and `count` is 1: what the default handler returned
+```
+
+The parts of `call`:
+
+| Argument | What it is |
+|---|---|
+| `'cart:add'` | The name of the hook. Use `area:action` so it never clashes with another |
+| `undefined` | The visit. Leave it out and the current visit is used. Pass one if the hook belongs to a particular visit |
+| `args` | An object shared by every handler. Changing it is how they talk to each other |
+| the last function | What happens by default. Optional: without it the hook is only a notification |
+
+`call` waits for every handler, so they may be `async`, and it returns whatever the default handler (or the `replace` handler) returned. Use `callSync` when you cannot wait.
+
+Two things to remember:
+
+- **Create the hook before anyone listens.** Listening to a name that does not exist logs a warning and does nothing. A plugin creates it in `mount()`, which runs when Pagefold starts, before your own handlers are added. Creating a name twice is harmless.
+- **Always pick a name of your own.** Do not reuse a built-in name such as `page:view`.
+
+### In TypeScript
+
+Declare the hook once and every `on`, `before`, `replace` and `call` knows its arguments:
+
+```ts
+declare module 'pagefold' {
+  interface HookDefinitions {
+    'cart:add': { id: string; quantity: number }
+  }
+}
+```
+
+Put it in any `.ts` file of your project, or in a `.d.ts` that is part of it. After that:
+
+```ts
+pagefold.hooks.before('cart:add', (visit, args) => {
+  args.quantity // number
+})
+
+pagefold.hooks.call('cart:add', undefined, { id: 'sku-1', quantity: '2' })
+// error: quantity must be a number
+
+pagefold.hooks.on('cart:remove', () => {})
+// error: there is no hook with that name
+```
+
+The value that `call` returns is typed `unknown` for hooks you add, so say what it is: `const count = (await cart.add('sku-1')) as number`.
+
+Without the declaration the hook still works, but TypeScript will not know its name. In that case, cast it: `'cart:add' as HookName`, importing `HookName` from `pagefold`.
 
 ## Sync and async
 
