@@ -59,6 +59,20 @@ const pages = {
   '/detail/2': { title: 'Two', split: `<div id="list">users: <a href="/list">back</a></div><div id="detail" class="transition-fade">detail two</div>` },
 }
 
+/** A page that loads Pagefold the old way: plain script tags and globals, no modules. */
+const umdPage = (title, body) => `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>${title}</title>
+<meta name="description" content="${title} description"></head>
+<body><nav><a href="/umd-a" data-nav>a</a> <a href="/umd-b" data-nav>b</a></nav>
+<div id="pagefold">${body}</div>
+<script src="/dist/umd/pagefold.js"></script>
+<script src="/dist/umd/head.js"></script>
+<script src="/dist/umd/a11y.js"></script>
+<script>
+  window.pagefold = new Pagefold({ animationSelector: false, plugins: [new PagefoldHead(), new PagefoldA11y()] })
+  window.__ready = true
+</script></body></html>`
+
 const html = (res, status, content) => {
   res.writeHead(status, { 'content-type': 'text/html; charset=utf-8' })
   res.end(content)
@@ -104,6 +118,9 @@ createServer(async (req, res) => {
     for await (const chunk of req) body += chunk
     return html(res, 200, shell({ title: 'Echo', body: `<h1>Echo</h1><p id="method">${req.method}</p><p id="body">${body}</p>` }))
   }
+
+  if (pathname === '/umd-a') return html(res, 200, umdPage('UMD A', '<h1>UMD A</h1>'))
+  if (pathname === '/umd-b') return html(res, 200, umdPage('UMD B', '<h1>UMD B</h1>'))
 
   const page = pages[pathname]
   return page ? html(res, 200, shell(page)) : html(res, 404, shell({ title: '404', body: '<h1>Not found</h1>' }))

@@ -25,81 +25,157 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./head": {
-      "types": "./dist/plugins/head.d.ts",
-      "import": "./dist/head.js",
-      "require": "./dist/head.cjs"
+      "import": {
+        "types": "./dist/plugins/head.d.ts",
+        "default": "./dist/head.js"
+      },
+      "require": {
+        "types": "./dist/plugins/head.d.cts",
+        "default": "./dist/head.cjs"
+      }
     },
     "./scripts": {
-      "types": "./dist/plugins/scripts.d.ts",
-      "import": "./dist/scripts.js",
-      "require": "./dist/scripts.cjs"
+      "import": {
+        "types": "./dist/plugins/scripts.d.ts",
+        "default": "./dist/scripts.js"
+      },
+      "require": {
+        "types": "./dist/plugins/scripts.d.cts",
+        "default": "./dist/scripts.cjs"
+      }
     },
     "./js": {
-      "types": "./dist/plugins/js.d.ts",
-      "import": "./dist/js.js",
-      "require": "./dist/js.cjs"
+      "import": {
+        "types": "./dist/plugins/js.d.ts",
+        "default": "./dist/js.js"
+      },
+      "require": {
+        "types": "./dist/plugins/js.d.cts",
+        "default": "./dist/js.cjs"
+      }
     },
     "./overlap": {
-      "types": "./dist/plugins/overlap.d.ts",
-      "import": "./dist/overlap.js",
-      "require": "./dist/overlap.cjs"
+      "import": {
+        "types": "./dist/plugins/overlap.d.ts",
+        "default": "./dist/overlap.js"
+      },
+      "require": {
+        "types": "./dist/plugins/overlap.d.cts",
+        "default": "./dist/overlap.cjs"
+      }
     },
     "./preload": {
-      "types": "./dist/plugins/preload.d.ts",
-      "import": "./dist/preload.js",
-      "require": "./dist/preload.cjs"
+      "import": {
+        "types": "./dist/plugins/preload.d.ts",
+        "default": "./dist/preload.js"
+      },
+      "require": {
+        "types": "./dist/plugins/preload.d.cts",
+        "default": "./dist/preload.cjs"
+      }
     },
     "./a11y": {
-      "types": "./dist/plugins/a11y.d.ts",
-      "import": "./dist/a11y.js",
-      "require": "./dist/a11y.cjs"
+      "import": {
+        "types": "./dist/plugins/a11y.d.ts",
+        "default": "./dist/a11y.js"
+      },
+      "require": {
+        "types": "./dist/plugins/a11y.d.cts",
+        "default": "./dist/a11y.cjs"
+      }
     },
     "./scroll": {
-      "types": "./dist/plugins/scroll.d.ts",
-      "import": "./dist/scroll.js",
-      "require": "./dist/scroll.cjs"
+      "import": {
+        "types": "./dist/plugins/scroll.d.ts",
+        "default": "./dist/scroll.js"
+      },
+      "require": {
+        "types": "./dist/plugins/scroll.d.cts",
+        "default": "./dist/scroll.cjs"
+      }
     },
     "./body-class": {
-      "types": "./dist/plugins/body-class.d.ts",
-      "import": "./dist/body-class.js",
-      "require": "./dist/body-class.cjs"
+      "import": {
+        "types": "./dist/plugins/body-class.d.ts",
+        "default": "./dist/body-class.js"
+      },
+      "require": {
+        "types": "./dist/plugins/body-class.d.cts",
+        "default": "./dist/body-class.cjs"
+      }
     },
     "./debug": {
-      "types": "./dist/plugins/debug.d.ts",
-      "import": "./dist/debug.js",
-      "require": "./dist/debug.cjs"
+      "import": {
+        "types": "./dist/plugins/debug.d.ts",
+        "default": "./dist/debug.js"
+      },
+      "require": {
+        "types": "./dist/plugins/debug.d.cts",
+        "default": "./dist/debug.cjs"
+      }
     },
     "./route-name": {
-      "types": "./dist/plugins/route-name.d.ts",
-      "import": "./dist/route-name.js",
-      "require": "./dist/route-name.cjs"
+      "import": {
+        "types": "./dist/plugins/route-name.d.ts",
+        "default": "./dist/route-name.js"
+      },
+      "require": {
+        "types": "./dist/plugins/route-name.d.cts",
+        "default": "./dist/route-name.cjs"
+      }
     },
     "./progress": {
-      "types": "./dist/plugins/progress.d.ts",
-      "import": "./dist/progress.js",
-      "require": "./dist/progress.cjs"
+      "import": {
+        "types": "./dist/plugins/progress.d.ts",
+        "default": "./dist/progress.js"
+      },
+      "require": {
+        "types": "./dist/plugins/progress.d.cts",
+        "default": "./dist/progress.cjs"
+      }
     },
     "./forms": {
-      "types": "./dist/plugins/forms.d.ts",
-      "import": "./dist/forms.js",
-      "require": "./dist/forms.cjs"
+      "import": {
+        "types": "./dist/plugins/forms.d.ts",
+        "default": "./dist/forms.js"
+      },
+      "require": {
+        "types": "./dist/plugins/forms.d.cts",
+        "default": "./dist/forms.cjs"
+      }
     },
     "./fragment": {
-      "types": "./dist/plugins/fragment.d.ts",
-      "import": "./dist/fragment.js",
-      "require": "./dist/fragment.cjs"
+      "import": {
+        "types": "./dist/plugins/fragment.d.ts",
+        "default": "./dist/fragment.js"
+      },
+      "require": {
+        "types": "./dist/plugins/fragment.d.cts",
+        "default": "./dist/fragment.cjs"
+      }
     },
     "./analytics": {
-      "types": "./dist/plugins/analytics.d.ts",
-      "import": "./dist/analytics.js",
-      "require": "./dist/analytics.cjs"
+      "import": {
+        "types": "./dist/plugins/analytics.d.ts",
+        "default": "./dist/analytics.js"
+      },
+      "require": {
+        "types": "./dist/plugins/analytics.d.cts",
+        "default": "./dist/analytics.cjs"
+      }
     },
-    "./css/*": "./dist/css/*"
+    "./css/*": "./dist/css/*",
+    "./umd/*": "./dist/umd/*"
   },
   "files": [
     "dist"
@@ -109,7 +185,7 @@
     "provenance": true
   },
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json && node scripts/copy-css.mjs",
+    "build": "vite build && tsc -p tsconfig.build.json && node scripts/make-dcts.mjs && node scripts/copy-css.mjs && node scripts/build-umd.mjs",
     "dev": "vite build --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests --ext .ts",
@@ -119,9 +195,11 @@
     "docs:dev": "pnpm --filter pagefold-docs dev",
     "docs:build": "pnpm --filter pagefold-docs build",
     "prepare": "husky",
-    "test:e2e": "pnpm build && playwright test -c tests/e2e/playwright.config.ts"
+    "test:e2e": "pnpm build && playwright test -c tests/e2e/playwright.config.ts",
+    "check:package": "attw --pack ."
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
     "@commitlint/cli": "^21.2.4",
     "@playwright/test": "^1.64.1",
     "@types/node": "^22.20.5",
@@ -139,5 +217,53 @@
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.0",
+  "unpkg": "./dist/umd/pagefold.js",
+  "jsdelivr": "./dist/umd/pagefold.js",
+  "typesVersions": {
+    "*": {
+      "head": [
+        "dist/plugins/head.d.ts"
+      ],
+      "scripts": [
+        "dist/plugins/scripts.d.ts"
+      ],
+      "js": [
+        "dist/plugins/js.d.ts"
+      ],
+      "overlap": [
+        "dist/plugins/overlap.d.ts"
+      ],
+      "preload": [
+        "dist/plugins/preload.d.ts"
+      ],
+      "a11y": [
+        "dist/plugins/a11y.d.ts"
+      ],
+      "scroll": [
+        "dist/plugins/scroll.d.ts"
+      ],
+      "body-class": [
+        "dist/plugins/body-class.d.ts"
+      ],
+      "debug": [
+        "dist/plugins/debug.d.ts"
+      ],
+      "route-name": [
+        "dist/plugins/route-name.d.ts"
+      ],
+      "progress": [
+        "dist/plugins/progress.d.ts"
+      ],
+      "forms": [
+        "dist/plugins/forms.d.ts"
+      ],
+      "fragment": [
+        "dist/plugins/fragment.d.ts"
+      ],
+      "analytics": [
+        "dist/plugins/analytics.d.ts"
+      ]
+    }
+  }
 }

@@ -1,0 +1,84 @@
+---
+title: "Using a script tag"
+description: "Use Pagefold without a bundler: plain script tags, global variables and a CDN."
+section: guides
+order: 12
+---
+
+If your site has no build step, use the UMD files: one per module, each a single minified file that puts a global variable on the page.
+
+```html
+<main id="pagefold" class="transition-fade">...</main>
+
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/pagefold.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/head.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/a11y.js"></script>
+<script>
+  new Pagefold({
+    plugins: [new PagefoldHead({ awaitAssets: true }), new PagefoldA11y()],
+  })
+</script>
+```
+
+Load `pagefold.js` first and the plugins after it. Pin a version in the URL, so an update never changes your site without you knowing.
+
+> Pagefold is not published yet, so those addresses will work once it is. You can host the files from `dist/umd/` yourself in the meantime.
+
+## The globals
+
+| File | Global |
+|---|---|
+| `pagefold.js` | `Pagefold` (the class, with `Pagefold.Plugin` attached for writing plugins) |
+| `head.js` | `PagefoldHead` |
+| `scripts.js` | `PagefoldScripts` |
+| `js.js` | `PagefoldJs` |
+| `overlap.js` | `PagefoldOverlap` |
+| `preload.js` | `PagefoldPreload` |
+| `a11y.js` | `PagefoldA11y` |
+| `scroll.js` | `PagefoldScroll` |
+| `body-class.js` | `PagefoldBodyClass` |
+| `debug.js` | `PagefoldDebug` |
+| `route-name.js` | `PagefoldRouteName` |
+| `progress.js` | `PagefoldProgress` |
+| `forms.js` | `PagefoldForms` |
+| `fragment.js` | `PagefoldFragment` |
+| `analytics.js` | `PagefoldAnalytics` |
+
+The globals are the classes themselves: there is no `.default` to read.
+
+## Sizes
+
+The core is about 19 KB minified and 7 KB compressed. Modules are between 2 and 6 KB minified. Each file includes what it needs, including the small plugin base class, so loading several costs a little more than adding their sizes in the [module list](/docs/getting-started).
+
+If you do have a bundler, import the modules instead: you get the smaller ones, with no duplicated code.
+
+## The CSS themes
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/css/fade.css" />
+```
+
+## With GSAP
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/pagefold.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/js.js"></script>
+<script>
+  new Pagefold({
+    animationSelector: false,
+    plugins: [
+      new PagefoldJs({
+        animations: [{
+          out: (done) => gsap.to('#pagefold', { opacity: 0, duration: 0.4, onComplete: done }),
+          in: (done) => gsap.fromTo('#pagefold', { opacity: 0 }, { opacity: 1, duration: 0.4, onComplete: done }),
+        }],
+      }),
+    ],
+  })
+</script>
+```
+
+## Checked
+
+The browser tests load Pagefold with plain script tags and the Head and A11y globals in Chromium, Firefox and WebKit. Navigation without a reload, title updates and the screen reader announcement all work.

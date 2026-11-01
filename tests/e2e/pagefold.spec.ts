@@ -174,6 +174,25 @@ test.describe('animation', () => {
   })
 })
 
+test.describe('script tag (UMD) build', () => {
+  test('works from plain script tags with global classes', async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', (e) => errors.push(e.message))
+    await page.goto('/umd-a')
+    await page.waitForFunction(() => window.__ready === true)
+    expect(await page.evaluate(() => [typeof (window as never as Record<string, unknown>).Pagefold, typeof (window as never as Record<string, unknown>).PagefoldHead])).toEqual(['function', 'function'])
+    await page.evaluate(() => {
+      window.__marker = 'same document'
+    })
+    await page.locator('nav a[href="/umd-b"]').click()
+    await expect(heading(page)).toHaveText('UMD B')
+    await expect(page).toHaveTitle('UMD B') // updated by the head plugin
+    await expect(page.locator('.pagefold-announcer')).toHaveText('Navigated to: UMD B')
+    expect(await page.evaluate(() => window.__marker)).toBe('same document')
+    expect(errors).toEqual([])
+  })
+})
+
 test.describe('Alpine.js', () => {
   test('components in a new page start working, and the old ones are gone', async ({ page }) => {
     await open(page, '/alpine-a', { alpine: true })

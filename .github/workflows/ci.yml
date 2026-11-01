@@ -21,6 +21,7 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm size
+      - run: pnpm check:package
       - run: pnpm docs:build
 
   e2e:
