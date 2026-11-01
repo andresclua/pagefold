@@ -53,7 +53,7 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
     plugins: [
       new PagefoldHead({ awaitAssets: true }),
       new PagefoldA11y(),
-      new PagefoldScroll({ duration: 400 }),
+      new PagefoldScroll({ duration: 500, animateScroll: { betweenPages: false } }),
       new PagefoldPreload(),
     ],
   })

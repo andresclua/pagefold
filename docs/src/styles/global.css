@@ -85,7 +85,7 @@ pre {
 }
 
 .wrap {
-  max-width: 64rem;
+  max-width: 80rem;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -152,9 +152,9 @@ blockquote {
  * `main` has a transition of its own with the same total time, which is what Pagefold waits for.
  */
 :root {
-  --fold-t: 0.26s; /* duration of each band */
-  --fold-d1: 0.06s; /* how far the second band lags the first */
-  --fold-d2: 0.12s; /* and the third */
+  --fold-t: 0.46s; /* duration of each band */
+  --fold-d1: 0.1s; /* how far the second band lags the first */
+  --fold-d2: 0.2s; /* and the third */
 }
 
 html::before,
@@ -228,4 +228,12 @@ html.is-animating main.transition-fold {
     max-width: 100%;
     overflow-x: auto;
   }
+}
+
+/* A wider page, but prose stays at a comfortable line length. Code, tables and the timeline use the room. */
+article > p,
+article > ul:not([class]),
+article > ol:not([class]),
+article > blockquote {
+  max-width: 72ch;
 }
