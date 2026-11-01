@@ -30,6 +30,21 @@ const pagefold = new Pagefold({ /* options */ })
 | `resolveUrl` | `(url) => string` | identity | Rewrite URLs before they are loaded or cached, to treat `/en/about` and `/about` as one page, for example. |
 | `skipPopStateHandling` | `(event) => boolean` | skips entries Pagefold did not create | Return `true` to ignore a back or forward event. |
 
+## Start from your goal
+
+| I want to... | Set |
+|---|---|
+| The fastest feel | The [Preload plugin](/docs/preload). The cache is already on |
+| Keep memory low on a big site | `cacheMax` and `cacheTtl` ([why](/docs/caching-and-history#why-not-keep-everything)) |
+| Animate with GSAP, Motion or the Web Animations API | `animationSelector: false` and the [JS plugin](/docs/js) |
+| Let the browser animate | `native: true` ([View Transitions](/docs/view-transitions)) |
+| Animate the back button too | `animateHistoryBrowsing: true` |
+| Replace more than one area | `containers: ['#main', '#sidebar']` |
+| Leave a part of the site to the browser | `ignoreVisit` |
+| Treat 404 as a failure | `failOnStatus: (status) => status >= 400` |
+| Not wait forever for a slow server | `timeout: 8000` |
+| Treat `/en/about` and `/about` as one page | `resolveUrl` |
+
 ## Common setups
 
 ```js

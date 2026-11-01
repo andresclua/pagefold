@@ -1,0 +1,115 @@
+---
+title: "Recipes"
+description: "Short, complete answers to the things almost every site needs: the active menu item, a player that keeps playing, a menu that closes."
+section: guides
+order: 14
+---
+
+Each recipe is independent. Copy what you need.
+
+## Highlight the current page in the menu
+
+A menu outside the container is not replaced, so it keeps the state it had on the first page. Update it after every visit. Pagefold changes the address bar before the page is shown, so `location` is already the new one:
+
+```js
+function markCurrent() {
+  document.querySelectorAll('nav a').forEach((a) => {
+    if (a.pathname === location.pathname) a.setAttribute('aria-current', 'page')
+    else a.removeAttribute('aria-current')
+  })
+}
+
+markCurrent()
+pagefold.hooks.on('page:view', markCurrent)
+```
+
+```css
+nav a[aria-current='page'] {
+  font-weight: 600;
+}
+```
+
+`aria-current` is also what screen readers use to announce the current page, so the style and the accessibility come from the same attribute. If the menu is **inside** the container, the server already renders it correctly on every page and you need none of this.
+
+## Keep a player playing
+
+The easiest way is to put the player **outside** the container. Pagefold never touches it:
+
+```html
+<body>
+  <audio id="player" src="song.mp3" controls></audio>
+  <main id="pagefold">...</main>
+</body>
+```
+
+If the layout needs it inside the container, mark it with `data-pagefold-persist` and the same name in every page. Pagefold moves the existing element into the new page instead of replacing it:
+
+```html
+<audio data-pagefold-persist="player" src="song.mp3" controls></audio>
+```
+
+## Close a mobile menu when a visit starts
+
+```js
+pagefold.hooks.on('visit:start', () => {
+  document.body.classList.remove('menu-open')
+})
+```
+
+If you use the [Body class plugin](/docs/body-class) without a `prefix`, it replaces the whole `class` attribute of the body and would also remove `menu-open`. Give it a prefix, as that page explains.
+
+## Turn the animation off for some pages
+
+```js
+pagefold.hooks.on('visit:start', (visit) => {
+  if (visit.to.url.startsWith('/admin')) visit.animation.animate = false
+})
+```
+
+The content is still swapped without a reload. Only the animation is skipped. To leave a page entirely to the browser, use `ignoreVisit` instead:
+
+```js
+new Pagefold({ ignoreVisit: (url) => url.startsWith('/admin') })
+```
+
+## Show a loading indicator
+
+For visits that take a while, use the [Progress plugin](/docs/progress): it appears after 300 ms, so quick visits show nothing. For your own indicator, `html.is-changing` is present during the whole transition:
+
+```css
+.spinner {
+  display: none;
+}
+html.is-changing .spinner {
+  display: block;
+}
+```
+
+## Go to another page after something happens
+
+```js
+await saveDraft()
+await pagefold.navigate('/drafts')
+```
+
+Add `{ history: 'replace' }` as the second argument if the visitor should not be able to go back to the page they just left.
+
+## Run something on every page
+
+```js
+pagefold.hooks.on('page:view', (visit, { url, title }) => {
+  console.log('now on', url)
+})
+```
+
+`page:view` runs once per visit, when the new page is in place. For components that must be created and destroyed with their page, see [Initializing components](/docs/components).
+
+## Show a message when a page fails to load
+
+```js
+pagefold.hooks.replace('visit:fail', (visit, { error }) => {
+  showToast('Could not load the page. Try again.')
+})
+```
+
+Replacing `visit:fail` means the browser does **not** fall back to a normal load, so only do it if your message is enough.

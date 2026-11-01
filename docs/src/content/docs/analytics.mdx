@@ -67,3 +67,9 @@ analytics.send({ url: '/virtual', title: 'Virtual page', location: location.href
 ```
 
 If you prefer no plugin, the [Troubleshooting](/docs/troubleshooting) page has a three-line `page:view` handler that does the same.
+
+## Common problems
+
+- **The first page is counted twice.** Pagefold never sends the first page, so a second source is sending it. Check that you do not also have a `page:view` handler, as in [Troubleshooting](/docs/troubleshooting).
+- **Nothing is sent with `gtag`.** `window.gtag` must exist when the plugin sends. The console warns once if it does not.
+- **The page title is the old one.** The plugin sends after the content is on screen. If the title is wrong, check that the [Head plugin](/docs/head) is installed.

@@ -62,3 +62,9 @@ Scripts that were already on the page, such as the one that started Pagefold, do
 With `optin: true`, marked scripts run on every visit even if they were already on the page.
 
 Scripts run right after the content is replaced.
+
+## Common problems
+
+- **A script runs on every visit.** It is inside the replaced content, so it is new each time. Move it to the `<head>` or outside the container if it should run once.
+- **A script never runs again.** It was already on the page, which is by design. With `optin: true`, mark it with `data-pagefold-reload-script`.
+- **A module script does not run again.** Browsers run a module once per document. Put the code in a function and call it from the `page:view` hook.

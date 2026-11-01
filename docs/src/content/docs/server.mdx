@@ -1,0 +1,74 @@
+---
+title: "Your server"
+description: "What your server needs to send for Pagefold to work, and what to do with status codes, redirects and caching."
+section: guides
+order: 13
+---
+
+import Strips from '../../components/Strips.astro'
+
+Pagefold needs very little from a server. It asks for the same pages the browser would, and takes the part it needs from each.
+
+<Strips
+  rows={[
+    { label: 'Pagefold asks', items: [{ text: 'GET /about', tone: 'moved' }, { text: 'X-Requested-With: pagefold' }, { text: 'Accept: text/html' }] },
+    { label: 'Your server answers', items: [{ text: 'a complete HTML page', tone: 'new' }] },
+    { label: 'Pagefold keeps', items: [{ text: '<main id="pagefold">', tone: 'new' }, { text: '<title>' }, { text: 'head tags (Head plugin)' }] },
+  ]}
+  caption="The same page you serve to the browser works. There is no API to build and no special response format."
+/>
+
+## What every page must have
+
+- **A full HTML document**, not a fragment. Pagefold parses it and reads from it.
+- **Every container.** If you use the default, each page needs `<main id="pagefold">` (or whatever element your `containers` option names). A page without it makes the visit fail, and the browser loads that page normally, so nothing breaks, but the transition is lost.
+- **A `<title>`.** It is updated on every visit.
+
+To update meta tags, stylesheets and the `lang` attribute, add the [Head plugin](/docs/head).
+
+## Status codes and redirects
+
+| The server answers | What Pagefold does |
+|---|---|
+| `200` | Shows the page |
+| `404` or other `4xx` | Shows it like any page, because that is usually a page you designed. Change it with `failOnStatus` |
+| `500` | The visit fails and the browser loads the page normally |
+| A redirect (`301`, `302`, `303`) | The request follows it and shows the final page. A redirected page is **not** stored in the cache under the address that was asked for |
+| An empty body | The visit fails and the browser loads the page normally |
+
+```js
+// Also fall back to a normal load for 404 and the like
+new Pagefold({ failOnStatus: (status) => status >= 400 })
+```
+
+## Cookies and logged-in pages
+
+The request is a normal same-origin `fetch`, so it carries the visitor's cookies. A page that depends on the session comes back personalised, exactly as it would on a normal load.
+
+What changes is the [cache](/docs/caching-and-history): a page fetched while logged out stays in memory after the visitor logs in. Clear it when the session changes:
+
+```js
+pagefold.cache.clear()
+```
+
+## If you answer differently to Pagefold
+
+Most sites do not need this. If your server returns something different when it sees `X-Requested-With: pagefold` (a lighter layout, for example), tell shared caches and CDNs, so that they keep the two versions apart:
+
+```http
+Vary: X-Requested-With
+```
+
+Without it, a cache could give a visitor who opens the address directly the page meant for Pagefold. The header name can be changed with the `requestHeaders` option.
+
+## Forms
+
+A `POST` made with the [Forms plugin](/docs/forms) is shown like any page: your server answers with the page to display. It is never stored in the cache.
+
+## A checklist
+
+- [ ] Every page has all the containers.
+- [ ] Every page has its own `<title>`.
+- [ ] Error pages answer with the right status code.
+- [ ] Pages that change per visitor are not kept for long: use `cacheTtl`, or clear the cache when the session changes.
+- [ ] If your server answers Pagefold differently, it sends `Vary: X-Requested-With`.

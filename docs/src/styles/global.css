@@ -10,7 +10,9 @@
   --muted: #a3a39e;
   --primary: #1b1bff;
   --accent: #00ff9c;
-  --link: var(--accent); /* primary on dark is only ~2.5:1, so links use the accent */
+  /* Primary on dark is only ~2.5:1, so links use a softer mint of the accent (about 13:1); hover is the full accent */
+  --link: #5af0ae;
+  --link-hover: var(--accent);
   --on-primary: #fafaf8;
   --font-head: 'JetBrains Mono Variable', ui-monospace, monospace;
   --font-body: 'Inter Variable', system-ui, sans-serif;
@@ -24,8 +26,9 @@
     --border: #e0e0d9;
     --text: #0a0a0a;
     --muted: #5c5c57;
-    /* The brand blue pulled toward the text color: a calm indigo instead of an electric blue (about 12:1) */
-    --link: color-mix(in srgb, var(--primary) 58%, #0a0a0a);
+    /* The brand blue, deepened a little so it reads calmly and still looks blue next to black text (about 8:1) */
+    --link: #2f2fd0;
+    --link-hover: var(--primary);
   }
 }
 
@@ -61,6 +64,7 @@ a {
     color 0.15s;
 }
 a:hover {
+  color: var(--link-hover);
   text-decoration-thickness: 2px;
   text-decoration-color: currentColor;
 }

@@ -48,4 +48,33 @@ in: () =>
 import { animate, stagger } from 'motion'
 ```
 
+## A different animation per page
+
+The same entries as any other engine, with patterns for the pages they apply to:
+
+```js
+animations: [
+  {
+    from: '/',
+    to: '/work/:slug',
+    out: () => animate('#pagefold', { opacity: 0, scale: 0.96 }, { duration: 0.3 }),
+    in: () => animate('#pagefold', { opacity: [0, 1], scale: [1.04, 1] }, { duration: 0.4 }),
+  },
+  { out: () => animate('#pagefold', { opacity: 0 }, { duration: 0.3 }), in: () => animate('#pagefold', { opacity: [0, 1] }, { duration: 0.3 }) },
+]
+```
+
+The last entry has no patterns, so it is the fallback for every other visit. See [JS](/docs/js#matching) for how entries are chosen.
+
+## Reduced motion
+
+Check `prefers-reduced-motion` yourself and shorten the animations when the visitor asked for less motion:
+
+```js
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches
+const duration = calm ? 0 : 0.4
+```
+
+The [A11y plugin](/docs/a11y) can also skip animation for those visits altogether.
+
 The two phases are tested in the project's browser tests with the same fade shown at the top.

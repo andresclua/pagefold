@@ -89,3 +89,9 @@ new PagefoldProgress({ styles: false })
 ```
 
 Pagefold sets the `transform: scaleX(...)` itself, from 0 to 1.
+
+## Common problems
+
+- **The bar never appears.** The visit finished before `delay` (300 ms). That is the point. Lower `delay` to see it on quick visits while you test.
+- **It looks different from my site.** Set `styles: false` and style `.pagefold-progress-bar` yourself.
+- **It is hidden behind something.** The default bar uses `z-index: 99999`. With `styles: false`, set your own in the CSS.

@@ -99,3 +99,9 @@ Each returns the page, or `undefined` if it was skipped or failed.
 `page:preload` fires after a page is preloaded, with the page: `{ page }`.
 
 Slow connection detection uses the Network Information API, which not every browser has. Where it is missing, preloading simply stays on.
+
+## Common problems
+
+- **Too many requests.** Lower `throttle`, turn off `preloadVisibleLinks`, or mark links with `data-no-preload`.
+- **A page that depends on the visitor looks old.** A preloaded page goes into the cache like any other. Keep it out with `ignore`, or set a short `cacheTtl`. See [Caching and history](/docs/caching-and-history).
+- **Nothing is preloaded on a phone.** On slow connections, or when the visitor asked to save data, the plugin does nothing. Turn that off with `respectConnection: false` if you would rather not respect it.

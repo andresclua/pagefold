@@ -73,3 +73,9 @@ A rule is only used if **every container is on the current page**. If the new pa
 />
 
  `visit.fragment` tells you whether a visit is a fragment visit.
+
+## Common problems
+
+- **The way back replaces everything.** A rule needs the page you leave **and** the page you enter. Add a second rule for the return trip.
+- **A rule never applies.** Every container in the rule must exist on the current page, and both patterns must match. Turn on the [Debug plugin](/docs/debug) to see what the visit does.
+- **The scroll position resets.** Fragment visits keep it unless the rule has `scroll: true`.

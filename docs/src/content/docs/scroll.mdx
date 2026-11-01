@@ -65,3 +65,9 @@ await scroll.scrollTo(300, false)          // jump
 ```
 
 It replaces the default behavior of the `scroll:top` and `scroll:anchor` hooks. Back and forward visits keep the browser's own scroll restoration.
+
+## Common problems
+
+- **The page jumps instead of gliding.** Between pages the old content is usually hidden while it changes, so many sites turn `betweenPages` off. Check `animateScroll`.
+- **A sticky header covers the target.** Set `offset` to the header's height, as in the example above.
+- **Back and forward do not animate.** They keep the browser's own scroll restoration, on purpose.

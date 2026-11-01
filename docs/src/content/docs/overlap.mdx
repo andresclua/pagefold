@@ -76,3 +76,9 @@ pagefold.hooks.on('visit:start', (visit) => {
 ## Hooks it adds
 
 `content:insert` and `content:remove` fire with the list of containers, and you can replace their default behavior to control how containers enter and leave the DOM.
+
+## Common problems
+
+- **The two pages stack one under the other.** Both containers are in the document at the same time, so the layout has to allow it. For a crossfade, place them on top of each other with `position: absolute` or a shared grid cell.
+- **An old container stays after the visit.** `keep` says how many previous containers to hold on to. Leave it at `0` to remove them all.
+- **It animates when I do not want it to.** Set `visit.animation.overlap = false` for that visit, as shown above.

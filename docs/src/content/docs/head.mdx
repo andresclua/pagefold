@@ -63,3 +63,9 @@ New `<script>` tags are inserted but the browser does not run them. Use the [Scr
 ## Waiting for stylesheets
 
 With `awaitAssets` the visit waits for the `load` or `error` event of every new stylesheet, up to `timeout`. This avoids a flash of unstyled content when a page brings its own CSS. Only stylesheets are awaited.
+
+## Common problems
+
+- **A stylesheet from the old page is still there.** Only tags that are identical on both pages are kept. A tag that only the old page has is removed, unless you list it in `persistTags`.
+- **The page flashes without its styles.** Turn on `awaitAssets`, so the visit waits for the new stylesheets.
+- **A script in the head did not run.** Inserting it is not enough. Add the [Scripts plugin](/docs/scripts).

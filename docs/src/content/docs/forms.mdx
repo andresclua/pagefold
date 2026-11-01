@@ -64,3 +64,9 @@ pagefold.hooks.on('form:submit', (visit, { el }) => {
   analytics.track('submit', { form: el.id })
 })
 ```
+
+## Common problems
+
+- **The form reloads the page.** By default only forms with `data-pagefold-form` are handled. Add it, or set `formSelector: 'form'`.
+- **A POST result looks out of date.** It is never read from or written to the cache, so it is the server's current answer.
+- **My own submit handler stopped working.** If another listener called `preventDefault()` first, the plugin leaves the form alone.

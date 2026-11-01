@@ -71,3 +71,9 @@ The temporary `tabindex="-1"` it adds to the content is removed when focus leave
 ## Tip
 
 Use a heading in each page's content. The announcement reads the first match of `headingSelector`, so a clear `h1` makes the message useful.
+
+## Common problems
+
+- **The announcement is empty or says the wrong thing.** The title comes from the first match of `headingSelector`. Make sure each page has one `h1`.
+- **An outline appears around the content after a visit.** Focus moves there so keyboard users start at the top. The content is not interactive, so you can hide the ring: `#pagefold:focus { outline: none }`.
+- **Animations do not play for some visitors.** They asked their system for reduced motion, and the plugin respects it.
