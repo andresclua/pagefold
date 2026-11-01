@@ -51,6 +51,31 @@ const pages = {
       <form id="get" data-pagefold-form action="/search" method="get"><input name="q" value="cats"><button>go</button></form>
       <form id="post" data-pagefold-form action="/echo" method="post"><input name="note" value="hello"><button>send</button></form>`,
   },
+  '/blog/hello': { title: 'Hello post', body: '<h1>Hello post</h1>' },
+  '/contact': { title: 'Contact', body: '<h1>Contact</h1>' },
+  '/work': { title: 'Work', body: '<h1>Work</h1>' },
+  '/work/hello': { title: 'Hello project', body: '<h1>Hello project</h1>' },
+  '/page-home': { title: 'Page home', body: '<h1>Page home</h1>', bodyClass: 'page-home theme-light' },
+  '/page-blog': { title: 'Page blog', body: '<h1>Page blog</h1>', bodyClass: 'page-blog theme-light' },
+  '/dashboard': { title: 'Dashboard', split: '<div id="list">dashboard</div>' },
+  '/nested-a': { title: 'Nested A', body: '<div id="detail">detail a</div><p id="stay">outside the detail</p>' },
+  '/nested-b': { title: 'Nested B', body: '<div id="detail">detail b</div><p id="stay">outside the detail</p>' },
+  '/nested-c': { title: 'Nested C', body: '<p id="stay">no detail here</p>' },
+  '/forms2': {
+    title: 'Forms 2',
+    body: `<h1>Forms 2</h1>
+      <form id="plain" action="/search" method="get"><input name="q" value="x"><button>go</button></form>
+      <form id="blank" data-pagefold-form action="/search" method="get" target="_blank"><input name="q" value="x"><button>go</button></form>
+      <form id="dialog" data-pagefold-form method="dialog"><button>close</button></form>`,
+  },
+  '/head-keep-a': { title: 'Keep A', body: '<h1>Keep A</h1>', head: '<link rel="stylesheet" href="/css/a.css" id="only-a">' },
+  '/head-keep-b': { title: 'Keep B', body: '<h1>Keep B</h1>' },
+  '/ignored-script': {
+    title: 'Ignored script',
+    body: '<h1>Ignored script</h1><script data-pagefold-ignore-script>window.__ignored = true</script><script>window.__ran2 = true</script>',
+  },
+  '/alpine-p1': { title: 'Alpine P1', body: '<h1>Alpine P1</h1><div data-pagefold-persist="counter" x-data="{ n: 0 }"><button id="inc" @click="n++">+</button> <span id="n" x-text="n"></span></div>' },
+  '/alpine-p2': { title: 'Alpine P2', body: '<h1>Alpine P2</h1><div data-pagefold-persist="counter" x-data="{ n: 0 }"><button id="inc" @click="n++">+</button> <span id="n" x-text="n"></span></div>' },
   '/admin': { title: 'Admin', body: '<h1>Admin</h1>' },
   '/persist-a': { title: 'Persist A', body: '<h1>Persist A</h1><audio id="player" data-pagefold-persist="player" controls></audio>' },
   '/persist-b': { title: 'Persist B', body: '<h1>Persist B</h1><audio id="player" data-pagefold-persist="player" controls></audio>' },
@@ -103,6 +128,7 @@ createServer(async (req, res) => {
   if (pathname.startsWith('/fixtures/')) return serveFile(res, ROOT + 'tests/e2e' + pathname)
   if (pathname === '/vendor/gsap.js') return serveFile(res, ROOT + 'node_modules/gsap/dist/gsap.min.js')
   if (pathname === '/vendor/alpine.js') return serveFile(res, ROOT + 'node_modules/alpinejs/dist/cdn.min.js')
+  if (pathname === '/vendor/scrolltrigger.js') return serveFile(res, ROOT + 'node_modules/gsap/dist/ScrollTrigger.min.js')
   if (pathname === '/vendor/motion.js') return serveFile(res, ROOT + 'node_modules/motion/dist/motion.js')
 
   if (pathname.startsWith('/css/')) {
@@ -117,6 +143,10 @@ createServer(async (req, res) => {
   if (pathname === '/redirect') {
     res.writeHead(302, { location: '/about' })
     return res.end()
+  }
+  if (pathname === '/headers') {
+    const h = req.headers
+    return html(res, 200, shell({ title: 'Headers', body: `<h1>Headers</h1><p id="auth">${h.authorization ?? ''}</p><p id="xrw">${h['x-requested-with'] ?? ''}</p><p id="accept">${h.accept ?? ''}</p>` }))
   }
   if (pathname === '/empty') return html(res, 200, '')
   if (pathname === '/whoami') {
