@@ -33,3 +33,37 @@ new Pagefold({
 `fill: 'forwards'` keeps the old content hidden between `out` finishing and the content being replaced. It is not needed in `in`, because the animation ends at the element's normal state.
 
 This is the setup with the fewest dependencies, and it is the one the project's browser tests use as the baseline for the other engines.
+
+## A slide, with the page staying in view
+
+The same pattern with movement. `transform` and `opacity` are the cheapest properties to animate, because the browser can do them without recalculating the layout:
+
+```js
+{
+  out: () =>
+    el().animate(
+      [{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-24px)' }],
+      { duration: 300, easing: 'ease-in', fill: 'forwards' }
+    ).finished,
+  in: () =>
+    el().animate(
+      [{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 400, easing: 'ease-out' }
+    ).finished,
+}
+```
+
+## Things to know
+
+- **Return the promise.** `.finished` is what Pagefold waits for. Forgetting the `return` (or using braces without one) makes it continue at once and the animation is cut off.
+- **Reduced motion.** `element.animate()` does not follow `prefers-reduced-motion` by itself. Check `matchMedia('(prefers-reduced-motion: reduce)').matches` and return `Promise.resolve()` or a shorter duration.
+- **Cancelled animations.** If your code calls `.cancel()` on an animation, `.finished` rejects. Add `.catch(() => {})` if you cancel on purpose and see errors in the console.
+- **Not in a very old browser.** `element.animate()` and `.finished` work in every browser released since 2020. For anything older, load a polyfill or animate with CSS.
+
+## When to pick something else
+
+| If you need | Use |
+|---|---|
+| A fade or a slide, nothing more | This page, or [CSS](/docs/css-animations) with no JavaScript at all |
+| Timelines, stagger, scroll-linked effects | [GSAP](/docs/gsap) |
+| Small bundle with springs and a nicer API | [Motion](/docs/motion) |

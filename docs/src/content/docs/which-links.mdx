@@ -5,6 +5,8 @@ section: concepts
 order: 2
 ---
 
+import Flow from '../../components/Flow.astro'
+
 By default Pagefold handles every `a[href]` on the page (change it with `linkSelector`). It leaves a link to the browser when:
 
 - it points to **another origin**;
@@ -16,6 +18,22 @@ By default Pagefold handles every `a[href]` on the page (change it with `linkSel
 ```html
 <a href="/legacy-page" data-no-pagefold>Normal page load</a>
 ```
+
+## The decision, step by step
+
+Every click on a link goes through these questions, in this order. The first "yes" hands the link back to the browser. If every answer is "no", Pagefold takes over.
+
+<Flow
+  checks={[
+    { q: 'Is it on another origin?', note: 'Another domain, subdomain or port.' },
+    { q: 'Does it have target="_blank" or download?' },
+    { q: 'Does it, or an ancestor, have data-no-pagefold?', note: 'Or does your ignoreVisit option return true?' },
+    { q: 'Was a modifier key held (Cmd, Ctrl, Shift, Alt)?', note: 'The hook link:newtab fires first.' },
+    { q: 'Was it any button other than the left one?' },
+  ]}
+  stop="The browser handles it, as if Pagefold was not there."
+  end="Pagefold handles it: link:click fires, then the visit starts."
+/>
 
 ## Links to the current page
 

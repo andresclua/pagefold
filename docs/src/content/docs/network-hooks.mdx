@@ -5,6 +5,18 @@ section: hooks
 order: 4
 ---
 
+These hooks fire while Pagefold gets the next page. This is the order, and what ends each path:
+
+| # | What happens | Hook | If it goes wrong |
+|---|---|---|---|
+| 1 | The request is sent | `fetch:request` | A network error fails the visit |
+| 2 | The request takes longer than `timeout` | `fetch:timeout` | The visit fails |
+| 3 | The response arrives with a status that `failOnStatus` rejects | `fetch:error` | The visit fails |
+| 4 | The response body is empty | none | The visit fails |
+| 5 | The page is stored in the cache | `cache:set` | |
+
+"The visit fails" means `visit:fail` fires and, by default, the browser loads the page normally, so the visitor never gets stuck. If the visit is **aborted** because the visitor clicked another link, no hook fires: it is a normal event, not a failure.
+
 ## `fetch:request`
 
 Just before the request. Arguments: `{ url, options }`, where `options` are the `fetch` options (headers, method, body, signal). The default calls `fetch(url, options)` and returns the `Response`.
@@ -19,13 +31,36 @@ pagefold.hooks.before('fetch:request', (visit, { options }) => {
 
 The `signal` in `options` is connected to the visit, so aborting the visit aborts the request.
 
+Use `replace` when you need to change how the request is made, for example to send cookies to another subdomain. Remember to pass the arguments on and to return the `Response`:
+
+```js
+pagefold.hooks.replace('fetch:request', (visit, { url, options }) =>
+  fetch(url, { ...options, credentials: 'include' })
+)
+```
+
 ## `fetch:error`
 
 The response status counts as a failure (`failOnStatus`, by default only `500`). Arguments: `{ url, status, response }`. It is awaited before the visit fails.
 
+```js
+// A 404 is shown like any page, but a 500 or a 503 sends the visitor to the browser's own page
+new Pagefold({ failOnStatus: (status) => status >= 500 })
+
+pagefold.hooks.on('fetch:error', (visit, { status, url }) => {
+  reportError(`Page ${url} answered ${status}`)
+})
+```
+
 ## `fetch:timeout`
 
 The request exceeded the `timeout` option (milliseconds, `0` means no limit). Arguments: `{ url }`. Awaited before the visit fails.
+
+Without a timeout a slow server leaves the visitor looking at the old page with nothing happening. A limit of a few seconds turns that into a normal page load, which at least shows the browser's own progress:
+
+```js
+new Pagefold({ timeout: 8000 })
+```
 
 ## `cache:set` and `cache:clear`
 
@@ -36,6 +71,17 @@ pagefold.hooks.on('cache:set', (visit, { page }) => {
   console.log('cached', page.url)
 })
 ```
+
+## Which hook for which job
+
+| I want to... | Use |
+|---|---|
+| Add a header or a token to every request | `before` on `fetch:request` |
+| Send cookies, or use my own `fetch` | `replace` on `fetch:request` |
+| Log or report pages that fail | `on` for `fetch:error` and `fetch:timeout` |
+| Decide what counts as a failure | the `failOnStatus` option |
+| Know when a page was stored | `on` for `cache:set` |
+| Read or edit the stored pages | `pagefold.cache`, see [Caching and history](/docs/caching-and-history) |
 
 ## Failing visits
 

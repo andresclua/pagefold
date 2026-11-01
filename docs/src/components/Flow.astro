@@ -1,0 +1,47 @@
+---
+interface Props {
+  /** Questions asked in order. The first one answered "yes" stops the flow with `stop` */
+  checks: { q: string; note?: string }[]
+  /** What happens when a check is "yes" */
+  stop: string
+  /** What happens when every check is "no" */
+  end: string
+}
+const { checks, stop, end } = Astro.props
+---
+
+<ol class="flow" aria-label="Decision flow, top to bottom">
+  {
+    checks.map((c) => (
+      <li>
+        <div class="q">
+          <strong>{c.q}</strong>
+          {c.note && <span>{c.note}</span>}
+        </div>
+        <div class="yes"><b>Yes</b> → browser</div>
+        <div class="no" aria-hidden="true">No ↓</div>
+      </li>
+    ))
+  }
+  <li class="end"><div class="q"><strong>{end}</strong></div></li>
+</ol>
+<p class="stop"><b>Yes</b>: {stop}</p>
+
+<style>
+  .flow { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; gap: 0; max-width: 46rem; }
+  li { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem 0.75rem; align-items: center; position: relative; padding-bottom: 1.6rem; }
+  li:last-child { padding-bottom: 0; }
+  .q { grid-column: 1; padding: 0.7rem 0.95rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); display: grid; gap: 0.1rem; }
+  .q span { color: var(--muted); font-size: 0.9rem; }
+  .yes { grid-column: 2; grid-row: 1; font-size: 0.85rem; padding: 0.35rem 0.7rem; border-radius: 8px; border: 1px dashed var(--border); color: var(--muted); white-space: nowrap; }
+  .yes b { color: var(--text); font-family: var(--font-head); }
+  .no { position: absolute; left: 1rem; bottom: 0.2rem; font: 0.75rem var(--font-head); color: var(--muted); }
+  li:not(.end)::after { content: ''; position: absolute; left: 1.55rem; bottom: 1.45rem; width: 2px; height: 0.45rem; background: var(--border); }
+  .stop { color: var(--muted); font-size: 0.9rem; margin: 0 0 1.5rem; }
+  .end .q { border-color: var(--link); background: color-mix(in srgb, var(--link) 10%, var(--surface)); }
+  @media (max-width: 40rem) {
+    li { grid-template-columns: 1fr; }
+    .yes { grid-column: 1; grid-row: 2; justify-self: start; }
+    li { padding-bottom: 2rem; }
+  }
+</style>

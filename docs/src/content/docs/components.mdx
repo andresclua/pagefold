@@ -44,3 +44,22 @@ mount(pagefold, '[data-slider]', (el) => {
 
 - Elements kept with `data-pagefold-persist` are not set up twice, because they are the same element.
 - Cleanups run right after the content is replaced. If your cleanup needs the old element to still be in the page, use `content:replace.before` and run the cleanup there instead.
+
+## What happens, step by step
+
+A visit from a page with one slider to a page with two:
+
+| Moment | `mount` does |
+|---|---|
+| Page loads | `sync()` runs: the first slider is set up |
+| `content:replace` fires | The old slider's element is gone, so its cleanup runs. The two new elements are found and set up |
+| Back button, to the first page | Same again: the two are cleaned up and one is created |
+
+Each element is remembered in a `Map`, so nothing is created twice, and each cleanup runs once.
+
+## Common problems
+
+- **Two sliders on the same element.** You attached them somewhere other than `mount`, such as a `DOMContentLoaded` listener that also runs on the first page. Keep one place that creates components.
+- **Memory grows with every visit.** `setup` returned nothing, so the old instance was never destroyed. Always return the cleanup, even when it only removes a listener.
+- **The component flickers when the page appears.** It is created after the transition has already started showing the page. Run `mount` on `content:replace` (as above) rather than on `visit:end`.
+- **Scripts in the page do not run.** Inline `<script>` tags are not part of this. See [Scripts](/docs/scripts) for new scripts in the incoming page.

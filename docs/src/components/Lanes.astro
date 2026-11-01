@@ -1,0 +1,46 @@
+---
+interface Segment { from: number; to: number; text: string; tone?: 'out' | 'in' | 'load' | 'abort' | 'wait' }
+interface Props {
+  rows: { label: string; segments: Segment[] }[]
+  /** The time axis runs from 0 to this value (arbitrary units) */
+  total?: number
+  caption?: string
+}
+const { rows, total = 100, caption } = Astro.props
+---
+
+<figure class="lanes">
+  {
+    rows.map((r) => (
+      <div class="row">
+        <span class="label">{r.label}</span>
+        <div class="track">
+          {r.segments.map((s) => (
+            <span
+              class={`seg ${s.tone ?? 'wait'}`}
+              style={`left:${(s.from / total) * 100}%;width:${((s.to - s.from) / total) * 100}%`}
+            >{s.text}</span>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+  <div class="axis" aria-hidden="true"><span>time →</span></div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .lanes { margin: 1.5rem 0; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); display: grid; gap: 0.7rem; }
+  .row { display: grid; grid-template-columns: 6.5rem 1fr; gap: 0.75rem; align-items: center; }
+  .label { font: 0.8rem var(--font-head); color: var(--muted); }
+  .track { position: relative; height: 2.1rem; border-radius: 6px; background: color-mix(in srgb, var(--border) 45%, transparent); }
+  .seg { position: absolute; top: 0; bottom: 0; display: grid; place-items: center; font: 0.72rem var(--font-head); color: var(--text); border-radius: 6px; border: 1px solid var(--border); overflow: hidden; white-space: nowrap; padding-inline: 0.25rem; }
+  .out { background: color-mix(in srgb, var(--primary) 32%, var(--surface)); border-color: var(--primary); }
+  .in { background: color-mix(in srgb, var(--accent) 38%, var(--surface)); border-color: color-mix(in srgb, var(--accent) 70%, var(--border)); }
+  .load { background: var(--surface); border-style: dashed; color: var(--muted); }
+  .wait { background: var(--bg); color: var(--muted); }
+  .abort { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--muted) 35%, transparent) 6px 8px); color: var(--muted); border-style: dashed; }
+  .axis { padding-left: 7.25rem; font: 0.72rem var(--font-head); color: var(--muted); text-align: right; border-top: 1px solid var(--border); padding-top: 0.3rem; }
+  figcaption { color: var(--muted); font-size: 0.9rem; }
+  @media (max-width: 40rem) { .row { grid-template-columns: 1fr; gap: 0.25rem; } .axis { padding-left: 0; } }
+</style>

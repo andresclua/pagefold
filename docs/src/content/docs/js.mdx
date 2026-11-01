@@ -39,3 +39,30 @@ Read [Animating with JavaScript](/docs/javascript-animations) for the contract, 
 ## How it fits in
 
 It replaces the default behavior of the `animation:out:await` and `animation:in:await` hooks. Handlers registered with `.before` or normally still run around it.
+
+## Which animation runs: examples
+
+With these entries:
+
+```js
+new PagefoldJs([
+  { name: 'slide', out: slideOut, in: slideIn },
+  { from: '/', to: '/blog/:slug', out: zoomOut, in: zoomIn },
+  { out: fadeOut, in: fadeIn },
+])
+```
+
+| Visit | Runs | Why |
+|---|---|---|
+| `/` to `/blog/hello` | zoom | The second entry matches both patterns and has no name |
+| `/about` to `/contact` | fade | No pattern matches, so the first entry **without a name** runs |
+| `/about` to `/contact`, link has `data-pagefold-animation="slide"` | slide | An entry with the visit's name wins, as long as its own patterns match |
+| `/` to `/blog/hello`, link has `data-pagefold-animation="slide"` | slide | The name wins. The `slide` entry has no patterns, so it matches every visit |
+
+Put the most specific entries first and a plain fallback last. Without a fallback, pages that match nothing change instantly.
+
+## Common problems
+
+- **The animation is skipped.** No entry matched and there is no fallback, or the visit has `animation.animate = false` (for example a back-button visit). See [Caching and history](/docs/caching-and-history).
+- **The page waits forever.** An `out` or `in` that takes `done` never calls it, for example because of an exception before it. Pagefold has no timeout of its own here, so wrap risky code in `try / finally`.
+- **Both CSS and JS animate.** Set `animationSelector: false` so Pagefold does not also wait for CSS transitions.

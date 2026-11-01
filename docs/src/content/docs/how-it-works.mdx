@@ -6,6 +6,7 @@ order: 1
 ---
 
 import Timeline from '../../components/Timeline.astro'
+import Lanes from '../../components/Lanes.astro'
 
 Every navigation is a **visit**: an object that carries everything about it (where from, where to, what triggered it, how it animates). Every hook handler receives it. See [The Visit object](/docs/visit).
 
@@ -50,6 +51,42 @@ Set `animationScope: 'containers'` to put the classes on the containers instead 
 
 - If the running visit is still **loading**, it is aborted. Its request is cancelled and its content never appears.
 - If the running visit has **already replaced the content**, it finishes first. If several visits wait, only the last one runs.
+
+The two cases side by side. In both, the visitor clicks a second link while the first visit is running:
+
+<Lanes
+  total={100}
+  rows={[
+    { label: 'Visit A (loading)', segments: [
+      { from: 0, to: 30, text: 'out', tone: 'out' },
+      { from: 30, to: 45, text: 'load…', tone: 'load' },
+      { from: 45, to: 100, text: 'aborted', tone: 'abort' },
+    ] },
+    { label: 'Visit B', segments: [
+      { from: 45, to: 65, text: 'out', tone: 'out' },
+      { from: 65, to: 85, text: 'swap', tone: 'load' },
+      { from: 85, to: 100, text: 'in', tone: 'in' },
+    ] },
+  ]}
+  caption="Click B while A is still loading: A is stopped and its request is cancelled. B starts right away."
+/>
+
+<Lanes
+  total={100}
+  rows={[
+    { label: 'Visit A (swapped)', segments: [
+      { from: 0, to: 25, text: 'out', tone: 'out' },
+      { from: 25, to: 35, text: 'swap', tone: 'load' },
+      { from: 35, to: 55, text: 'in', tone: 'in' },
+    ] },
+    { label: 'Visit B', segments: [
+      { from: 55, to: 75, text: 'out', tone: 'out' },
+      { from: 75, to: 85, text: 'swap', tone: 'load' },
+      { from: 85, to: 100, text: 'in', tone: 'in' },
+    ] },
+  ]}
+  caption="Click B after A swapped the content: A finishes, then B runs. If C and D are also waiting, only D runs."
+/>
 
 ## Requests
 

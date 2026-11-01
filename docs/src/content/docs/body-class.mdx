@@ -22,3 +22,31 @@ new Pagefold({ plugins: [new PagefoldBodyClass({ prefix: 'page-' })] })
 Only the containers are replaced, so without this plugin the body would keep the class of the first page.
 
 Without a `prefix`, the whole `class` attribute is replaced with the new page's. Use a prefix when JavaScript adds classes to the body (`js-ready`, `menu-open`) that must survive a visit.
+
+## A before and after
+
+Two pages with different body classes:
+
+```html
+<!-- /index -->
+<body class="page-home theme-light">
+
+<!-- /blog -->
+<body class="page-blog theme-light">
+```
+
+The visitor is on `/index`, your script opens the menu (`menu-open`) and then clicks to `/blog`:
+
+| | Body classes after the visit |
+|---|---|
+| Without the plugin | `page-home theme-light menu-open` (the old page's classes stay) |
+| With the plugin, no `prefix` | `page-blog theme-light` (`menu-open` is lost) |
+| With the plugin, `prefix: 'page-'` | `theme-light menu-open page-blog` |
+
+With a prefix, only the classes that start with it are swapped. Everything else on the body stays, including `theme-light` here, even if the new page has a different value. A class that must change with the page needs a name that starts with the prefix.
+
+## Common problems
+
+- **Styles of the new page do not apply.** The class you rely on is set by JavaScript after load rather than in the HTML. Pagefold copies what the server sent, so set it on the server.
+- **The menu closes on every visit.** Without a `prefix` the whole attribute is replaced. Add one, and give state classes names that do not start with it.
+- **Only the body is wrong.** This plugin does not touch `html`. Its `lang` and `dir` attributes are handled by [Head](/docs/head), which can sync more with its `attributes` option.

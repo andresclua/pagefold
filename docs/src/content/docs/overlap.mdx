@@ -15,6 +15,8 @@ options:
     description: "How many previous containers to keep after the animation, in total or per selector."
 ---
 
+import Lanes from '../../components/Lanes.astro'
+
 Import it from `pagefold/overlap` (about 1.4 KB minified and compressed, shared code included).
 
 ```js
@@ -24,6 +26,21 @@ new Pagefold({ plugins: [new PagefoldOverlap()] })
 ```
 
 Normally the old content animates out, is replaced, and the new content animates in: one after the other. With Overlap the new container is **inserted next to the old one** and both animate together. When the visit ends, the old container is removed.
+
+The same visit, with and without the plugin. Both animations run at the same time, so the visit is as long as the longest one, and both pages are visible together while it runs:
+
+<Lanes
+  total={100}
+  rows={[
+    { label: 'Without Overlap', segments: [
+      { from: 0, to: 40, text: 'old page out', tone: 'out' },
+      { from: 40, to: 46, text: '', tone: 'load' },
+      { from: 46, to: 86, text: 'new page in', tone: 'in' },
+    ] },
+    { label: 'Overlap: old', segments: [{ from: 0, to: 40, text: 'old page out', tone: 'out' }] },
+    { label: 'Overlap: new', segments: [{ from: 0, to: 40, text: 'new page in', tone: 'in' }] },
+  ]}
+/>
 
 ## Classes
 
