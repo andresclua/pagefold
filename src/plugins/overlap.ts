@@ -1,7 +1,7 @@
-import type { HookHandler } from '../hooks'
-import { Plugin } from '../plugin'
-import { forceReflow } from '../utils'
-import type { Visit } from '../visit'
+import type { HookHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
+import { forceReflow } from '../utils.js'
+import type { Visit } from '../visit.js'
 
 export interface ContainerSet {
   selector: string
@@ -16,7 +16,7 @@ export interface ContainerSet {
   all: HTMLElement[]
 }
 
-declare module '../hooks' {
+declare module '../hooks.js' {
   interface HookDefinitions {
     'content:insert': { containers: ContainerSet[] }
     'content:remove': { containers: ContainerSet[] }

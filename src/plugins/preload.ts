@@ -1,9 +1,9 @@
-import type { HookHandler } from '../hooks'
-import { Location } from '../location'
-import { Plugin } from '../plugin'
-import type { PageData } from '../types'
+import type { HookHandler } from '../hooks.js'
+import { Location } from '../location.js'
+import { Plugin } from '../plugin.js'
+import type { PageData } from '../types.js'
 
-declare module '../hooks' {
+declare module '../hooks.js' {
   interface HookDefinitions {
     'page:preload': { page: PageData }
   }

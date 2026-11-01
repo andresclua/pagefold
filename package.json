@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "author": "Andres Clua",
-  "homepage": "https://pagefold.js.org",
+  "homepage": "https://github.com/andresclua/pagefold#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/andresclua/pagefold.git"
@@ -17,7 +17,9 @@
     "spa",
     "animation"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

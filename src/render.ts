@@ -1,9 +1,9 @@
-import type { Pagefold } from './pagefold'
-import { getCurrentUrl, updateHistoryRecord } from './history'
-import { Location } from './location'
-import type { PageData } from './types'
-import { classify, query, queryAll } from './utils'
-import { VisitState, type Visit } from './visit'
+import type { Pagefold } from './pagefold.js'
+import { getCurrentUrl, updateHistoryRecord } from './history.js'
+import { Location } from './location.js'
+import type { PageData } from './types.js'
+import { classify, query, queryAll } from './utils.js'
+import { VisitState, type Visit } from './visit.js'
 
 const esc = (value: string): string => value.replace(/["\\]/g, '\\$&')
 

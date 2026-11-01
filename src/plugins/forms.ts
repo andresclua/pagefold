@@ -1,8 +1,8 @@
-import { Location } from '../location'
-import type { NavigationOptions } from '../navigate'
-import { Plugin } from '../plugin'
+import { Location } from '../location.js'
+import type { NavigationOptions } from '../navigate.js'
+import { Plugin } from '../plugin.js'
 
-declare module '../hooks' {
+declare module '../hooks.js' {
   interface HookDefinitions {
     'form:submit': { el: HTMLFormElement; event: SubmitEvent }
   }

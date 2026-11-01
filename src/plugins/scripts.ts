@@ -1,4 +1,4 @@
-import { Plugin } from '../plugin'
+import { Plugin } from '../plugin.js'
 
 export interface ScriptsOptions {
   /** Run new scripts found in the head. Default: true */

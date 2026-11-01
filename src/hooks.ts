@@ -1,5 +1,5 @@
-import type { FetchOptions, PageData } from './types'
-import { Visit } from './visit'
+import type { FetchOptions, PageData } from './types.js'
+import { Visit } from './visit.js'
 
 /** Built-in hooks. */
 interface CoreHooks {

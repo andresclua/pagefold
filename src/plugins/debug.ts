@@ -1,5 +1,5 @@
-import type { HookName } from '../hooks'
-import { Plugin } from '../plugin'
+import type { HookName } from '../hooks.js'
+import { Plugin } from '../plugin.js'
 
 export interface DebugOptions {
   /** Where messages go. Default: the console */

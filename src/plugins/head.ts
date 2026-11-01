@@ -1,5 +1,5 @@
-import type { HookHandler } from '../hooks'
-import { Plugin } from '../plugin'
+import type { HookHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
 
 export interface HeadOptions {
   /** Keep tags of the old page that the new page does not have. Boolean, selector or predicate. */

@@ -1,14 +1,14 @@
-import { awaitAnimations } from './animation'
-import type { FetchError} from './fetch';
-import { fetchPage } from './fetch'
-import { createHistoryRecord, getCurrentUrl, updateHistoryRecord } from './history'
-import { Location } from './location'
-import type { Pagefold } from './pagefold'
-import { renderPage } from './render'
-import type { FetchOptions, PageData } from './types'
-import { classify, getContextualAttr } from './utils'
-import type { Visit} from './visit';
-import { VisitState, type HistoryAction, type VisitInit } from './visit'
+import { awaitAnimations } from './animation.js'
+import type { FetchError} from './fetch.js';
+import { fetchPage } from './fetch.js'
+import { createHistoryRecord, getCurrentUrl, updateHistoryRecord } from './history.js'
+import { Location } from './location.js'
+import type { Pagefold } from './pagefold.js'
+import { renderPage } from './render.js'
+import type { FetchOptions, PageData } from './types.js'
+import { classify, getContextualAttr } from './utils.js'
+import type { Visit} from './visit.js';
+import { VisitState, type HistoryAction, type VisitInit } from './visit.js'
 
 export interface NavigationOptions extends FetchOptions {
   /** Animate this visit. Default: true */

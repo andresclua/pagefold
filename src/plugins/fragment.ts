@@ -1,7 +1,7 @@
-import type { HookHandler } from '../hooks'
-import { Plugin } from '../plugin'
-import type { Visit } from '../visit'
-import { matchPath } from './match-path'
+import type { HookHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
+import type { Visit } from '../visit.js'
+import { matchPath } from './match-path.js'
 
 export interface FragmentRule {
   /** Path patterns of the page being left */
@@ -20,7 +20,7 @@ export interface FragmentOptions {
   rules: FragmentRule[]
 }
 
-declare module '../visit' {
+declare module '../visit.js' {
   interface Visit {
     /** Set on visits that replace only some containers */
     fragment?: { name: string | undefined; containers: string[]; original: string[] }

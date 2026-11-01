@@ -1,7 +1,7 @@
-import type { Pagefold } from './pagefold'
-import type { FetchOptions, PageData } from './types'
-import { Location } from './location'
-import type { Visit } from './visit'
+import type { Pagefold } from './pagefold.js'
+import type { FetchOptions, PageData } from './types.js'
+import { Location } from './location.js'
+import type { Visit } from './visit.js'
 
 export class FetchError extends Error {
   url: string

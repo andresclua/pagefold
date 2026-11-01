@@ -1,5 +1,5 @@
-import type { HookDefaultHandler, HookHandler, HookName, HookOptions, HookUnregister } from './hooks'
-import type { Pagefold } from './pagefold'
+import type { HookDefaultHandler, HookHandler, HookName, HookOptions, HookUnregister } from './hooks.js'
+import type { Pagefold } from './pagefold.js'
 
 /** Does `version` satisfy a `>=x.y.z` requirement? Other range types are not supported yet. */
 export function satisfies(version: string, range: string): boolean {

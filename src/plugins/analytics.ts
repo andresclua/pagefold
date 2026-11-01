@@ -1,5 +1,5 @@
-import type { HookHandler } from '../hooks'
-import { Plugin } from '../plugin'
+import type { HookHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
 
 export interface PageView {
   /** Path and query of the new page */

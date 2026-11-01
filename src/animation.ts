@@ -1,5 +1,5 @@
-import type { Visit } from './visit'
-import { queryAll } from './utils'
+import type { Visit } from './visit.js'
+import { queryAll } from './utils.js'
 
 const END = { transition: 'transitionend', animation: 'animationend' } as const
 type Kind = keyof typeof END

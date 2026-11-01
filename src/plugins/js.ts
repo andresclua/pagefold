@@ -1,7 +1,7 @@
-import type { HookDefaultHandler } from '../hooks'
-import { Plugin } from '../plugin'
-import type { Visit } from '../visit'
-import { matchPath } from './match-path'
+import type { HookDefaultHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
+import type { Visit } from '../visit.js'
+import { matchPath } from './match-path.js'
 
 export interface AnimationSide {
   url: string

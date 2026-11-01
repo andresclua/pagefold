@@ -1,5 +1,5 @@
-import type { HookHandler } from '../hooks'
-import { Plugin } from '../plugin'
+import type { HookHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
 
 export interface BodyClassOptions {
   /** Only manage classes that start with this. Others on the body are left alone. Default: all */

@@ -1,7 +1,7 @@
-import type { HookHandler } from '../hooks'
-import { Plugin } from '../plugin'
-import { classify } from '../utils'
-import { matchPath } from './match-path'
+import type { HookHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
+import { classify } from '../utils.js'
+import { matchPath } from './match-path.js'
 
 export interface RouteAnimation {
   /** Route names of the page being left. Default: any */

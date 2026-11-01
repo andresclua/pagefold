@@ -1,5 +1,5 @@
-import type { HookHandler } from '../hooks'
-import { Plugin } from '../plugin'
+import type { HookHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
 
 export interface A11yOptions {
   /** Tell screen readers about the new page. Default: true */

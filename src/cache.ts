@@ -1,4 +1,4 @@
-import type { PageData } from './types'
+import type { PageData } from './types.js'
 
 export interface CacheOptions {
   /** Keep at most this many pages, dropping the least recently used. Default: unlimited */

@@ -1,6 +1,6 @@
-import type { HookDefaultHandler } from '../hooks'
-import { Plugin } from '../plugin'
-import type { Visit } from '../visit'
+import type { HookDefaultHandler } from '../hooks.js'
+import { Plugin } from '../plugin.js'
+import type { Visit } from '../visit.js'
 
 export interface ScrollKinds {
   /** Visits to another page */
