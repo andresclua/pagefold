@@ -63,16 +63,20 @@ The animation classes go on the fragment containers, not on the `html` element, 
 
 ## When it falls back
 
-A rule is only used if **every container is on the current page**. If the new page does not contain one of them, Pagefold replaces all the normal containers instead of leaving a broken page.
+A rule is only used if **every container in the rule is on the current page**. And if the **new** page does not contain one of them, the rule is dropped for that visit and Pagefold replaces the normal containers instead, so you never end up with a half-updated page.
+
+That works when a normal container is bigger than the fragment. Here `#pagefold` is the normal container and `#detail` is inside it:
 
 <Panes
-  columns="1fr 2fr"
-  before={{ url: '/users/7', panes: [{ name: '#list' }, { name: '#detail', text: 'user 7' }] }}
-  after={{ url: '/dashboard', panes: [{ name: '#list', state: 'replaced' }, { name: '#detail', text: 'no #detail here', state: 'replaced' }] }}
-  caption="The new page has no #detail, so the rule is skipped and every container is replaced."
+  columns="1fr"
+  before={{ url: '/projects/a', panes: [{ name: '#pagefold', text: 'contains #detail and the rest of the page' }] }}
+  after={{ url: '/projects', panes: [{ name: '#pagefold', text: 'no #detail on this page: everything inside is replaced', state: 'replaced' }] }}
+  caption="The rule asked for #detail only, but the new page has none, so the whole #pagefold is replaced."
 />
 
- `visit.fragment` tells you whether a visit is a fragment visit.
+If the new page is also missing one of the **normal** containers, there is nothing safe to replace. The visit fails and the browser loads the page normally, as for any visit that cannot be done.
+
+`visit.fragment` tells you whether a visit is a fragment visit.
 
 ## Common problems
 

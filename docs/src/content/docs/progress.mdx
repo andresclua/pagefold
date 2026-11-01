@@ -49,7 +49,7 @@ import PagefoldProgress from 'pagefold/progress'
 new Pagefold({ plugins: [new PagefoldProgress({ color: '#00ff9c' })] })
 ```
 
-The bar appears if a visit takes longer than `delay`, starts at `initialValue`, and moves forward slower and slower, so it never looks finished before it is. When the page is shown it runs to the end and fades out. If the visit fails, it disappears.
+The bar appears if a visit takes longer than `delay`, counted from the click until the new page is in place. That includes the animation out, so if yours lasts 400 ms, use a `delay` longer than that or the bar will show on every visit. It starts at `initialValue`, and moves forward slower and slower, so it never looks finished before it is. When the page is shown it runs to the end and fades out. If the visit fails, it disappears.
 
 Two visits with the default settings:
 
@@ -93,5 +93,6 @@ Pagefold sets the `transform: scaleX(...)` itself, from 0 to 1.
 ## Common problems
 
 - **The bar never appears.** The visit finished before `delay` (300 ms). That is the point. Lower `delay` to see it on quick visits while you test.
+- **The bar flashes on every visit.** The animation out lasts longer than `delay`, and the time counts. Raise `delay` above it.
 - **It looks different from my site.** Set `styles: false` and style `.pagefold-progress-bar` yourself.
 - **It is hidden behind something.** The default bar uses `z-index: 99999`. With `styles: false`, set your own in the CSS.

@@ -22,9 +22,10 @@ pagefold.hooks.on('visit:start', (visit) => {
 <Strips
   rows={[
     { label: 'A normal visit', items: [{ text: 'created' }, { text: 'started' }, { text: 'leaving' }, { text: 'loaded' }, { text: 'entering' }, { text: 'completed', tone: 'new' }] },
+    { label: 'If it has to wait', items: [{ text: 'created' }, { text: 'queued', tone: 'moved' }, { text: 'started' }, { text: '…' }] },
     { label: 'It can end early', items: [{ text: 'aborted', tone: 'moved' }, { text: 'failed', tone: 'moved' }, { text: 'ignored', tone: 'moved' }] },
   ]}
-  caption="Aborted: another visit took over or you called abort(). Failed: the request or a hook failed. Ignored: you called ignore() and the browser loads the page. All four endings count as done."
+  caption="Queued: another visit has already replaced the content, so this one waits for it to finish. Aborted: another visit took over or you called abort(). Failed: the request or a hook failed. Ignored: you called ignore() and the browser loads the page. All four endings count as done."
 />
 
 ## Fields
@@ -32,7 +33,7 @@ pagefold.hooks.on('visit:start', (visit) => {
 | Field | Type | What it is |
 |---|---|---|
 | `id` | `number` | Unique per visit |
-| `state` | number | Where it is in its life: created, started, leaving, loaded, entering, completed, aborted, failed, ignored |
+| `state` | number | Where it is in its life: created, queued, started, leaving, loaded, entering, completed, aborted, failed, ignored |
 | `from` | `{ url, hash, route? }` | The page being left |
 | `to` | `{ url, hash, route?, html?, document? }` | The page being entered. `html` and `document` are set once it is loaded and are available until the end of the visit |
 | `containers` | `string[]` | The containers that will be replaced |
