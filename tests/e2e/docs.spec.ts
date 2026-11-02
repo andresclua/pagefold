@@ -3,8 +3,10 @@
 import { expect, test, type Page } from '@playwright/test'
 import { heading, link, open } from './helpers'
 
-const win = <T = unknown>(page: Page, name: string) => page.evaluate((n) => (window as never as Record<string, T>)[n], name)
-const done = (page: Page) => page.waitForFunction(() => !document.documentElement.classList.contains('is-changing'))
+const win = <T = unknown>(page: Page, name: string) =>
+  page.evaluate((n) => (window as never as Record<string, T>)[n], name)
+const done = (page: Page) =>
+  page.waitForFunction(() => !document.documentElement.classList.contains('is-changing'))
 
 test.describe('overlap', () => {
   const slow = `.transition-fade { transition-duration: 1.2s !important }`
@@ -12,11 +14,18 @@ test.describe('overlap', () => {
     await open(page, '/', { plugins: [['overlap', options]] })
     await page.addStyleTag({ content: slow })
   }
-  const bothThere = (page: Page) => page.waitForFunction(() => document.querySelectorAll('#pagefold').length === 2)
+  const bothThere = (page: Page) =>
+    page.waitForFunction(() => document.querySelectorAll('#pagefold').length === 2)
   const tops = (page: Page) =>
-    page.evaluate(() => [...document.querySelectorAll('#pagefold')].map((el) => Math.round(el.getBoundingClientRect().top)))
+    page.evaluate(() =>
+      [...document.querySelectorAll('#pagefold')].map((el) =>
+        Math.round(el.getBoundingClientRect().top)
+      )
+    )
 
-  test('the incoming container goes first, the outgoing one is hidden from screen readers', async ({ page }) => {
+  test('the incoming container goes first, the outgoing one is hidden from screen readers', async ({
+    page,
+  }) => {
     await openOverlap(page)
     await link(page, '/about').click()
     await bothThere(page)
@@ -46,7 +55,9 @@ test.describe('overlap', () => {
 
   test('position: absolute puts them on top of each other', async ({ page }) => {
     await openOverlap(page)
-    await page.addStyleTag({ content: `#pagefold { position: absolute; top: 60px; left: 0; right: 0 }` })
+    await page.addStyleTag({
+      content: `#pagefold { position: absolute; top: 60px; left: 0; right: 0 }`,
+    })
     await link(page, '/about').click()
     await bothThere(page)
     const [first, second] = await tops(page)
@@ -95,7 +106,10 @@ test.describe('overlap', () => {
     `)
     await link(page, '/about').click()
     await page.waitForFunction(() => (window as never as { __seen: unknown[] }).__seen.length === 2)
-    expect(await win(page, '__seen')).toEqual([['insert', 1], ['remove', 1]])
+    expect(await win(page, '__seen')).toEqual([
+      ['insert', 1],
+      ['remove', 1],
+    ])
   })
 })
 
@@ -128,14 +142,21 @@ test.describe('using hooks', () => {
     `)
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
-    await page.waitForFunction(() => (window as never as { __viewAt?: number }).__viewAt !== undefined)
-    const [slowDone, viewAt] = await Promise.all([win<number>(page, '__slowDone'), win<number>(page, '__viewAt')])
+    await page.waitForFunction(
+      () => (window as never as { __viewAt?: number }).__viewAt !== undefined
+    )
+    const [slowDone, viewAt] = await Promise.all([
+      win<number>(page, '__slowDone'),
+      win<number>(page, '__viewAt'),
+    ])
     expect(viewAt).toBeGreaterThanOrEqual(slowDone)
   })
 
   test('the hooks option, with before and once, and destroy()', async ({ page }) => {
     await open(page, '/')
-    expect(await page.evaluate(() => document.documentElement.classList.contains('pagefold-enabled'))).toBe(true)
+    expect(
+      await page.evaluate(() => document.documentElement.classList.contains('pagefold-enabled'))
+    ).toBe(true)
     await page.evaluate(`(async () => {
       await pagefold.destroy()
       window.__afterDestroy = document.documentElement.classList.contains('pagefold-enabled')
@@ -312,10 +333,14 @@ test.describe('network hooks', () => {
     await link(page, '/boom').click()
     await expect(page).toHaveURL(/\/boom$/)
     await page.waitForFunction(() => window.__marker === undefined)
-    expect(await page.evaluate(() => sessionStorage.getItem('reported'))).toBe('Page http://localhost:4173/boom answered 500')
+    expect(await page.evaluate(() => sessionStorage.getItem('reported'))).toBe(
+      'Page http://localhost:4173/boom answered 500'
+    )
   })
 
-  test('the timeout option fires fetch:timeout and falls back to a normal load', async ({ page }) => {
+  test('the timeout option fires fetch:timeout and falls back to a normal load', async ({
+    page,
+  }) => {
     await open(page, '/', { options: { timeout: 300 } })
     await page.evaluate(`
       window.__marker = 'same document'
@@ -355,7 +380,9 @@ test.describe('visit, link and content hooks', () => {
 
   test('visit:abort fires when a new visit starts while one is loading', async ({ page }) => {
     await open(page, '/')
-    await page.evaluate(`pagefold.hooks.on('visit:abort', () => { window.__aborted = (window.__aborted || 0) + 1 })`)
+    await page.evaluate(
+      `pagefold.hooks.on('visit:abort', () => { window.__aborted = (window.__aborted || 0) + 1 })`
+    )
     await link(page, '/slow?ms=1500').click()
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
@@ -377,7 +404,11 @@ test.describe('visit, link and content hooks', () => {
     await expect(heading(page)).toHaveText('Home')
     await page.goForward()
     await expect(heading(page)).toHaveText('About')
-    expect(await win(page, '__names')).toEqual([[null, null], ['backwards', 'reverse'], ['forwards', null]])
+    expect(await win(page, '__names')).toEqual([
+      [null, null],
+      ['backwards', 'reverse'],
+      ['forwards', null],
+    ])
   })
 
   test('before content:replace can change the incoming document', async ({ page }) => {
@@ -405,7 +436,9 @@ test.describe('visit, link and content hooks', () => {
     expect(await win(page, '__behavior')).toBe('smooth')
   })
 
-  test('on scroll:anchor runs after the default, so it is too late to change the behavior', async ({ page }) => {
+  test('on scroll:anchor runs after the default, so it is too late to change the behavior', async ({
+    page,
+  }) => {
     await open(page, '/')
     await page.evaluate(`
       const original = Element.prototype.scrollIntoView
@@ -430,9 +463,25 @@ test.describe('visit, link and content hooks', () => {
       await pagefold.navigate('/about')
       return { seen, VisitState }
     })()`)
-    const { seen, VisitState } = result as { seen: [string, number][]; VisitState: Record<string, number> }
-    const order = Object.entries(VisitState).sort((a, b) => a[1] - b[1]).map(([name]) => name)
-    expect(order).toEqual(['CREATED', 'QUEUED', 'STARTED', 'LEAVING', 'LOADED', 'ENTERING', 'COMPLETED', 'ABORTED', 'FAILED', 'IGNORED'])
+    const { seen, VisitState } = result as {
+      seen: [string, number][]
+      VisitState: Record<string, number>
+    }
+    const order = Object.entries(VisitState)
+      .sort((a, b) => a[1] - b[1])
+      .map(([name]) => name)
+    expect(order).toEqual([
+      'CREATED',
+      'QUEUED',
+      'STARTED',
+      'LEAVING',
+      'LOADED',
+      'ENTERING',
+      'COMPLETED',
+      'ABORTED',
+      'FAILED',
+      'IGNORED',
+    ])
     const states = seen.map(([, state]) => state)
     expect(states).toEqual([...states].sort((a, b) => a - b))
     const at = Object.fromEntries(seen)
@@ -452,7 +501,9 @@ test.describe('visit, link and content hooks', () => {
       })
     `)
     await link(page, '/about').click()
-    await page.waitForFunction(() => (window as never as { __states?: boolean[] }).__states?.length === 1)
+    await page.waitForFunction(
+      () => (window as never as { __states?: boolean[] }).__states?.length === 1
+    )
     expect(await win(page, '__states')).toEqual([true])
     await expect(heading(page)).toHaveText('Home')
   })
@@ -469,7 +520,9 @@ test.describe('state classes', () => {
       }
     `)
     await page.evaluate(`pagefold.navigate('/about', { animation: 'slide' })`)
-    await page.waitForFunction(() => (window as never as { __classes: unknown[] }).__classes.length === 6)
+    await page.waitForFunction(
+      () => (window as never as { __classes: unknown[] }).__classes.length === 6
+    )
     expect(await win(page, '__classes')).toEqual([
       ['animation:out:start', ['is-animating', 'is-changing', 'is-leaving', 'to-slide']],
       ['animation:out:end', ['is-animating', 'is-changing', 'is-leaving', 'to-slide']],
@@ -480,7 +533,9 @@ test.describe('state classes', () => {
     ])
   })
 
-  test('a visit that starts after the content was replaced waits, and only the last of several runs', async ({ page }) => {
+  test('a visit that starts after the content was replaced waits, and only the last of several runs', async ({
+    page,
+  }) => {
     await open(page, '/')
     await page.addStyleTag({ content: `.transition-fade { transition-duration: 0.8s !important }` })
     await page.evaluate(`
@@ -488,9 +543,13 @@ test.describe('state classes', () => {
       pagefold.hooks.on('content:replace', (visit) => window.__rendered.push(visit.to.url))
     `)
     await page.evaluate(`pagefold.navigate('/about')`)
-    await page.waitForFunction(() => (window as never as { __rendered: string[] }).__rendered.length === 1)
+    await page.waitForFunction(
+      () => (window as never as { __rendered: string[] }).__rendered.length === 1
+    )
     // /about has replaced the content and is animating in. Three more arrive.
-    await page.evaluate(`pagefold.navigate('/long'); pagefold.navigate('/plain-b'); pagefold.navigate('/contact')`)
+    await page.evaluate(
+      `pagefold.navigate('/long'); pagefold.navigate('/plain-b'); pagefold.navigate('/contact')`
+    )
     await expect(page).toHaveTitle('Contact')
     await done(page)
     expect(await win(page, '__rendered')).toEqual(['/about', '/contact'])
@@ -505,11 +564,17 @@ test.describe('which links are handled', () => {
         document.body.insertAdjacentHTML('beforeend', h)
         return true
       }, html)
-    await make('<div id="b"><a href="/x" target="_blank">x</a></div><div id="d"><a href="/x" download>x</a></div>')
-    await make('<div id="o" data-no-pagefold><a href="/x">x</a></div><div id="n"><a href="/about">x</a></div>')
+    await make(
+      '<div id="b"><a href="/x" target="_blank">x</a></div><div id="d"><a href="/x" download>x</a></div>'
+    )
+    await make(
+      '<div id="o" data-no-pagefold><a href="/x">x</a></div><div id="n"><a href="/about">x</a></div>'
+    )
     const ignored = await page.evaluate(() => {
       const check = (href: string, selector?: string) =>
-        window.pagefold.shouldIgnoreVisit(href, { el: selector ? document.querySelector(selector)! : undefined })
+        window.pagefold.shouldIgnoreVisit(href, {
+          el: selector ? document.querySelector(selector)! : undefined,
+        })
       return {
         otherOrigin: check('https://example.com/x'),
         blank: check('/x', '#b a'),
@@ -518,7 +583,13 @@ test.describe('which links are handled', () => {
         normal: check('/about', '#n a'),
       }
     })
-    expect(ignored).toEqual({ otherOrigin: true, blank: true, download: true, optOut: true, normal: false })
+    expect(ignored).toEqual({
+      otherOrigin: true,
+      blank: true,
+      download: true,
+      optOut: true,
+      normal: false,
+    })
   })
 
   test('the ignoreVisit option decides too', async ({ page }) => {
@@ -543,7 +614,9 @@ test.describe('which links are handled', () => {
     await expect(heading(page)).toHaveText('Home')
   })
 
-  test('data-pagefold-animation names the animation and data-pagefold-history replaces the entry', async ({ page }) => {
+  test('data-pagefold-animation names the animation and data-pagefold-history replaces the entry', async ({
+    page,
+  }) => {
     await open(page, '/')
     const before = await page.evaluate(() => history.length)
     await page.evaluate(`
@@ -559,10 +632,15 @@ test.describe('which links are handled', () => {
     expect(await page.evaluate(() => history.length)).toBe(before)
   })
 
-  test('a #section link on the same page fires link:anchor, and the current page fires link:self', async ({ page }) => {
+  test('a #section link on the same page fires link:anchor, and the current page fires link:self', async ({
+    page,
+  }) => {
     await open(page, '/long', { record: true })
     await page.evaluate(() => {
-      document.body.insertAdjacentHTML('beforeend', '<a id="same" href="#bottom">bottom</a><a id="self" href="/long">self</a>')
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<a id="same" href="#bottom">bottom</a><a id="self" href="/long">self</a>'
+      )
     })
     await page.locator('#same').click()
     await page.locator('#self').click()
@@ -574,7 +652,9 @@ test.describe('which links are handled', () => {
 
   test('linkToSelf: navigate loads the current page again through Pagefold', async ({ page }) => {
     await open(page, '/long', { record: true, options: { linkToSelf: 'navigate' } })
-    await page.evaluate(() => document.body.insertAdjacentHTML('beforeend', '<a id="self" href="/long">self</a>'))
+    await page.evaluate(() =>
+      document.body.insertAdjacentHTML('beforeend', '<a id="self" href="/long">self</a>')
+    )
     await page.locator('#self').click()
     await expect.poll(() => page.evaluate(() => window.__events.includes('visit:start'))).toBe(true)
   })
@@ -641,7 +721,9 @@ test.describe('plugin API', () => {
     })()`)
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
-    expect(await win(page, '__gtag')).toEqual([['config', 'G-XXXX', { page_path: '/about', page_title: 'About' }]])
+    expect(await win(page, '__gtag')).toEqual([
+      ['config', 'G-XXXX', { page_path: '/about', page_title: 'About' }],
+    ])
     expect(await page.evaluate(`pagefold.findPlugin('AnalyticsPlugin') !== undefined`)).toBe(true)
     await page.evaluate(`pagefold.unuse('AnalyticsPlugin')`)
     await link(page, '/plain-b').click()
@@ -719,7 +801,10 @@ test.describe('JS plugin', () => {
       ]))
     })()`)
     const go = async (url: string, animation?: string) => {
-      await page.evaluate(([u, a]) => window.pagefold.navigate(u!, a ? { animation: a } : {}), [url, animation])
+      await page.evaluate(
+        ([u, a]) => window.pagefold.navigate(u!, a ? { animation: a } : {}),
+        [url, animation]
+      )
     }
     await go('/blog/hello') // from / : zoom
     await go('/contact') // no pattern matches: the first entry without a name
@@ -734,13 +819,16 @@ test.describe('route name', () => {
   test('route names, classes and the animation name', async ({ page }) => {
     await open(page, '/work', {
       plugins: [
-        ['route-name', {
-          routes: { home: '/', work: '/work', project: '/work/:slug' },
-          animations: [
-            { from: 'work', to: 'project', animation: 'expand' },
-            { from: 'project', to: 'work', animation: 'collapse' },
-          ],
-        }],
+        [
+          'route-name',
+          {
+            routes: { home: '/', work: '/work', project: '/work/:slug' },
+            animations: [
+              { from: 'work', to: 'project', animation: 'expand' },
+              { from: 'project', to: 'work', animation: 'collapse' },
+            ],
+          },
+        ],
       ],
     })
     await page.evaluate(`
@@ -756,9 +844,17 @@ test.describe('route name', () => {
     await expect(heading(page)).toHaveText('Hello project')
     await done(page)
     expect(await win(page, '__seen')).toEqual([
-      { from: 'work', to: 'project', classes: ['from-route-work', 'to-expand', 'to-route-project'] },
+      {
+        from: 'work',
+        to: 'project',
+        classes: ['from-route-work', 'to-expand', 'to-route-project'],
+      },
     ])
-    expect(await page.evaluate(() => [...document.documentElement.classList].filter((c) => /^(from-route|to-)/.test(c)))).toEqual([])
+    expect(
+      await page.evaluate(() =>
+        [...document.documentElement.classList].filter((c) => /^(from-route|to-)/.test(c))
+      )
+    ).toEqual([])
   })
 })
 
@@ -778,7 +874,11 @@ test.describe('body class', () => {
     expect(await scenario(page, [['body-class']])).toEqual(['page-blog', 'theme-light'])
   })
   test('with a prefix only those classes are swapped', async ({ page }) => {
-    expect(await scenario(page, [['body-class', { prefix: 'page-' }]])).toEqual(['menu-open', 'page-blog', 'theme-light'])
+    expect(await scenario(page, [['body-class', { prefix: 'page-' }]])).toEqual([
+      'menu-open',
+      'page-blog',
+      'theme-light',
+    ])
   })
 })
 
@@ -832,9 +932,15 @@ test.describe('progress', () => {
     expect(await bar.evaluate((el) => (el as HTMLElement).style.zIndex)).toBe('99999')
   })
 
-  const barsDuring = async (page: Page, options: Record<string, unknown>, config: Record<string, unknown> = {}) => {
+  const barsDuring = async (
+    page: Page,
+    options: Record<string, unknown>,
+    config: Record<string, unknown> = {}
+  ) => {
     await open(page, '/', { plugins: [['progress', options]], ...config })
-    await page.evaluate(`window.__bars = 0; new MutationObserver(() => { window.__bars = Math.max(window.__bars, document.querySelectorAll('.pagefold-progress-bar').length) }).observe(document.body, { childList: true, subtree: true })`)
+    await page.evaluate(
+      `window.__bars = 0; new MutationObserver(() => { window.__bars = Math.max(window.__bars, document.querySelectorAll('.pagefold-progress-bar').length) }).observe(document.body, { childList: true, subtree: true })`
+    )
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
     await done(page)
@@ -842,7 +948,9 @@ test.describe('progress', () => {
   }
 
   test('a visit that is over before the delay shows nothing', async ({ page }) => {
-    expect(await barsDuring(page, { delay: 300 }, { options: { animationSelector: false } })).toBe(0)
+    expect(await barsDuring(page, { delay: 300 }, { options: { animationSelector: false } })).toBe(
+      0
+    )
   })
 
   test('the delay counts from the click, so it includes the animation out', async ({ page }) => {
@@ -855,13 +963,16 @@ test.describe('preload', () => {
   const fetched = (page: Page) => {
     const urls: string[] = []
     page.on('request', (r) => {
-      if (r.resourceType() === 'fetch') urls.push(new URL(r.url()).pathname + new URL(r.url()).search)
+      if (r.resourceType() === 'fetch')
+        urls.push(new URL(r.url()).pathname + new URL(r.url()).search)
     })
     return urls
   }
   const quiet = { preloadHoveredLinks: false, preloadInitialPage: false }
 
-  test('preload() takes a URL, a link, a list, and preloadLinks() every link inside', async ({ page }) => {
+  test('preload() takes a URL, a link, a list, and preloadLinks() every link inside', async ({
+    page,
+  }) => {
     const urls = fetched(page)
     await open(page, '/', { plugins: [['preload', quiet]] })
     await page.evaluate(`(async () => {
@@ -873,13 +984,23 @@ test.describe('preload', () => {
       await preload.preload('/page-home', { priority: true })
       await preload.preloadLinks(document.querySelector('nav'))
     })()`)
-    for (const path of ['/contact', '/about', '/work', '/work/hello', '/page-home', '/long', '/plain-b']) {
+    for (const path of [
+      '/contact',
+      '/about',
+      '/work',
+      '/work/hello',
+      '/page-home',
+      '/long',
+      '/plain-b',
+    ]) {
       expect(urls).toContain(path)
     }
     expect(urls.filter((u) => u === '/about')).toHaveLength(1) // asked for twice, fetched once
   })
 
-  test('a click that comes while the page is still being preloaded waits for the same request', async ({ page }) => {
+  test('a click that comes while the page is still being preloaded waits for the same request', async ({
+    page,
+  }) => {
     const urls = fetched(page)
     await open(page, '/', { plugins: [['preload', { hoverDelay: 0, preloadInitialPage: false }]] })
     await link(page, '/slow?ms=1500').hover()
@@ -892,7 +1013,9 @@ test.describe('preload', () => {
   test('data-no-preload and ignore skip a link', async ({ page }) => {
     const urls = fetched(page)
     await open(page, '/', { plugins: [['preload', { hoverDelay: 0, preloadInitialPage: false }]] })
-    await page.evaluate(`document.querySelector('nav a[href="/about"]').setAttribute('data-no-preload', '')`)
+    await page.evaluate(
+      `document.querySelector('nav a[href="/about"]').setAttribute('data-no-preload', '')`
+    )
     await link(page, '/about').hover()
     await link(page, '/long').hover()
     await expect.poll(() => urls.includes('/long')).toBe(true)
@@ -901,13 +1024,24 @@ test.describe('preload', () => {
 })
 
 test.describe('head and scripts', () => {
-  test('identical tags are not touched, tags only the old page has are removed', async ({ page }) => {
+  test('identical tags are not touched, tags only the old page has are removed', async ({
+    page,
+  }) => {
     await open(page, '/head-keep-a', { plugins: [['head']] })
     await page.evaluate(`document.querySelector('link[href="/fixtures/style.css"]').same = true`)
     await expect(page.locator('#only-a')).toHaveCount(1)
     await page.evaluate(`pagefold.navigate('/head-keep-b')`)
     await expect(heading(page)).toHaveText('Keep B')
-    expect(await page.evaluate(() => (document.querySelector('link[href="/fixtures/style.css"]') as HTMLLinkElement & { same?: boolean }).same)).toBe(true)
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            document.querySelector('link[href="/fixtures/style.css"]') as HTMLLinkElement & {
+              same?: boolean
+            }
+          ).same
+      )
+    ).toBe(true)
     await expect(page.locator('#only-a')).toHaveCount(0)
   })
 
@@ -950,24 +1084,39 @@ test.describe('forms and fragment', () => {
     await page.waitForFunction(() => window.__marker === undefined)
   })
 
-  test('fragment: a rule is dropped when the new page lacks the container, and the way back needs a rule', async ({ page }) => {
+  test('fragment: a rule is dropped when the new page lacks the container, and the way back needs a rule', async ({
+    page,
+  }) => {
     await open(page, '/nested-a', {
-      plugins: [['fragment', { rules: [{ from: '/nested-:x', to: '/nested-:y', containers: ['#detail'] }] }]],
+      plugins: [
+        [
+          'fragment',
+          { rules: [{ from: '/nested-:x', to: '/nested-:y', containers: ['#detail'] }] },
+        ],
+      ],
     })
     await page.evaluate(`document.querySelector('#stay').same = true`)
     await page.evaluate(`pagefold.navigate('/nested-b')`)
     await expect(page.locator('#detail')).toHaveText('detail b')
-    expect(await page.evaluate(() => (document.querySelector('#stay') as HTMLElement & { same?: boolean }).same)).toBe(true)
+    expect(
+      await page.evaluate(
+        () => (document.querySelector('#stay') as HTMLElement & { same?: boolean }).same
+      )
+    ).toBe(true)
     // The new page has no #detail: everything is replaced instead
     await page.evaluate(`pagefold.navigate('/nested-c')`)
     await expect(page.locator('#stay')).toHaveText('no detail here')
     await expect(page.locator('#detail')).toHaveCount(0)
   })
 
-  test('fragment: with two normal containers, a page without one of them falls back to the browser', async ({ page }) => {
+  test('fragment: with two normal containers, a page without one of them falls back to the browser', async ({
+    page,
+  }) => {
     await open(page, '/list', {
       options: { containers: ['#list', '#detail'] },
-      plugins: [['fragment', { rules: [{ from: '/list', to: '/dashboard', containers: ['#detail'] }] }]],
+      plugins: [
+        ['fragment', { rules: [{ from: '/list', to: '/dashboard', containers: ['#detail'] }] }],
+      ],
     })
     await page.evaluate(() => {
       window.__marker = 'same document'
@@ -981,9 +1130,12 @@ test.describe('forms and fragment', () => {
 test.describe('themes and view transitions', () => {
   test('--pagefold-duration changes the slide theme', async ({ page }) => {
     await open(page, '/slide-a')
-    const duration = () => page.evaluate(() => getComputedStyle(document.querySelector('#pagefold')!).transitionDuration)
+    const duration = () =>
+      page.evaluate(() => getComputedStyle(document.querySelector('#pagefold')!).transitionDuration)
     expect(await duration()).not.toContain('0.6s')
-    await page.addStyleTag({ content: `:root { --pagefold-duration: 0.6s; --pagefold-distance: 6rem; }` })
+    await page.addStyleTag({
+      content: `:root { --pagefold-duration: 0.6s; --pagefold-distance: 6rem; }`,
+    })
     expect(await duration()).toContain('0.6s')
   })
 })
@@ -1017,7 +1169,10 @@ test.describe('animating in JavaScript', () => {
     })()`)
     const time = async (name: string) => {
       const start = Date.now()
-      await page.evaluate((n) => window.pagefold.navigate('/about?' + n, { animation: n, cache: false }), name)
+      await page.evaluate(
+        (n) => window.pagefold.navigate('/about?' + n, { animation: n, cache: false }),
+        name
+      )
       return Date.now() - start
     }
     expect(await time('callback')).toBeGreaterThanOrEqual(380)
@@ -1025,7 +1180,9 @@ test.describe('animating in JavaScript', () => {
     expect(await time('nothing')).toBeLessThan(380)
   })
 
-  test('the second argument has the visit, the direction and both pages with their parameters', async ({ page }) => {
+  test('the second argument has the visit, the direction and both pages with their parameters', async ({
+    page,
+  }) => {
     await open(page, '/', noCss)
     await page.evaluate(`(async () => {
       const { default: PagefoldJs } = await import('/dist/js.js')
@@ -1046,7 +1203,9 @@ test.describe('animating in JavaScript', () => {
     })
   })
 
-  test('if your function throws, the visit fails and the browser loads the page', async ({ page }) => {
+  test('if your function throws, the visit fails and the browser loads the page', async ({
+    page,
+  }) => {
     await open(page, '/', noCss)
     await page.evaluate(`(async () => {
       const { default: PagefoldJs } = await import('/dist/js.js')
@@ -1089,17 +1248,27 @@ test.describe('animating in JavaScript', () => {
       ] }))
     })()`)
     // The docs timeline animates a .content element too: give the pages one
-    await page.evaluate(() => document.querySelector('#pagefold')!.insertAdjacentHTML('beforeend', '<div class="content">x</div>'))
+    await page.evaluate(() =>
+      document
+        .querySelector('#pagefold')!
+        .insertAdjacentHTML('beforeend', '<div class="content">x</div>')
+    )
     await page.evaluate(`pagefold.navigate('/work/hello')`)
     await page.evaluate(`pagefold.navigate('/about', { animation: 'curtain' })`)
     await page.evaluate(`pagefold.navigate('/contact')`)
     await expect(heading(page)).toHaveText('Contact')
     expect(await win(page, '__used')).toEqual(['expand', 'curtain', 'fade'])
     // The timeline came back to rest
-    expect(await page.evaluate(() => Number(getComputedStyle(document.querySelector('#pagefold h1')!).opacity))).toBe(1)
+    expect(
+      await page.evaluate(() =>
+        Number(getComputedStyle(document.querySelector('#pagefold h1')!).opacity)
+      )
+    ).toBe(1)
   })
 
-  test('GSAP: kill ScrollTrigger instances before the content is replaced, create new ones on page:view', async ({ page }) => {
+  test('GSAP: kill ScrollTrigger instances before the content is replaced, create new ones on page:view', async ({
+    page,
+  }) => {
     await open(page, '/long')
     await loadVendor(page, 'gsap')
     await loadVendor(page, 'scrolltrigger')
@@ -1113,11 +1282,23 @@ test.describe('animating in JavaScript', () => {
       window.__counts = []
       pagefold.hooks.on('content:replace', () => window.__counts.push(ScrollTrigger.getAll().length))
     `)
-    expect(await page.evaluate(() => (window as never as { ScrollTrigger: { getAll(): unknown[] } }).ScrollTrigger.getAll().length)).toBe(1)
+    expect(
+      await page.evaluate(
+        () =>
+          (window as never as { ScrollTrigger: { getAll(): unknown[] } }).ScrollTrigger.getAll()
+            .length
+      )
+    ).toBe(1)
     await page.evaluate(`pagefold.navigate('/about')`)
     await expect(heading(page)).toHaveText('About')
     expect(await win(page, '__counts')).toEqual([0]) // the old one was gone when the content changed
-    expect(await page.evaluate(() => (window as never as { ScrollTrigger: { getAll(): unknown[] } }).ScrollTrigger.getAll().length)).toBe(1)
+    expect(
+      await page.evaluate(
+        () =>
+          (window as never as { ScrollTrigger: { getAll(): unknown[] } }).ScrollTrigger.getAll()
+            .length
+      )
+    ).toBe(1)
     expect(await win(page, '__created')).toBe(2)
   })
 
@@ -1149,7 +1330,13 @@ test.describe('animating in JavaScript', () => {
     await page.evaluate(`pagefold.navigate('/about')`)
     await expect(heading(page)).toHaveText('About')
     expect(await win(page, '__used')).toEqual(['zoom', 'fade'])
-    await expect.poll(() => page.evaluate(() => Number(getComputedStyle(document.querySelector('#pagefold h1')!).opacity))).toBe(1)
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Number(getComputedStyle(document.querySelector('#pagefold h1')!).opacity)
+        )
+      )
+      .toBe(1)
   })
 
   test('Web Animations API: the slide', async ({ page }) => {
@@ -1172,7 +1359,11 @@ test.describe('animating in JavaScript', () => {
     })()`)
     await page.evaluate(`pagefold.navigate('/about')`)
     await expect(heading(page)).toHaveText('About')
-    await expect.poll(() => page.evaluate(() => getComputedStyle(document.querySelector('#pagefold')!).opacity)).toBe('1')
+    await expect
+      .poll(() =>
+        page.evaluate(() => getComputedStyle(document.querySelector('#pagefold')!).opacity)
+      )
+      .toBe('1')
   })
 })
 
@@ -1201,7 +1392,12 @@ test.describe('CSS animations', () => {
         html.is-leaving.is-animating .transition-fade { transform: translateX(-2rem); }
         html.is-rendering.is-animating .transition-fade { transform: translateX(2rem); }`,
     })
-    const t = await transforms(page, ['animation:out:start', 'content:replace', 'animation:in:start', 'visit:end'])
+    const t = await transforms(page, [
+      'animation:out:start',
+      'content:replace',
+      'animation:in:start',
+      'visit:end',
+    ])
     expect(t).toEqual([
       ['animation:out:start', 'matrix(1, 0, 0, 1, -32, 0)', '0'],
       ['content:replace', 'matrix(1, 0, 0, 1, 32, 0)', '0'],
@@ -1210,7 +1406,9 @@ test.describe('CSS animations', () => {
     ])
   })
 
-  test('without is-animating the offset stays until the very end of the visit', async ({ page }) => {
+  test('without is-animating the offset stays until the very end of the visit', async ({
+    page,
+  }) => {
     await open(page, '/')
     await page.addStyleTag({
       content: `${still} html.is-rendering .transition-fade { transform: translateX(2rem); }`,
@@ -1223,7 +1421,9 @@ test.describe('CSS animations', () => {
     ])
   })
 
-  test('history visits are not animated unless animateHistoryBrowsing is on, and is-popstate marks them', async ({ page }) => {
+  test('history visits are not animated unless animateHistoryBrowsing is on, and is-popstate marks them', async ({
+    page,
+  }) => {
     await open(page, '/', { record: true })
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
@@ -1268,7 +1468,9 @@ test.describe('CSS animations', () => {
 })
 
 test.describe('Alpine', () => {
-  test('a component outside the container keeps its state, a store survives, and a persisted one keeps its state', async ({ page }) => {
+  test('a component outside the container keeps its state, a store survives, and a persisted one keeps its state', async ({
+    page,
+  }) => {
     await open(page, '/alpine-p1', { alpine: true })
     await page.evaluate(`
       document.body.insertAdjacentHTML('afterbegin', '<div id="menu" x-data="{ open: false }"><button id="toggle" @click="open = !open">Menu</button><span id="state" x-text="open"></span></div>')
@@ -1313,12 +1515,17 @@ test.describe('scroll, debug, forms, preload and analytics', () => {
     expect(Date.now() - start).toBeGreaterThanOrEqual(250)
     expect(await page.evaluate(() => window.scrollY)).toBe(0)
     await page.evaluate(`window.__scroll.scrollTo(document.querySelector('#bottom'))`)
-    const [y, top] = await page.evaluate(() => [Math.round(window.scrollY), Math.round(document.querySelector('#bottom')!.getBoundingClientRect().top + window.scrollY)])
+    const [y, top] = await page.evaluate(() => [
+      Math.round(window.scrollY),
+      Math.round(document.querySelector('#bottom')!.getBoundingClientRect().top + window.scrollY),
+    ])
     expect(Math.abs(y - (top - 100))).toBeLessThanOrEqual(1) // the offset leaves room for a sticky header (a pixel of rounding in WebKit)
   })
 
   test('scroll: animateScroll betweenPages false jumps, anchors glide', async ({ page }) => {
-    await open(page, '/long', { plugins: [['scroll', { duration: 600, animateScroll: { betweenPages: false } }]] })
+    await open(page, '/long', {
+      plugins: [['scroll', { duration: 600, animateScroll: { betweenPages: false } }]],
+    })
     await page.evaluate(`window.scrollTo(0, 500)`)
     const start = Date.now()
     await page.evaluate(`pagefold.navigate('/about')`)
@@ -1348,7 +1555,9 @@ test.describe('scroll, debug, forms, preload and analytics', () => {
     expect(lines.some((l) => l.includes('animation:'))).toBe(false)
   })
 
-  test('forms: form:submit with on lets the plugin work, replacing it hands the submit to you', async ({ page }) => {
+  test('forms: form:submit with on lets the plugin work, replacing it hands the submit to you', async ({
+    page,
+  }) => {
     await open(page, '/form', { plugins: [['forms']] })
     await page.evaluate(`
       window.__tracked = []
@@ -1373,7 +1582,9 @@ test.describe('scroll, debug, forms, preload and analytics', () => {
   })
 
   test('preload: the page:preload hook gets the page', async ({ page }) => {
-    await open(page, '/', { plugins: [['preload', { preloadHoveredLinks: false, preloadInitialPage: false }]] })
+    await open(page, '/', {
+      plugins: [['preload', { preloadHoveredLinks: false, preloadInitialPage: false }]],
+    })
     await page.evaluate(`
       window.__pre = []
       pagefold.hooks.on('page:preload', (visit, { page }) => window.__pre.push(page.url))
@@ -1396,12 +1607,18 @@ test.describe('scroll, debug, forms, preload and analytics', () => {
     })()`)
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
-    expect(await win(page, '__sent')).toEqual([['pageview', { u: 'http://localhost:4173/about', props: { title: 'About' }, url: '/about' }]])
-    await page.evaluate(`window.__analytics.send({ url: '/virtual', title: 'Virtual page', location: location.href, referrer: document.referrer })`)
+    expect(await win(page, '__sent')).toEqual([
+      ['pageview', { u: 'http://localhost:4173/about', props: { title: 'About' }, url: '/about' }],
+    ])
+    await page.evaluate(
+      `window.__analytics.send({ url: '/virtual', title: 'Virtual page', location: location.href, referrer: document.referrer })`
+    )
     expect((await win<unknown[]>(page, '__sent')).length).toBe(2)
   })
 
-  test('analytics: the referrer is the full address of the page that was left', async ({ page }) => {
+  test('analytics: the referrer is the full address of the page that was left', async ({
+    page,
+  }) => {
     await open(page, '/long')
     await page.evaluate(`(async () => {
       const { default: PagefoldAnalytics } = await import('/dist/analytics.js')
@@ -1467,7 +1684,9 @@ test.describe('options and navigate()', () => {
     expect(await page.evaluate(() => window.__events)).not.toContain('animation:out:start')
   })
 
-  test('navigate options: cache { read: false } refetches but stores, cache: false does neither', async ({ page }) => {
+  test('navigate options: cache { read: false } refetches but stores, cache: false does neither', async ({
+    page,
+  }) => {
     const urls: string[] = []
     page.on('request', (r) => r.resourceType() === 'fetch' && urls.push(new URL(r.url()).pathname))
     await open(page, '/')
@@ -1500,7 +1719,9 @@ test.describe('options and navigate()', () => {
       window.__result = pagefold.navigate('/slow?ms=1500', { signal: controller.signal }).then(() => 'resolved', () => 'rejected')
       setTimeout(() => controller.abort(), 100)
     `)
-    expect(await page.evaluate(() => (window as never as { __result: Promise<string> }).__result)).toBe('resolved')
+    expect(
+      await page.evaluate(() => (window as never as { __result: Promise<string> }).__result)
+    ).toBe('resolved')
     expect(await win(page, '__marker')).toBe('same document')
     await expect(heading(page)).toHaveText('Home')
     expect(finished).toEqual(['cancelled'])
@@ -1511,5 +1732,92 @@ test.describe('options and navigate()', () => {
     await page.evaluate(`pagefold.navigate('/detail/1')`)
     await expect(page.locator('#detail')).toHaveText('detail one')
     await expect(page.locator('#list')).toContainText('back')
+  })
+})
+
+test.describe('components: pagefold.mount', () => {
+  // The snippet of the guide, with counters so the test can see what ran
+  const mountSliders = (page: Page) =>
+    page.evaluate(() => {
+      const w = window as never as { __up: number; __down: number }
+      w.__up = 0
+      w.__down = 0
+      ;(
+        window as never as {
+          pagefold: { mount: (s: string, f: (el: Element) => () => void) => void }
+        }
+      ).pagefold.mount('[data-slider]', () => {
+        w.__up++
+        return () => w.__down++
+      })
+    })
+  const counts = (page: Page) =>
+    page.evaluate(() => [
+      (window as never as { __up: number }).__up,
+      (window as never as { __down: number }).__down,
+    ])
+
+  test('sets up now and after each visit, cleans up what leaves, back included', async ({
+    page,
+  }) => {
+    await open(page, '/widgets-a')
+    await mountSliders(page)
+    expect(await counts(page)).toEqual([1, 0])
+    await page.evaluate(
+      () =>
+        void (window as never as { pagefold: { navigate: (u: string) => void } }).pagefold.navigate(
+          '/widgets-b'
+        )
+    )
+    await expect(heading(page)).toHaveText('Widgets B')
+    await done(page)
+    expect(await counts(page)).toEqual([3, 1])
+    await page.goBack()
+    await expect(heading(page)).toHaveText('Widgets A')
+    await done(page)
+    expect(await counts(page)).toEqual([4, 3])
+  })
+
+  test('with Overlap the old page is cleaned up when it is removed', async ({ page }) => {
+    await open(page, '/widgets-a', { plugins: [['overlap']] })
+    await mountSliders(page)
+    await page.evaluate(
+      () =>
+        void (window as never as { pagefold: { navigate: (u: string) => void } }).pagefold.navigate(
+          '/widgets-b'
+        )
+    )
+    await done(page)
+    await expect(page.locator('#pagefold')).toHaveCount(1)
+    await expect(heading(page)).toHaveText('Widgets B')
+    expect(await counts(page)).toEqual([3, 1])
+  })
+
+  test('the function it returns stops it and cleans up; destroy cleans up the rest', async ({
+    page,
+  }) => {
+    await open(page, '/widgets-a')
+    await page.evaluate(() => {
+      const w = window as never as {
+        __down: number
+        __stop: () => void
+        pagefold: { mount: (s: string, f: () => () => void) => () => void }
+      }
+      w.__down = 0
+      w.__stop = w.pagefold.mount('[data-slider]', () => () => w.__down++)
+      w.__stop()
+    })
+    expect(await page.evaluate(() => (window as never as { __down: number }).__down)).toBe(1)
+    await page.evaluate(async () => {
+      const w = window as never as {
+        pagefold: { mount: (s: string, f: () => () => void) => void; destroy: () => Promise<void> }
+      }
+      w.pagefold.mount(
+        '[data-slider]',
+        () => () => ((window as never as { __down: number }).__down += 10)
+      )
+      await w.pagefold.destroy()
+    })
+    expect(await page.evaluate(() => (window as never as { __down: number }).__down)).toBe(11)
   })
 })

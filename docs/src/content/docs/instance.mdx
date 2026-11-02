@@ -54,8 +54,9 @@ Replace the containers from `visit.to.document`. It returns whether all containe
 | `isSameResolvedUrl(a, b)` | Do two URLs resolve to the same page |
 | `shouldIgnoreVisit(href, { el, event })` | Would Pagefold leave this to the browser |
 | `createVisit({ to, ... })` | Build a visit object |
+| `mount(selector, setup)` | Run `setup(el)` for each matching element now and after each visit, and its cleanup when the element leaves. Returns a function that stops it. See [Components](/docs/components) |
 | `enable()` | Start handling links. Runs on creation |
-| `destroy()` | Stop handling links, unmount plugins and remove all hook handlers |
+| `destroy()` | Stop handling links, unmount plugins, clean up components and remove all hook handlers |
 
 ## Properties
 

@@ -7,43 +7,21 @@ order: 7
 
 Pagefold swaps the HTML but does not know about the JavaScript you attached to it. A slider on the old page keeps its listeners and timers after its element is gone, and the slider on the new page does not exist yet.
 
-You are responsible for creating and destroying your components, because only you know how. A small helper does the bookkeeping.
+Pagefold gives you `mount` for this. It runs your setup for every element that matches a selector, now and after each visit, and runs the cleanup you return when the element leaves the page.
 
 ```js
-/** Run `setup(el)` for each match, now and after every visit. `setup` may return a cleanup. */
-export function mount(pagefold, selector, setup) {
-  const cleanups = new Map()
-
-  const sync = () => {
-    // Elements that are gone: clean them up
-    for (const [el, cleanup] of cleanups) {
-      if (!el.isConnected) {
-        cleanup?.()
-        cleanups.delete(el)
-      }
-    }
-    // New elements: set them up
-    document.querySelectorAll(selector).forEach((el) => {
-      if (!cleanups.has(el)) cleanups.set(el, setup(el))
-    })
-  }
-
-  sync()
-  pagefold.hooks.on('content:replace', sync)
-}
-```
-
-Use it:
-
-```js
-mount(pagefold, '[data-slider]', (el) => {
+pagefold.mount('[data-slider]', (el) => {
   const slider = new Slider(el)
   return () => slider.destroy()
 })
 ```
 
-- Elements kept with `data-pagefold-persist` are not set up twice, because they are the same element.
-- Cleanups run right after the content is replaced. If your cleanup needs the old element to still be in the page, use `content:replace.before` and run the cleanup there instead.
+- `setup` receives the element. Return a function to tear it down. It is optional, but without it nothing is released when the page goes away.
+- Each element is set up once and cleaned up once, however many visits come and go.
+- `mount` returns a function. Call it to stop watching the selector and clean up everything it started.
+- `pagefold.destroy()` cleans up every component.
+- A component that throws is reported in the console and left alone. The others, and the visit, are not affected.
+- Elements kept with `data-pagefold-persist` are the same element before and after, so they are not set up twice.
 
 ## What happens, step by step
 
@@ -51,15 +29,16 @@ A visit from a page with one slider to a page with two:
 
 | Moment | `mount` does |
 |---|---|
-| Page loads | `sync()` runs: the first slider is set up |
+| You call `mount` | The first slider is set up |
 | `content:replace` fires | The old slider's element is gone, so its cleanup runs. The two new elements are found and set up |
-| Back button, to the first page | Same again: the two are cleaned up and one is created |
+| The visit ends | A last check, for containers that stayed until the end, such as the previous page with [Overlap](/docs/overlap) |
+| Back button, to the first page | The two are cleaned up and one is created |
 
-Each element is remembered in a `Map`, so nothing is created twice, and each cleanup runs once.
+The cleanup runs after the old element has left the page. If it needs the element to still be there, use the hook `content:replace` with `before` and clean up in it yourself.
 
 ## Common problems
 
 - **Two sliders on the same element.** You attached them somewhere other than `mount`, such as a `DOMContentLoaded` listener that also runs on the first page. Keep one place that creates components.
 - **Memory grows with every visit.** `setup` returned nothing, so the old instance was never destroyed. Always return the cleanup, even when it only removes a listener.
-- **The component flickers when the page appears.** It is created after the transition has already started showing the page. Run `mount` on `content:replace` (as above) rather than on `visit:end`.
+- **The component flickers when the page appears.** It is created after the transition has already started showing the page. `mount` already sets components up on `content:replace`. If you create them yourself in `visit:end`, move them to `mount`.
 - **Scripts in the page do not run.** Inline `<script>` tags are not part of this. See [Scripts](/docs/scripts) for new scripts in the incoming page.

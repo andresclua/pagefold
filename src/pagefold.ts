@@ -4,6 +4,7 @@ import { fetchPage } from './fetch.js'
 import { getCurrentUrl, updateHistoryRecord, type HistoryState } from './history.js'
 import { Hooks, type HookInitOptions } from './hooks.js'
 import { Location } from './location.js'
+import { Components, type Setup } from './mount.js'
 import { navigate, performNavigation, type NavigationOptions } from './navigate.js'
 import type { Plugin } from './plugin.js'
 import { getAnchorElement, replaceContent, scrollToContent } from './render.js'
@@ -79,6 +80,7 @@ export class Pagefold {
   readonly cache: Cache
   readonly hooks: Hooks
   readonly classes: Classes
+  private readonly components = new Components()
   location: Location = Location.fromUrl(window.location.href)
 
   /** True between enable() and destroy() */
@@ -130,6 +132,10 @@ export class Pagefold {
       updateHistoryRecord(null, { index: this.historyIndex })
     }
 
+    // Components follow the page: set up what arrives, clean up what leaves
+    this.hooks.on('content:replace', () => this.components.sync())
+    this.hooks.on('visit:end', () => this.components.sync())
+
     await nextTick()
     await this.hooks.call('enable', undefined, undefined, () => {
       if (!this.active) return // destroyed while enabling
@@ -145,11 +151,21 @@ export class Pagefold {
     document.removeEventListener('click', this.onClick)
     window.removeEventListener('popstate', this.onPopState)
     this.cache.clear()
+    this.components.clear()
     this.plugins.slice().forEach((plugin) => this.unuse(plugin))
     await this.hooks.call('disable', undefined, undefined, () => {
       document.documentElement.classList.remove('pagefold-enabled', 'pagefold-native')
     })
     this.hooks.clear()
+  }
+
+  /**
+   * Run `setup(el)` for every element that matches `selector`, now and after each visit.
+   * `setup` may return a function that tears the component down: it runs when the element leaves
+   * the page. Returns a function that stops it all and cleans up what is running.
+   */
+  mount<T extends Element = Element>(selector: string, setup: Setup<T>): () => void {
+    return this.components.add(selector, setup)
   }
 
   use(plugin: unknown): Plugin[] | undefined {

@@ -77,6 +77,8 @@ const pages = {
   '/alpine-p1': { title: 'Alpine P1', body: '<h1>Alpine P1</h1><div data-pagefold-persist="counter" x-data="{ n: 0 }"><button id="inc" @click="n++">+</button> <span id="n" x-text="n"></span></div>' },
   '/alpine-p2': { title: 'Alpine P2', body: '<h1>Alpine P2</h1><div data-pagefold-persist="counter" x-data="{ n: 0 }"><button id="inc" @click="n++">+</button> <span id="n" x-text="n"></span></div>' },
   '/admin': { title: 'Admin', body: '<h1>Admin</h1>' },
+  '/widgets-a': { title: 'Widgets A', body: '<h1>Widgets A</h1><div data-slider></div>' },
+  '/widgets-b': { title: 'Widgets B', body: '<h1>Widgets B</h1><div data-slider></div><div data-slider></div>' },
   '/persist-a': { title: 'Persist A', body: '<h1>Persist A</h1><audio id="player" data-pagefold-persist="player" controls></audio>' },
   '/persist-b': { title: 'Persist B', body: '<h1>Persist B</h1><audio id="player" data-pagefold-persist="player" controls></audio>' },
   '/outside-a': { title: 'Outside A', split: '<audio id="player" controls></audio><div id="pagefold" class="transition-fade"><h1>Outside A</h1></div>' },

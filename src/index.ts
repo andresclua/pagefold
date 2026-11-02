@@ -22,6 +22,7 @@ export type {
   HookUnregister,
 } from './hooks.js'
 export { Location } from './location.js'
+export type { Cleanup, Setup } from './mount.js'
 export { Plugin, satisfies } from './plugin.js'
 export type { FetchOptions, PageData } from './types.js'
 export { Visit, VisitState } from './visit.js'

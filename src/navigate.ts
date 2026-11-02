@@ -6,7 +6,7 @@ import { Location } from './location.js'
 import type { Pagefold } from './pagefold.js'
 import { renderPage } from './render.js'
 import type { FetchOptions, PageData } from './types.js'
-import { classify, getContextualAttr } from './utils.js'
+import { classify, forceReflow, getContextualAttr } from './utils.js'
 import type { Visit} from './visit.js';
 import { VisitState, type HistoryAction, type VisitInit } from './visit.js'
 
@@ -54,7 +54,7 @@ async function animateIn(p: Pagefold, visit: Visit): Promise<void> {
   await p.hooks.call('animation:in:start', visit, undefined, () => {
     // The new containers must be styled in their "before" state first, or the browser has nothing
     // to transition from and the content appears at once. Reading a layout property flushes the styles.
-    void document.body.offsetHeight
+    forceReflow()
     p.classes.remove('is-animating')
   })
   await p.hooks.call('animation:in:await', visit, { skip: false }, async (v, { skip }) => {
