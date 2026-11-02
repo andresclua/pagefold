@@ -67,6 +67,7 @@ These are starting points, not rules. Start small and raise the numbers only if 
 | `get(url)` | `{ url, html }` or `undefined` | Read a stored page without visiting it, for example to take its `<title>` for a tooltip |
 | `delete(url)` | Forget one page | You changed what that page shows |
 | `prune(fn)` | Forget every page for which `fn(url, page)` returns `true` | You changed a whole area of the site |
+| `all` | Every stored page, as a `Map` copy, oldest first | Inspect or export what is cached. Changing the copy does not change the cache |
 | `clear()` | Forget everything | The visitor's identity or language changed |
 
 ### Examples
