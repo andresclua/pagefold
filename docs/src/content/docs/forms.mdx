@@ -9,6 +9,14 @@ options:
     type: "string"
     default: "'form[data-pagefold-form]'"
     description: "Which forms are handled. By default, only forms with data-pagefold-form. Use \"form\" for all."
+  - name: "inlineFormSelector"
+    type: "string"
+    default: "'form[data-pagefold-inline-form]'"
+    description: "Forms that replace only themselves instead of the containers of the page."
+  - name: "stripEmptyParams"
+    type: "boolean"
+    default: "false"
+    description: "Leave empty fields out of the address of a GET form."
 ---
 
 import Flow from '../../components/Flow.astro'
@@ -53,7 +61,29 @@ A submit button can override the form with `formaction`, `formmethod`, `formenct
 
 ## What is left to the browser
 
-Forms to another origin, with `target="_blank"`, with `method="dialog"`, that already had their submit cancelled, or that match `ignoreVisit`.
+Forms to another origin, with `target="_blank"` (which fires `form:submit:newtab`), with `method="dialog"`, that already had their submit cancelled, or that match `ignoreVisit`.
+
+## Inline forms
+
+A form marked `data-pagefold-inline-form` replaces **only itself**, not the containers of the page. The rest of the page stays as it is, and the animation classes go on the form instead of on `html`. After the answer arrives the page scrolls back to the start of the form.
+
+```html
+<form id="newsletter" class="transition-form" data-pagefold-inline-form action="/subscribe" method="post">
+  <input name="email">
+  <button>Subscribe</button>
+</form>
+```
+
+```css
+.transition-form.is-changing { transition: opacity 0.2s; }
+.transition-form.is-animating { opacity: 0; }
+```
+
+The form **needs an `id`**: it is how the form in the answer is found. Without one Pagefold warns in the console and treats the form like any other. The server must answer with a page that contains a form with the same `id`.
+
+## Empty fields
+
+A GET form sends every field, including the empty ones: `?q=cats&tag=`. With `stripEmptyParams: true` the empty ones are left out and the address is `?q=cats`.
 
 ## Hook
 
@@ -64,6 +94,8 @@ pagefold.hooks.on('form:submit', (visit, { el }) => {
   analytics.track('submit', { form: el.id })
 })
 ```
+
+`form:submit:newtab` fires instead when the form opens a new tab (`target="_blank"`). The form is left to the browser, and you can still react to it.
 
 ## Common problems
 

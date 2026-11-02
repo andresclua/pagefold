@@ -187,3 +187,115 @@ describe('PagefoldFragment', () => {
     expect(plugin.find(pf.createVisit({ to: '/user/1' }))).toBeUndefined()
   })
 })
+
+describe('PagefoldForms: inline forms, empty fields and new tabs', () => {
+  const answer = (extra = '') =>
+    `<html><head></head><body><div id="pagefold"><p id="other">changed</p><form id="f" data-pagefold-inline-form action="/search">answer${extra}</form></div></body></html>`
+  const inlinePage = () =>
+    `<div id="pagefold"><p id="other">stay</p><form id="f" data-pagefold-inline-form action="/search"><input name="q" value="cats"><input name="empty" value=""><button id="go">go</button></form></div>`
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = vi.fn() // jsdom has none
+  })
+  const make = (options?: ConstructorParameters<typeof PagefoldForms>[0]) => {
+    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldForms(options)] })
+  }
+
+  test('an inline form replaces only itself and scrolls to its start', async () => {
+    resetDom(inlinePage())
+    fetchMock = stubFetch({ '/search?q=cats&empty=': answer() })
+    make()
+    let seen: { containers: string[]; target: string | false | undefined } | undefined
+    pf.hooks.before('visit:transition', (v) => {
+      seen = { containers: v.containers, target: v.scroll.target }
+    })
+    const other = document.querySelector('#other')
+    document.querySelector<HTMLFormElement>('#f')!.requestSubmit()
+    await vi.waitFor(() => expect(document.querySelector('#f')?.textContent).toBe('answer'))
+    expect(seen).toEqual({ containers: ['#f'], target: '#f' })
+    expect(document.querySelector('#other')).toBe(other) // outside the form: untouched
+    expect(other?.textContent).toBe('stay')
+  })
+
+  test('the next visit is a normal one again', async () => {
+    resetDom(inlinePage())
+    fetchMock = stubFetch({ '/search?q=cats&empty=': answer(), '/page': answer() })
+    make()
+    document.querySelector<HTMLFormElement>('#f')!.requestSubmit()
+    await vi.waitFor(() => expect(document.querySelector('#f')?.textContent).toBe('answer'))
+    await pf.navigate('/page')
+    expect(document.querySelector('#other')?.textContent).toBe('changed')
+  })
+
+  test('stripEmptyParams leaves empty fields out of the address', async () => {
+    resetDom(inlinePage())
+    fetchMock = stubFetch({ '/search?q=cats': answer() })
+    make({ stripEmptyParams: true })
+    document.querySelector<HTMLFormElement>('#f')!.requestSubmit()
+    await vi.waitFor(() =>
+      expect(window.location.pathname + window.location.search).toBe('/search?q=cats')
+    )
+  })
+
+  test('a form that opens a new tab fires form:submit:newtab and is left to the browser', () => {
+    resetDom(
+      `<div id="pagefold"><form id="f" data-pagefold-form action="/search" target="_blank"><button>go</button></form></div>`
+    )
+    fetchMock = stubFetch({})
+    make()
+    const seen = vi.fn()
+    pf.hooks.on('form:submit:newtab', seen)
+    const event = new Event('submit', { bubbles: true, cancelable: true })
+    document.querySelector('#f')!.dispatchEvent(event)
+    expect(seen).toHaveBeenCalledTimes(1)
+    expect(event.defaultPrevented).toBe(false)
+  })
+})
+
+describe('PagefoldFragment: if and scroll', () => {
+  const layout = (detail: string) =>
+    `<html><head><title>T</title></head><body><div id="list">users</div><div id="detail">${detail}</div></body></html>`
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = vi.fn() // jsdom has none
+    resetDom('<div id="list">users</div><div id="detail">none</div>')
+    window.history.replaceState(null, '', '/users')
+    stubFetch({ '/user/1': layout('one'), '/user/2': layout('two') })
+  })
+  const make = (rule: object) => {
+    pf = new Pagefold({
+      animationSelector: false,
+      containers: ['#list', '#detail'],
+      plugins: [
+        new PagefoldFragment({
+          rules: [{ from: '/users', to: '/user/:id', containers: ['#detail'], ...rule }],
+        }),
+      ],
+    })
+  }
+
+  test('a rule whose if returns false is skipped', async () => {
+    make({ if: (v: { to: { url: string } }) => v.to.url !== '/user/2' })
+    const list = document.querySelector('#list')
+    await pf.navigate('/user/2')
+    expect(document.querySelector('#list')).not.toBe(list) // normal visit: every container replaced
+  })
+
+  test('scroll can be a selector or a function', async () => {
+    make({ scroll: '#detail' })
+    let target: string | false | undefined
+    pf.hooks.before('visit:transition', (v) => {
+      target = v.scroll.target
+    })
+    await pf.navigate('/user/1')
+    expect(target).toBe('#detail')
+    await pf.destroy()
+    resetDom('<div id="list">users</div><div id="detail">none</div>')
+    window.history.replaceState(null, '', '/users')
+    make({ scroll: () => false })
+    let reset: boolean | undefined
+    pf.hooks.before('visit:transition', (v) => {
+      reset = v.scroll.reset
+    })
+    await pf.navigate('/user/2')
+    expect(reset).toBe(false)
+  })
+})

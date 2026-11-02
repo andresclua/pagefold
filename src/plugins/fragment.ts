@@ -12,8 +12,13 @@ export interface FragmentRule {
   containers: string[]
   /** Becomes the animation name, as `data-pagefold-animation` would */
   name?: string
-  /** Scroll to the top after the visit. Fragment visits keep the scroll position by default. */
-  scroll?: boolean
+  /**
+   * Scroll after the visit: `true` to the top, a selector to that element, or a function that
+   * decides for each visit. Fragment visits keep the scroll position by default.
+   */
+  scroll?: boolean | string | ((visit: Visit) => boolean | string)
+  /** Skip this rule for the visits where it returns `false`, even if the paths match */
+  if?: (visit: Visit) => boolean
 }
 
 export interface FragmentOptions {
@@ -57,7 +62,8 @@ export default class PagefoldFragment extends Plugin {
       (rule) =>
         matches(rule.from, visit.from.url) &&
         matches(rule.to, visit.to.url) &&
-        rule.containers.every((selector) => document.querySelector(selector))
+        rule.containers.every((selector) => document.querySelector(selector)) &&
+        (rule.if?.(visit) ?? true)
     )
   }
 
@@ -69,7 +75,10 @@ export default class PagefoldFragment extends Plugin {
     visit.containers = rule.containers
     visit.animation.scope = rule.containers // classes go on the fragment, not the whole page
     if (rule.name && !visit.animation.name) visit.animation.name = rule.name
-    if (!rule.scroll) {
+    const scroll = typeof rule.scroll === 'function' ? rule.scroll(visit) : rule.scroll
+    if (typeof scroll === 'string') {
+      visit.scroll.target = scroll
+    } else if (!scroll) {
       visit.scroll.reset = false
       visit.scroll.target = false
     }
