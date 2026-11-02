@@ -6,6 +6,7 @@ order: 6
 ---
 
 import Lanes from '../../components/Lanes.astro'
+import Demo from '../../components/Demo.astro'
 
 The [View Transitions API](https://developer.mozilla.org/docs/Web/API/View_Transition_API) lets the browser take a snapshot of the old page and the new one and animate between them. Turn it on with one option:
 
@@ -34,6 +35,12 @@ When the browser supports `document.startViewTransition`, Pagefold performs the 
   caption="With the native transition the browser keeps a picture of the old page and animates it into the new one, so the two can morph together. Without browser support, the normal flow runs."
 />
 
+Here it is, with a slide that changes direction when you go back. Try the links and then the back button:
+
+<Demo name="native" height={340} />
+
+The menu does not move because only `main` has a `view-transition-name`. That is the part of the page that animates.
+
 ## Customizing the transition
 
 The browser animates `::view-transition-*` pseudo-elements. Change them with CSS:
@@ -51,6 +58,45 @@ header {
 ```
 
 Elements with the same `view-transition-name` on the old and the new page morph into each other.
+
+## Transition types
+
+A site usually wants a different animation for going forward than for going back. Give the visit a name and match it in CSS:
+
+```js
+pagefold.hooks.on('visit:start', (visit) => {
+  if (visit.to.url.startsWith('/work')) visit.animation.types.push('zoom')
+})
+```
+
+```css
+:root:active-view-transition-type(zoom)::view-transition-new(page) {
+  animation: zoom-in 0.5s both;
+}
+```
+
+Pagefold also adds `forwards` or `backwards` on visits made with the back and forward buttons, so the example above needs no JavaScript for them. Set `animateHistoryBrowsing: true`, or those visits are not animated at all.
+
+Types are newer than the rest of the API, so check the [support table](https://developer.mozilla.org/docs/Web/API/ViewTransition/types). In a browser that has View Transitions but not types, the transition still runs, without the names, so write the CSS so that the default animation looks right on its own.
+
+## Reaching the transition
+
+While the swap runs inside a transition, `visit.transition` is the browser's `ViewTransition`. Use it for anything the CSS cannot do, such as animating the snapshots with the Web Animations API:
+
+```js
+pagefold.hooks.on('page:view', (visit) => {
+  visit.transition?.ready.then(() => {
+    document.documentElement.animate(
+      { clipPath: ['circle(0 at 50% 50%)', 'circle(150% at 50% 50%)'] },
+      { duration: 600, pseudoElement: '::view-transition-new(root)' }
+    )
+  })
+})
+```
+
+Do not `await visit.transition.ready` inside a hook that runs during the swap (`content:*`, `page:view`). The swap waits for your hook and `ready` waits for the swap, so the visit would never finish. Use `.then`, as above.
+
+It is `undefined` when `native` is off, when the browser has no View Transitions, or before the swap starts, so use `?.`.
 
 ## Using only the browser's animation
 
@@ -76,4 +122,4 @@ The [A11y plugin](/docs/a11y) can also turn animation off for those visits.
 
 ## Tested
 
-The browser tests check that the option calls the API once per visit and sets the class. The look of the transition depends on your CSS.
+The browser tests check that the option calls the API once per visit, that `visit.transition` reaches the hooks, and that the types, including `forwards` and `backwards`, arrive in the transition. The look of the transition depends on your CSS.

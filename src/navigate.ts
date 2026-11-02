@@ -50,6 +50,19 @@ async function animateOut(p: Pagefold, visit: Visit): Promise<void> {
   await p.hooks.call('animation:out:end', visit, undefined)
 }
 
+/** Run `update` inside a browser view transition, naming it so CSS can tell visits apart. */
+function startNative(visit: Visit, update: () => Promise<void>): Promise<void> {
+  const { history, animation } = visit
+  const types = [...animation.types]
+  if (history.direction) types.push(history.direction)
+  // Browsers before transition types only take the callback
+  const typed = 'ViewTransition' in window && 'types' in ViewTransition.prototype
+  visit.transition = typed
+    ? document.startViewTransition({ update, types } as never)
+    : document.startViewTransition(update)
+  return visit.transition.finished
+}
+
 async function animateIn(p: Pagefold, visit: Visit): Promise<void> {
   await p.hooks.call('animation:in:start', visit, undefined, () => {
     // The new containers must be styled in their "before" state first, or the browser has nothing
@@ -168,8 +181,8 @@ export async function performNavigation(
       }
       visit.advance(VisitState.LEAVING)
       await animateOut(p, visit)
-      if (visit.animation.native && document.startViewTransition) {
-        await document.startViewTransition(async () => renderPage(p, visit, await loaded)).finished
+      if (visit.animation.native && 'startViewTransition' in document) {
+        await startNative(visit, async () => renderPage(p, visit, await loaded))
       } else {
         await renderPage(p, visit, await loaded)
       }

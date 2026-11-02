@@ -13,7 +13,7 @@ const go = async (page: Page, name: string) => {
   await page.goto(`/examples/${name}/index.html`)
 }
 
-for (const name of ['fade', 'slide', 'overlap']) {
+for (const name of ['fade', 'slide', 'overlap', 'native']) {
   test(`${name}: links change the page without a reload and back works`, async ({ page }) => {
     await go(page, name)
     await page.evaluate(() => ((window as unknown as { __same: boolean }).__same = true))

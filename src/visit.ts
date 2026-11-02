@@ -56,6 +56,8 @@ export class Visit {
     wait: boolean
     name?: string | undefined
     native: boolean
+    /** Names for the browser transition, matched in CSS with `:active-view-transition-type(name)` */
+    types: string[]
     scope: 'html' | 'containers' | string[]
     selector: string | false
     /** Plugins may add their own flags */
@@ -66,6 +68,8 @@ export class Visit {
   history: { action: HistoryAction; popstate: boolean; direction: HistoryDirection | undefined }
   scroll: { reset: boolean; target?: string | false | undefined }
   meta: Record<string, unknown> = {}
+  /** The browser's `ViewTransition`, set when the swap runs inside one (see the `native` option) */
+  transition: ViewTransition | undefined
   /** Aborts the request and animations of this visit */
   readonly controller = new AbortController()
 
@@ -78,6 +82,7 @@ export class Visit {
       animate: true,
       wait: false,
       native: options.native,
+      types: [],
       scope: options.animationScope,
       selector: options.animationSelector,
     }

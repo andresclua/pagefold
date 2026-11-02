@@ -1821,3 +1821,109 @@ test.describe('components: pagefold.mount', () => {
     expect(await page.evaluate(() => (window as never as { __down: number }).__down)).toBe(11)
   })
 })
+
+test.describe('view transitions: visit.transition and types', () => {
+  type W = {
+    pagefold: {
+      navigate: (u: string) => void
+      hooks: {
+        on: (
+          n: string,
+          f: (v: { transition?: ViewTransition; animation: { types: string[] } }) => void
+        ) => void
+      }
+    }
+    __seen: { transition: boolean; types: string[] }[]
+  }
+  const watch = async (page: Page, addType?: string) => {
+    await page.evaluate((type) => {
+      const w = window as never as W
+      w.__seen = []
+      w.pagefold.hooks.on('visit:start', (v) => {
+        if (type) v.animation.types.push(type)
+      })
+      w.pagefold.hooks.on('content:replace', (v) => {
+        w.__seen.push({
+          transition: v.transition instanceof ViewTransition,
+          types: v.transition ? [...(v.transition.types ?? [])] : [],
+        })
+      })
+    }, addType)
+  }
+  const supported = (page: Page) => page.evaluate(() => 'startViewTransition' in document)
+  const typed = (page: Page) =>
+    page.evaluate(() => 'ViewTransition' in window && 'types' in ViewTransition.prototype)
+  const seen = (page: Page) => page.evaluate(() => (window as never as W).__seen)
+
+  test('the hooks can reach the browser transition', async ({ page }) => {
+    await open(page, '/', { options: { native: true } })
+    test.skip(!(await supported(page)), 'this browser has no View Transitions')
+    await watch(page)
+    await page.evaluate(() => (window as never as W).pagefold.navigate('/about'))
+    await expect(heading(page)).toHaveText('About')
+    expect(await seen(page)).toEqual([{ transition: true, types: expect.any(Array) }])
+  })
+
+  test('types added to the visit reach the transition, and history visits get their direction', async ({
+    page,
+  }) => {
+    await open(page, '/', { options: { native: true, animateHistoryBrowsing: true } })
+    test.skip(
+      !(await supported(page)) || !(await typed(page)),
+      'this browser has no transition types'
+    )
+    await watch(page, 'fancy')
+    await page.evaluate(() => (window as never as W).pagefold.navigate('/about'))
+    await expect(heading(page)).toHaveText('About')
+    await done(page)
+    await page.goBack()
+    await expect(heading(page)).toHaveText('Home')
+    const [first, second] = await seen(page)
+    expect(first.types).toEqual(['fancy'])
+    expect(second.types).toEqual(['fancy', 'backwards'])
+  })
+
+  test('without native there is no transition object', async ({ page }) => {
+    await open(page, '/')
+    await watch(page)
+    await page.evaluate(() => (window as never as W).pagefold.navigate('/about'))
+    await expect(heading(page)).toHaveText('About')
+    expect(await seen(page)).toEqual([{ transition: false, types: [] }])
+  })
+})
+
+test.describe('view transitions: animating the snapshots', () => {
+  test('the snippet of the guide animates the new snapshot and does not block the visit', async ({
+    page,
+  }) => {
+    await open(page, '/', { options: { native: true } })
+    test.skip(
+      !(await page.evaluate(() => 'startViewTransition' in document)),
+      'this browser has no View Transitions'
+    )
+    await page.evaluate(() => {
+      const w = window as never as {
+        __pseudo: string[]
+        pagefold: {
+          hooks: { on: (n: string, f: (v: { transition?: ViewTransition }) => void) => void }
+        }
+      }
+      w.__pseudo = []
+      w.pagefold.hooks.on('page:view', (visit) => {
+        void visit.transition?.ready.then(() => {
+          const a = document.documentElement.animate(
+            { clipPath: ['circle(0 at 50% 50%)', 'circle(150% at 50% 50%)'] },
+            { duration: 600, pseudoElement: '::view-transition-new(root)' }
+          )
+          w.__pseudo.push((a.effect as KeyframeEffect).pseudoElement ?? '')
+        })
+      })
+    })
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await done(page)
+    expect(await page.evaluate(() => (window as never as { __pseudo: string[] }).__pseudo)).toEqual(
+      ['::view-transition-new(root)']
+    )
+  })
+})
