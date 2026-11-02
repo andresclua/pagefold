@@ -8,11 +8,11 @@ import { join } from 'node:path'
 interface Props {
   name: string
   height?: number
+  /** The files shown under the example, the first one open. Default: index.html, main.js, style.css */
+  files?: string[]
 }
-const { name, height = 340 } = Astro.props
+const { name, height = 340, files = ['index.html', 'main.js', 'style.css'] } = Astro.props
 const dir = join(process.cwd(), '..', 'examples', name)
-// The other pages repeat the structure of index.html, so only the three that differ are shown
-const files = ['index.html', 'main.js', 'style.css']
 const lang = (f: string) => (f.endsWith('.html') ? 'html' : f.endsWith('.css') ? 'css' : 'js')
 const src = `/examples/${name}/index.html`
 const github = `https://github.com/andresclua/pagefold/tree/main/examples/${name}`

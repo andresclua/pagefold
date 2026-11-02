@@ -1,0 +1,33 @@
+---
+title: "Preloading, measured"
+description: "Hover a link and the page is fetched before you click. A log shows what came from the cache and what came from the network."
+section: demos
+order: 5
+---
+
+import Demo from '../../../components/Demo.astro'
+
+The [Preload plugin](/docs/preload) fetches a page when the pointer rests on its link, and puts it in the cache. By the time of the click there is nothing left to wait for. The log in this demo shows it happening.
+
+<Demo name="preload" height={540} files={['main.js', 'index.html', 'style.css']} />
+
+## What to try
+
+- Rest the pointer on a tile, wait for a moment and look at the log: `preloaded pricing.html`.
+- Now click it. The log says `opened pricing.html · from the cache`, with about 1 ms.
+- Click a tile **without hovering it first**, for example with the keyboard. The log says `from the network`, and the time is longer.
+- Press **Empty the cache** and try again. Emptying it is what you would do after a login or a change of language.
+
+## How it works
+
+```js
+const pagefold = new Pagefold({ plugins: [new PagefoldPreload()] })
+
+pagefold.hooks.on('page:preload', (visit, { page }) => log(`preloaded ${page.url}`))
+```
+
+- **`page:preload`** fires for every page the plugin fetches. The log lines come from it.
+- **The cache is Pagefold's own.** A preloaded page is stored in it like any other, which is why the visit finds it. It works with any server, with no special headers.
+- **The times are small here** because this site runs on a fast connection. On a slower one the difference between the cache and the network is much bigger.
+
+More in [Preload](/docs/preload) and [Caching and history](/docs/caching-and-history).

@@ -1,0 +1,39 @@
+---
+title: "GSAP transition"
+description: "A page transition made with GSAP: the old page lifts away, the new one comes up and its parts follow one by one."
+section: demos
+order: 1
+---
+
+import Demo from '../../../components/Demo.astro'
+
+A transition written with a GSAP timeline instead of CSS. Pagefold gives GSAP the two moments, leaving and arriving, through the [JS plugin](/docs/js), and waits until each one is over.
+
+<Demo name="gsap" height={420} files={['main.js', 'index.html', 'style.css']} />
+
+## What to try
+
+- Click **Work**, **About** and **Home**. The old content lifts and fades, the new content comes up, and then the title, the text and each card follow one after the other.
+- Click **Contact (zoom)**. That link has `data-pagefold-animation="zoom"`, so it gets a different animation: the page shrinks away and the next one grows into place.
+- Use the back button. Nothing special is needed: it runs the same animations.
+
+## How it works
+
+The JS plugin takes a list of animations. The first one has `from: '(.*)'` and `to: '(.*)'`, so it matches any visit. The second has a `name`, and runs when the link or the visit asks for it.
+
+```js
+{
+  from: '(.*)',
+  to: '(.*)',
+  out: () => gsap.to(page(), { opacity: 0, y: -24, duration: 0.3 }),
+  in: () => gsap.timeline().fromTo(page(), { opacity: 0, y: 24 }, { opacity: 1, y: 0 }),
+}
+```
+
+- **Return the tween.** A GSAP tween or timeline is a promise, so returning it is all Pagefold needs to wait for it. There is no `done` to call.
+- **Give the page back as it was.** The timeline ends with `clearProps`, so GSAP leaves no inline style behind and your CSS keeps control.
+- **Names pick the animation.** `data-pagefold-animation` on a link, or `navigate(url, { animation })`, chooses the entry with that name.
+
+More about it in [GSAP](/docs/gsap) and [Animating with JavaScript](/docs/javascript-animations).
+
+This demo loads GSAP from a CDN (jsDelivr). Pagefold does not include GSAP: install it yourself and check [its license](https://gsap.com/standard-license).

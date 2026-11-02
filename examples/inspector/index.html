@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home page</title>
+  <meta name="description" content="The first page of the inspector.">
+  <link rel="stylesheet" href="../_lib/fade.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-home">
+  <header class="top">
+    <strong>Inspector</strong>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="label.html">Label</a>
+      <a href="spanish.html">Español</a>
+    </nav>
+  </header>
+  <main id="pagefold" class="transition-fade">
+    <h1>Home</h1>
+    <p class="lead">The first page of the inspector.</p>
+  </main>
+  <section id="inspector" aria-label="What the plugins changed">
+    <dl>
+      <dt>document.title</dt><dd id="v-title">-</dd>
+      <dt>meta description</dt><dd id="v-desc">-</dd>
+      <dt>html lang</dt><dd id="v-lang">-</dd>
+      <dt>body class</dt><dd id="v-body">-</dd>
+      <dt>announced</dt><dd id="v-said">-</dd>
+      <dt>focus is on</dt><dd id="v-focus">-</dd>
+    </dl>
+  </section>
+  <script src="../_lib/pagefold.js"></script>
+  <script src="../_lib/head.js"></script>
+  <script src="../_lib/body-class.js"></script>
+  <script src="../_lib/a11y.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

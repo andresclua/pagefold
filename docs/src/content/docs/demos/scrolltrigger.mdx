@@ -1,0 +1,43 @@
+---
+title: "GSAP and ScrollTrigger"
+description: "Scroll animations that are created when a page arrives and killed when it leaves, with a counter that proves nothing is left behind."
+section: demos
+order: 2
+---
+
+import Demo from '../../../components/Demo.astro'
+
+ScrollTrigger keeps its triggers until you kill them. On a site that never reloads, they would pile up with every visit. This demo hands each element to [`pagefold.mount`](/docs/components), which sets it up when it arrives and runs the cleanup when it leaves.
+
+<Demo name="scrolltrigger" height={520} files={['main.js', 'index.html', 'style.css']} />
+
+## What to try
+
+- Scroll down. Each block comes up when it reaches the bottom of the window.
+- Look at the counter in the corner: **ScrollTriggers alive**. Page one has five blocks.
+- Go to **Two** and **Three**. The counter follows the page that is on screen: four, then six. It never adds up.
+- Come back with the browser's back button. The triggers are made again, once each.
+
+## How it works
+
+```js
+pagefold.mount('[data-reveal]', (el) => {
+  const tween = gsap.from(el, {
+    opacity: 0,
+    y: 48,
+    scrollTrigger: { trigger: el, start: 'top 88%' },
+  })
+  return () => {
+    tween.scrollTrigger?.kill()
+    tween.kill()
+  }
+})
+```
+
+- **`mount` runs the cleanup for you.** The function you return is called when the element leaves the page, including when you go back or forward.
+- **Measure again after the visit.** The new page has another height, so `visit:end` calls `ScrollTrigger.refresh()`.
+- **Without the cleanup** the counter would grow on every visit, and old triggers would keep working on elements that are gone.
+
+More in [Initializing components](/docs/components) and [GSAP](/docs/gsap).
+
+This demo loads GSAP from a CDN (jsDelivr). Pagefold does not include GSAP: install it yourself and check [its license](https://gsap.com/standard-license).

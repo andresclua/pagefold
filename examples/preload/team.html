@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Team · Preload</title>
+  <meta name="description" content="Use the button to empty the cache">
+  <link rel="stylesheet" href="../_lib/fade.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <strong>Preload</strong>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="docs.html">Docs</a>
+      <a href="blog.html">Blog</a>
+      <a href="team.html">Team</a>
+    </nav>
+  </header>
+  <main id="pagefold" class="transition-fade">
+    <h1>Team</h1>
+    <p class="lead">Use the button to empty the cache. Rest the pointer on a link for a moment and then click it.</p>
+    <div class="tiles">
+      <a class="tile" href="index.html"><b>Home</b><span>index.html</span></a>
+      <a class="tile" href="pricing.html"><b>Pricing</b><span>pricing.html</span></a>
+      <a class="tile" href="docs.html"><b>Docs</b><span>docs.html</span></a>
+      <a class="tile" href="blog.html"><b>Blog</b><span>blog.html</span></a>
+    </div>
+  </main>
+  <section id="log" aria-label="What Pagefold did">
+    <header><b>Log</b><button type="button" id="clear">Empty the cache</button></header>
+    <ol id="lines"></ol>
+  </section>
+  <script src="../_lib/pagefold.js"></script>
+  <script src="../_lib/preload.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

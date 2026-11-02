@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tabs · Components</title>
+  <meta name="description" content="Tabs with their own listeners, and a counter on the same page.">
+  <link rel="stylesheet" href="../_lib/fade.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <strong>Components</strong>
+    <nav>
+      <a href="index.html">Counter</a>
+      <a href="clock.html">Clock</a>
+      <a href="tabs.html">Tabs</a>
+    </nav>
+  </header>
+  <main id="pagefold" class="transition-fade">
+    <h1>Tabs</h1>
+    <p class="lead">Tabs with their own listeners, and a counter on the same page.</p>
+    <div class="widget" data-tabs><div class="tablist"><button type="button" aria-selected="true">One</button><button type="button">Two</button><button type="button">Three</button></div><p class="panel">Panel one</p></div>
+    <div class="widget" data-counter><button type="button">Clicked <b>0</b> times</button></div>
+  </main>
+  <section id="log" aria-label="What pagefold.mount did">
+    <header><b>pagefold.mount</b><span>timers running: <b id="timers">0</b></span></header>
+    <ol id="lines"></ol>
+  </section>
+  <script src="../_lib/pagefold.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

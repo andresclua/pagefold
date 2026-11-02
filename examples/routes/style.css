@@ -1,0 +1,44 @@
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:16px/1.6 system-ui,sans-serif;background:#0a0a0a;color:#fafaf8}
+/* Links: the accent color with a quiet underline that gets stronger on hover */
+a{color:#5af0ae;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:rgba(90,240,174,.5);transition:color .15s,text-decoration-color .15s}
+a:hover{color:#00ff9c;text-decoration-color:currentColor}
+a:focus-visible{outline:2px solid #5af0ae;outline-offset:3px;border-radius:2px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1.5rem;border-bottom:1px solid #2c2c2c}
+.top strong{font:700 .95rem ui-monospace,Menlo,monospace}
+.top nav{display:flex;gap:1.25rem;flex-wrap:wrap}
+main{padding:2rem 1.5rem 3rem;max-width:46rem}
+h1{margin:0 0 .5rem;font-size:2.1rem;line-height:1.15}
+p{margin:0 0 1rem;max-width:36rem;color:#c9c9c4}
+.lead{color:#a3a39e;font-size:1.05rem}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-top:1.5rem}
+.card{border:1px solid #2c2c2c;background:#141414;border-radius:12px;padding:.9rem}
+.card i{display:block;height:3.2rem;border-radius:8px;margin-bottom:.6rem}
+.card b{display:block;font-size:.95rem}
+.card span{font-size:.82rem;color:#a3a39e}
+@media (max-width:34rem){.cards{grid-template-columns:1fr}main{padding:1.25rem}}
+body{overflow-x:hidden}
+.cards{grid-template-columns:repeat(2,1fr)}
+main{transition:transform .4s ease,opacity .4s ease}
+
+/* The visit is named after the routes it goes between. These rules are the whole transition. */
+html.is-animating main{opacity:0}
+/* going deeper: Home to Work, Work to a project */
+html.is-animating.is-leaving.from-route-home.to-route-work main,
+html.is-animating.is-leaving.from-route-work.to-route-project main{transform:translateX(-48px)}
+html.is-animating.is-rendering.from-route-home.to-route-work main,
+html.is-animating.is-rendering.from-route-work.to-route-project main{transform:translateX(48px)}
+/* coming back */
+html.is-animating.is-leaving.from-route-work.to-route-home main,
+html.is-animating.is-leaving.from-route-project.to-route-work main{transform:translateX(48px)}
+html.is-animating.is-rendering.from-route-work.to-route-home main,
+html.is-animating.is-rendering.from-route-project.to-route-work main{transform:translateX(-48px)}
+/* the contact page rises from below */
+html.is-animating.to-route-contact main{transform:translateY(28px) scale(.98)}
+/* two pages of the same route: just a quick crossfade */
+html.to-same-route main{transition-duration:.15s}
+
+#route-info{position:fixed;left:.75rem;bottom:.75rem;right:.75rem;display:flex;gap:1.5rem;flex-wrap:wrap;padding:.55rem .85rem;border:1px solid #2c2c2c;border-radius:12px;background:#141414;font:.78rem ui-monospace,Menlo,monospace;color:#a3a39e}
+#route-info b{color:#00ff9c;font-weight:600}
+#route-info code{color:#fafaf8}

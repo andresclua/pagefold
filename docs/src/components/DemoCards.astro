@@ -1,0 +1,74 @@
+---
+interface Item {
+  href: string
+  title: string
+  text: string
+  tags: string[]
+}
+const { items } = Astro.props as { items: Item[] }
+---
+
+<ul class="cards">
+  {
+    items.map((i) => (
+      <li>
+        <a href={i.href}>
+          <b>{i.title}</b>
+          <span>{i.text}</span>
+          <em>
+            {i.tags.map((t) => (
+              <code>{t}</code>
+            ))}
+          </em>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .cards {
+    list-style: none;
+    margin: 1.5rem 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 0.9rem;
+  }
+  /* The card is the link, so it has its own look and not the one of a link in a paragraph */
+  .cards :global(a) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-decoration: none;
+    font-weight: 400;
+    transition:
+      border-color 0.15s,
+      transform 0.15s;
+  }
+  .cards :global(a:hover) {
+    background: var(--surface);
+    border-color: var(--link);
+    transform: translateY(-2px);
+  }
+  b {
+    font-family: var(--font-head);
+    font-size: 1rem;
+  }
+  span {
+    color: var(--muted);
+    font-size: 0.92rem;
+    flex: 1;
+  }
+  em {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    font-style: normal;
+  }
+</style>

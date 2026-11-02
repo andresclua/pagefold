@@ -1,3 +1,4 @@
+import { join } from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
 
 // The example sites embedded in the documentation, run as a visitor would use them
@@ -96,3 +97,160 @@ for (const name of ['fade', 'slide']) {
     expect(seen.some((v) => v > 0.05 && v < 0.95)).toBe(true)
   })
 }
+
+// The demos of the documentation load GSAP from a CDN. Here the same files come from node_modules, so the
+// tests do not need the network.
+const useGsap = (page: Page) =>
+  page.route('https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/*', (route) =>
+    route.fulfill({
+      path: join(
+        import.meta.dirname,
+        '../../node_modules/gsap/dist',
+        new URL(route.request().url()).pathname.split('/').pop() ?? ''
+      ),
+    })
+  )
+const markDocument = (page: Page) =>
+  page.evaluate(() => ((window as unknown as { __same: boolean }).__same = true))
+const sameDocument = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __same?: boolean }).__same === true)
+const h1 = (page: Page) => page.locator('h1').first()
+
+test.describe('demos', () => {
+  test('gsap: the transition leaves no inline style and a link can pick the zoom', async ({
+    page,
+  }) => {
+    await useGsap(page)
+    await go(page, 'gsap')
+    await markDocument(page)
+    await page.click('nav a[href="work.html"]')
+    await expect(h1(page)).toHaveText('Selected work')
+    await expect(page.locator('#pagefold')).not.toHaveAttribute('style', /.+/) // GSAP gave the page back
+    await expect(page.locator('.card').first()).toHaveCSS('opacity', '1')
+    await page.click('nav a[data-pagefold-animation="zoom"]')
+    await expect(h1(page)).toHaveText('Say hello')
+    await expect(page.locator('#pagefold')).not.toHaveAttribute('style', /.+/)
+    expect(await sameDocument(page)).toBe(true)
+  })
+
+  test('scrolltrigger: the triggers follow the page on screen and do not add up', async ({
+    page,
+  }) => {
+    await useGsap(page)
+    await go(page, 'scrolltrigger')
+    const alive = () => page.locator('#triggers')
+    await expect(alive()).toHaveText('5')
+    await page.click('nav a[href="two.html"]')
+    await expect(h1(page)).toHaveText('No trigger is left behind')
+    await expect(alive()).toHaveText('4')
+    await page.click('nav a[href="three.html"]')
+    await expect(h1(page)).toHaveText('Back and forward work too')
+    await expect(alive()).toHaveText('6')
+    await page.goBack()
+    await expect(alive()).toHaveText('4')
+    await page.goForward()
+    await expect(alive()).toHaveText('6')
+  })
+
+  test('scrolltrigger: a block comes up when it is reached', async ({ page }) => {
+    await useGsap(page)
+    await page.setViewportSize({ width: 800, height: 400 })
+    await go(page, 'scrolltrigger')
+    const last = page.locator('[data-reveal]').last()
+    await expect(last).toHaveCSS('opacity', '0')
+    await last.evaluate((el) => el.scrollIntoView({ block: 'center' }))
+    await expect(last).toHaveCSS('opacity', '1')
+  })
+
+  test('overlap-gsap: both pages are there during the visit and one is left, with its own style', async ({
+    page,
+  }) => {
+    await useGsap(page)
+    await go(page, 'overlap-gsap')
+    const numbers = () =>
+      page.evaluate(() => [...document.querySelectorAll('.num')].map((n) => n.textContent))
+    await page.evaluate(() => {
+      const w = window as unknown as { __max: number }
+      w.__max = 0
+      new MutationObserver(
+        () => (w.__max = Math.max(w.__max, document.querySelectorAll('#pagefold').length))
+      ).observe(document.body, { childList: true, subtree: true })
+    })
+    await page.click('nav a[href="two.html"]')
+    await expect.poll(numbers).toEqual(['Two']) // the old page is gone once the push is over
+    expect(await page.evaluate(() => (window as unknown as { __max: number }).__max)).toBe(2)
+    await expect(page.locator('#pagefold')).toHaveAttribute('style', /background/) // only what GSAP set was cleared
+    await page.goBack()
+    await expect.poll(numbers).toEqual(['One'])
+  })
+
+  test('routes: the visit is named after the routes and two pages of one route are marked', async ({
+    page,
+  }) => {
+    await go(page, 'routes')
+    await page.click('nav a[href="work.html"]')
+    await expect(h1(page)).toHaveText('Work')
+    await expect(page.locator('#route-names')).toHaveText('home → work')
+    await page.click('nav a[href="project.html"]')
+    await expect(h1(page)).toHaveText('Atlas')
+    await page.click('nav a[href="project-2.html"]')
+    await expect(h1(page)).toHaveText('Pulse')
+    await expect(page.locator('#route-names')).toHaveText('project → project')
+    await expect(page.locator('#route-classes')).toContainText('to-same-route')
+  })
+
+  test('preload: hovering puts the page in the cache, and the log says so', async ({ page }) => {
+    await go(page, 'preload')
+    const lines = () => page.locator('#lines li')
+    await page.hover('a.tile[href="pricing.html"]')
+    await expect(lines().filter({ hasText: 'preloaded pricing.html' })).toHaveCount(1)
+    await page.click('a.tile[href="pricing.html"]')
+    await expect(h1(page)).toHaveText('Pricing')
+    await expect(lines().filter({ hasText: /opened pricing\.html · from the cache/ })).toHaveCount(
+      1
+    )
+    // Without a pause on the link there is nothing in the cache
+    await page.locator('a.tile[href="team.html"]').dispatchEvent('click')
+    await expect(h1(page)).toHaveText('Team')
+    await expect(lines().filter({ hasText: /opened team\.html · from the network/ })).toHaveCount(1)
+    await page.click('#clear')
+    await expect(lines().first()).toHaveText('cache emptied')
+  })
+
+  test('components: each one is set up with its page and cleaned up when it leaves', async ({
+    page,
+  }) => {
+    await go(page, 'components')
+    const lines = page.locator('#lines')
+    await expect(lines).toContainText('set up   counter')
+    await page.click('[data-counter] button')
+    await page.click('[data-counter] button')
+    await page.click('nav a[href="clock.html"]')
+    await expect(h1(page)).toHaveText('Clock')
+    await expect(lines).toContainText('cleaned  counter (it had counted 2)')
+    await expect(lines).toContainText('set up   clock, timer started')
+    await expect(page.locator('#timers')).toHaveText('1')
+    await page.click('nav a[href="tabs.html"]')
+    await expect(h1(page)).toHaveText('Tabs')
+    await expect(lines).toContainText('cleaned  clock, timer stopped')
+    await expect(page.locator('#timers')).toHaveText('0')
+  })
+
+  test('inspector: title, description, language, body class, announcement and focus follow the page', async ({
+    page,
+  }) => {
+    await go(page, 'inspector')
+    await page.click('nav a[href="spanish.html"]')
+    await expect(h1(page)).toHaveText('Sobre nosotros')
+    await expect(page.locator('#v-title')).toHaveText('Página en español')
+    await expect(page.locator('#v-lang')).toHaveText('es')
+    await expect(page.locator('#v-body')).toHaveText('page-es')
+    await expect(page.locator('#v-desc')).toContainText('otro idioma')
+    await expect(page.locator('#v-said')).toHaveText('Navigated to: Sobre nosotros')
+    await expect(page.locator('#v-focus')).toContainText('main')
+    await page.click('nav a[href="label.html"]')
+    await expect(page.locator('#v-said')).toHaveText(
+      'Navigated to: A better name for screen readers'
+    )
+  })
+})

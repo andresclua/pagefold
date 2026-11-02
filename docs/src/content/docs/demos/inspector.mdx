@@ -1,0 +1,35 @@
+---
+title: "What the plugins change"
+description: "Head, Body class and A11y at work: the panel shows the title, the description, the language, the body class, what was announced and where the focus is."
+section: demos
+order: 7
+---
+
+import Demo from '../../../components/Demo.astro'
+
+Pagefold swaps a container, but a page is more than that: its title, its description, the class of its body, what a screen reader should hear and where the focus goes. Three plugins take care of those. The panel under the page shows their work as it happens.
+
+<Demo name="inspector" height={540} files={['main.js', 'index.html', 'style.css']} />
+
+## What to try
+
+- Click **About**. The title, the description and the body class change, and the panel reads `Navigated to: About us`.
+- Click **Label**. The heading says one thing and its `aria-label` says another. The announcement uses the label.
+- Click **Español**. The `lang` of the document changes to `es`, and so does everything else.
+- Look at **focus is on**. After every visit it is the content, so a keyboard user starts at the top of the new page and not on a link that no longer exists.
+
+## How it works
+
+```js
+new Pagefold({
+  plugins: [
+    new PagefoldHead(),      // title, meta tags, html lang
+    new PagefoldBodyClass(), // the class of the body
+    new PagefoldA11y(),      // announces the page, moves focus
+  ],
+})
+```
+
+- **[Head](/docs/head)** merges the `<head>` of the new page: it changes the tags that differ and leaves the rest alone.
+- **[Body class](/docs/body-class)** copies the class of the new body, so styles that depend on it keep working.
+- **[A11y](/docs/a11y)** says the name of the page, taken from the `aria-label` of the heading, the heading or the title, and moves focus to the content.

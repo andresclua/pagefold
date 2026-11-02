@@ -1,0 +1,20 @@
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font:16px/1.6 system-ui,sans-serif;background:#0a0a0a;color:#fafaf8}
+/* Links: the accent color with a quiet underline that gets stronger on hover */
+a{color:#5af0ae;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:rgba(90,240,174,.5);transition:color .15s,text-decoration-color .15s}
+a:hover{color:#00ff9c;text-decoration-color:currentColor}
+a:focus-visible{outline:2px solid #5af0ae;outline-offset:3px;border-radius:2px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1.5rem;border-bottom:1px solid #2c2c2c}
+.top strong{font:700 .95rem ui-monospace,Menlo,monospace}
+.top nav{display:flex;gap:1.25rem;flex-wrap:wrap}
+main{padding:2rem 1.5rem 3rem;max-width:46rem}
+h1{margin:0 0 .5rem;font-size:2.1rem;line-height:1.15}
+p{margin:0 0 1rem;max-width:36rem;color:#c9c9c4}
+.lead{color:#a3a39e;font-size:1.05rem}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-top:1.5rem}
+.card{border:1px solid #2c2c2c;background:#141414;border-radius:12px;padding:.9rem}
+.card i{display:block;height:3.2rem;border-radius:8px;margin-bottom:.6rem}
+.card b{display:block;font-size:.95rem}
+.card span{font-size:.82rem;color:#a3a39e}
+@media (max-width:34rem){.cards{grid-template-columns:1fr}main{padding:1.25rem}}

@@ -1,0 +1,34 @@
+---
+title: "Components that clean up"
+description: "Components with timers and listeners, set up when their page arrives and cleaned up when it leaves, with a log of every step."
+section: demos
+order: 6
+---
+
+import Demo from '../../../components/Demo.astro'
+
+When Pagefold swaps the HTML, the JavaScript you attached to it stays behind: listeners, timers and instances of libraries. [`pagefold.mount`](/docs/components) creates a component for every element that matches a selector, and runs its cleanup when the element leaves.
+
+<Demo name="components" height={540} files={['main.js', 'index.html', 'style.css']} />
+
+## What to try
+
+- On **Counter**, click the button a few times. Then go to **Clock**: the log says the counter was cleaned and how many clicks it had.
+- On **Clock**, look at `timers running`. It is 1. Go to another page and it is 0: the timer was stopped, not left running in the background.
+- On **Tabs**, a tabs component and a counter are set up together.
+- Go back and forward. The log follows the page that is on screen.
+
+## How it works
+
+```js
+pagefold.mount('[data-clock]', (el) => {
+  const timer = setInterval(tick, 1000)
+  return () => clearInterval(timer)
+})
+```
+
+- **Each element is set up once**, and cleaned up once, however many visits come and go.
+- **Return the cleanup.** Without it, every visit to the clock would leave one more timer running.
+- **No listener on a page's scripts** is needed: the code is loaded once and `mount` takes care of the rest.
+
+More in [Initializing components](/docs/components) and [Gia](/docs/gia).

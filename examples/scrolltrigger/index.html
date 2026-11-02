@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chapter one · ScrollTrigger</title>
+  <meta name="description" content="Things appear as you reach them">
+  <link rel="stylesheet" href="../_lib/fade.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <strong>Scroll</strong>
+    <nav>
+      <a href="index.html">One</a>
+      <a href="two.html">Two</a>
+      <a href="three.html">Three</a>
+    </nav>
+  </header>
+  <main id="pagefold" class="transition-fade">
+    <h1>Things appear as you reach them</h1>
+    <p class="lead">Chapter one · 5 blocks. Scroll down.</p>
+    <section class="reveal" data-reveal><i style="background:#1b1bff"></i><p>The first block waits below the fold.</p></section>
+    <section class="reveal" data-reveal><i style="background:#00ff9c"></i><p>Each block has its own ScrollTrigger.</p></section>
+    <section class="reveal" data-reveal><i style="background:#7c5cff"></i><p>When you leave the page, every one of them is killed.</p></section>
+    <section class="reveal" data-reveal><i style="background:#ff5c8a"></i><p>Come back and they are made again, once each.</p></section>
+    <section class="reveal" data-reveal><i style="background:#fafaf8"></i><p>The counter at the corner shows how many are alive.</p></section>
+  </main>
+  <div id="status" role="status">ScrollTriggers alive: <b id="triggers">0</b></div>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+  <script src="../_lib/pagefold.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

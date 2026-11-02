@@ -15,7 +15,7 @@ const docs = defineCollection({
     .object({
       title: z.string(),
       description: z.string(),
-      section: z.enum(['start', 'concepts', 'hooks', 'plugins', 'guides', 'reference']),
+      section: z.enum(['start', 'concepts', 'hooks', 'plugins', 'guides', 'demos', 'reference']),
       order: z.number().default(0),
       // Required on plugin pages so none is published incomplete.
       whenToUse: z.string().optional(),

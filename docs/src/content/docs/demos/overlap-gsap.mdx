@@ -1,0 +1,39 @@
+---
+title: "Overlap with GSAP"
+description: "The old and the new page in the page at once, pushed by a GSAP timeline that Pagefold waits for."
+section: demos
+order: 3
+---
+
+import Demo from '../../../components/Demo.astro'
+
+The [Overlap plugin](/docs/overlap) keeps the old page in the document while the new one comes in. That makes effects possible that a normal transition cannot do, because both pages are on screen together. Here GSAP pushes one over the other.
+
+<Demo name="overlap-gsap" height={420} files={['main.js', 'index.html', 'style.css']} />
+
+## What to try
+
+- Click **Two**, **Three** and **Four**. The new page slides in from the right over the old one, which moves back and fades a little.
+- Use the browser's **back button**. The push goes the other way, because the code reads `visit.history.direction`.
+
+## How it works
+
+```js
+pagefold.hooks.on('content:insert', (visit, { containers }) => {
+  const { next, previous } = containers[0]
+  timeline = gsap.timeline()
+    .fromTo(next, { xPercent: 100 }, { xPercent: 0 }, 0)
+    .to(previous, { xPercent: -30, opacity: 0.5 }, 0)
+})
+
+pagefold.hooks.replace('animation:in:await', () => timeline)
+```
+
+- **`content:insert`** fires when Overlap has put the new container next to the old one. Both are in the page, so you can animate both.
+- **The two share one grid cell** in the CSS, so they sit on top of each other instead of one below the other.
+- **Pagefold waits for the timeline.** Replacing `animation:in:await` with the timeline tells it when the animation is over. Then the old container is removed.
+- **Only what GSAP set is cleared**, so the page keeps its own styles.
+
+More in [Overlap](/docs/overlap).
+
+This demo loads GSAP from a CDN (jsDelivr). Pagefold does not include GSAP: install it yourself and check [its license](https://gsap.com/standard-license).

@@ -1,0 +1,44 @@
+---
+title: "Animations by route"
+description: "Name your pages and let the transition depend on where you come from and where you go, with nothing but CSS."
+section: demos
+order: 4
+---
+
+import Demo from '../../../components/Demo.astro'
+
+The [Route name plugin](/docs/route-name) gives each page a name, and every visit gets two classes: where it comes from and where it goes. The whole transition is then a few lines of CSS.
+
+<Demo name="routes" height={460} files={['main.js', 'style.css', 'index.html']} />
+
+## What to try
+
+- Go from **Home** to **Work**, then to **Project A**. Each step goes deeper, so the page leaves to the left and the next one comes from the right.
+- Go back. It is the same rule, mirrored.
+- Click **Contact**. Any visit to the contact page rises from below.
+- Go from **Project A** to **Project B**. They are two pages of the same route, so the visit only crossfades. Look at the bar at the bottom: the classes include `to-same-route`.
+
+## How it works
+
+```js
+new PagefoldRouteName({
+  routes: [
+    { name: 'home', path: '(.*)/index.html' },
+    { name: 'work', path: '(.*)/work.html' },
+    { name: 'project', path: ['(.*)/project.html', '(.*)/project-2.html'] },
+  ],
+})
+```
+
+```css
+html.is-animating.is-leaving.from-route-home.to-route-work main {
+  transform: translateX(-48px);
+}
+html.to-same-route main {
+  transition-duration: 0.15s;
+}
+```
+
+- **The first route that matches wins**, and a page that matches none is called `unknown`.
+- **`to-same-route`** is added when the page you leave and the page you enter have the same route.
+- **`visit.from.route` and `visit.to.route`** are also there for your code, as the bar at the bottom shows.
