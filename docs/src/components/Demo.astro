@@ -1,0 +1,96 @@
+---
+// A live example in a browser-like frame, with its source files underneath.
+// The files are read from /examples/<name>, the same ones the iframe loads.
+import { Code } from 'astro:components'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+interface Props {
+  name: string
+  height?: number
+}
+const { name, height = 340 } = Astro.props
+const dir = join(process.cwd(), '..', 'examples', name)
+// The other pages repeat the structure of index.html, so only the three that differ are shown
+const files = ['index.html', 'main.js', 'style.css']
+const lang = (f: string) => (f.endsWith('.html') ? 'html' : f.endsWith('.css') ? 'css' : 'js')
+const src = `/examples/${name}/index.html`
+const github = `https://github.com/andresclua/pagefold/tree/main/examples/${name}`
+---
+
+<figure class="demo">
+  <div class="chrome">
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="url">/examples/{name}/</span>
+    <a href={src} target="_blank" rel="noopener">Open in a new tab</a>
+    <a href={github} target="_blank" rel="noopener">Source on GitHub</a>
+  </div>
+  <iframe src={src} title={`Example: ${name}`} loading="lazy" style={`height:${height}px`}></iframe>
+  <div class="files">
+    {files.map((f, i) => (
+      <details open={i === 0}>
+        <summary>{f}</summary>
+        <Code code={readFileSync(join(dir, f), 'utf8')} lang={lang(f)} themes={{ light: 'github-light', dark: 'github-dark' }} defaultColor={false} />
+      </details>
+    ))}
+  </div>
+</figure>
+
+<style>
+  .demo {
+    margin: 1.5rem 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .dots {
+    display: flex;
+    gap: 0.3rem;
+  }
+  .dots i {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .url {
+    flex: 1;
+    min-width: 8rem;
+    font-family: var(--font-head);
+    color: var(--muted);
+  }
+  iframe {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: #0a0a0a;
+  }
+  .files {
+    border-top: 1px solid var(--border);
+  }
+  details + details {
+    border-top: 1px solid var(--border);
+  }
+  summary {
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+  }
+  .files :global(pre) {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    font-size: 0.85rem;
+  }
+</style>

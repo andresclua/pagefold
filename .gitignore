@@ -8,3 +8,4 @@ docs/.astro
 docs/dist
 playwright-report
 test-results
+docs/public/examples

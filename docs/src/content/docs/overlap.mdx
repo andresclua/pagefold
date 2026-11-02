@@ -16,6 +16,7 @@ options:
 ---
 
 import Lanes from '../../components/Lanes.astro'
+import Demo from '../../components/Demo.astro'
 
 Import it from `pagefold/overlap` (about 1.4 KB minified and compressed, shared code included).
 
@@ -41,6 +42,10 @@ The same visit, with and without the plugin. Both animations run at the same tim
     { label: 'Overlap: new', segments: [{ from: 0, to: 40, text: 'new page in', tone: 'in' }] },
   ]}
 />
+
+Try it. The old page slides out while the new one slides in, and for a moment both are on screen:
+
+<Demo name="overlap" height={280} />
 
 ## Classes
 

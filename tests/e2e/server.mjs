@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 
 const ROOT = new URL('../../', import.meta.url).pathname
 const PORT = 4173
-const types = { '.js': 'text/javascript', '.css': 'text/css', '.map': 'application/json' }
+const types = { '.js': 'text/javascript', '.css': 'text/css', '.map': 'application/json', '.html': 'text/html; charset=utf-8' }
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const NAV = ['/', '/about', '/long', '/slow?ms=1500', '/boom', '/plain-b']
@@ -125,6 +125,12 @@ createServer(async (req, res) => {
   const ms = Number(url.searchParams.get('ms') ?? 0)
 
   if (pathname.startsWith('/dist/')) return serveFile(res, ROOT + pathname.slice(1))
+  // The example sites, as the docs serve them: their library files live in /examples/_lib
+  if (pathname.startsWith('/examples/_lib/')) {
+    const f = pathname.slice('/examples/_lib/'.length)
+    return serveFile(res, ROOT + (f.endsWith('.css') ? 'dist/css/' : 'dist/umd/') + f)
+  }
+  if (pathname.startsWith('/examples/')) return serveFile(res, ROOT + pathname.slice(1))
   if (pathname.startsWith('/fixtures/')) return serveFile(res, ROOT + 'tests/e2e' + pathname)
   if (pathname === '/vendor/gsap.js') return serveFile(res, ROOT + 'node_modules/gsap/dist/gsap.min.js')
   if (pathname === '/vendor/alpine.js') return serveFile(res, ROOT + 'node_modules/alpinejs/dist/cdn.min.js')

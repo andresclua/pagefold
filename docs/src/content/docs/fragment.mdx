@@ -12,6 +12,7 @@ options:
 ---
 
 import Panes from '../../components/Panes.astro'
+import Demo from '../../components/Demo.astro'
 
 Import it from `pagefold/fragment` (about 1.2 KB minified and compressed, shared code included).
 
@@ -41,6 +42,10 @@ Here is what the visit does to the page, with `#list` and `#detail` as container
   after={{ url: '/users/7', panes: [{ name: '#list', text: 'scrolled, filtered', state: 'kept' }, { name: '#detail', text: 'user 7', state: 'replaced' }] }}
   caption="Only #detail changes. The list keeps its scroll position, its filter and anything playing in it."
 />
+
+Try it. Scroll the list or type in the field, then click a name: only the right side changes.
+
+<Demo name="fragment" height={340} />
 
 ## A rule
 

@@ -1,0 +1,10 @@
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.6 system-ui,sans-serif;background:#0a0a0a;color:#fafaf8}
+nav{display:flex;gap:1.25rem;padding:1rem 1.5rem;border-bottom:1px solid #2c2c2c}
+nav a{color:#fafaf8;text-decoration:none;opacity:.6}
+nav a:hover{opacity:1}
+main{padding:2rem 1.5rem}
+h1{margin:0 0 .5rem;font-size:2rem}
+p{margin:0 0 1rem;max-width:36rem;color:#a3a39e}
+.card{height:7rem;max-width:36rem;border-radius:12px}
+body{overflow-x:hidden}

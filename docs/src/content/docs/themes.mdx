@@ -6,6 +6,7 @@ order: 9
 ---
 
 import Strips from '../../components/Strips.astro'
+import Demo from '../../components/Demo.astro'
 
 A theme is a CSS file. Import it, give your container the theme's class, and you are done.
 
@@ -38,6 +39,8 @@ Or in HTML:
 
 Class: `transition-fade`. The page fades out and the new one fades in.
 
+<Demo name="fade" height={280} />
+
 ## Slide
 
 Class: `transition-slide`. The page leaves to the left while fading and the new page comes in from the right. On back and forward visits it goes the other way. For that to happen, animate history visits:
@@ -45,6 +48,8 @@ Class: `transition-slide`. The page leaves to the left while fading and the new 
 ```js
 new Pagefold({ animateHistoryBrowsing: true })
 ```
+
+<Demo name="slide" height={280} />
 
 ## Customizing
 
