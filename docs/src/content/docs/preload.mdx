@@ -100,8 +100,20 @@ Each returns the page, or `undefined` if it was skipped or failed.
 
 Slow connection detection uses the Network Information API, which not every browser has. Where it is missing, preloading simply stays on.
 
+## Speculation Rules
+
+Browsers can prefetch pages by themselves if the page has [speculation rules](https://developer.mozilla.org/docs/Web/API/Speculation_Rules_API). You do not need them with Pagefold: this plugin already puts the page in Pagefold's own cache, and it does it with any server.
+
+If you use them anyway, know how they meet:
+
+- A page prefetched by the browser is **reused by Pagefold only if your server allows caching it**, for example with `Cache-Control: private, max-age=60`.
+- Without that header the browser asks again when Pagefold fetches the page, so each page is requested twice.
+
+The second point is easy to miss, because nothing breaks: everything works, with double the requests. Pagefold's own cache has no such condition.
+
 ## Common problems
 
+- **Each page is requested twice.** You also use speculation rules and the server does not allow caching. See above.
 - **Too many requests.** Lower `throttle`, turn off `preloadVisibleLinks`, or mark links with `data-no-preload`.
 - **A page that depends on the visitor looks old.** A preloaded page goes into the cache like any other. Keep it out with `ignore`, or set a short `cacheTtl`. See [Caching and history](/docs/caching-and-history).
 - **Nothing is preloaded on a phone.** On slow connections, or when the visitor asked to save data, the plugin does nothing. Turn that off with `respectConnection: false` if you would rather not respect it.

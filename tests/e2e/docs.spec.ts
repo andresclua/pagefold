@@ -1927,3 +1927,38 @@ test.describe('view transitions: animating the snapshots', () => {
     )
   })
 })
+
+test.describe('preload: speculation rules', () => {
+  test('the browser prefetch is reused by fetch() only when the server allows caching', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', 'only Chromium has speculation rules')
+    await open(page, '/')
+    test.skip(
+      !(await page.evaluate(() => HTMLScriptElement.supports('speculationrules'))),
+      'this browser has no speculation rules'
+    )
+    const id = Math.random().toString(36).slice(2)
+    const cached = `/spec-cached?id=${id}`
+    const plain = `/spec-plain?id=${id}`
+    const hits = (url: string) =>
+      page.evaluate(
+        async (u) => Number(await (await fetch(`/spec-hits?of=${encodeURIComponent(u)}`)).text()),
+        url
+      )
+    await page.evaluate(
+      ([a, b]) => {
+        const s = document.createElement('script')
+        s.type = 'speculationrules'
+        s.textContent = JSON.stringify({ prefetch: [{ urls: [a, b] }] })
+        document.head.append(s)
+      },
+      [cached, plain]
+    )
+    await expect.poll(async () => (await hits(cached)) + (await hits(plain))).toBe(2)
+    await page.evaluate(([a, b]) => Promise.all([fetch(a), fetch(b)]), [cached, plain])
+    expect(await hits(cached)).toBe(1) // answered from the browser's cache
+    expect(await hits(plain)).toBe(2) // asked again
+  })
+})

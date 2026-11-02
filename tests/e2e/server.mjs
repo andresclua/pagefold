@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises'
 const ROOT = new URL('../../', import.meta.url).pathname
 const PORT = 4173
 const types = { '.js': 'text/javascript', '.css': 'text/css', '.map': 'application/json', '.html': 'text/html; charset=utf-8' }
+const hitCounts = new Map()
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const NAV = ['/', '/about', '/long', '/slow?ms=1500', '/boom', '/plain-b']
@@ -157,6 +158,15 @@ createServer(async (req, res) => {
     return html(res, 200, shell({ title: 'Headers', body: `<h1>Headers</h1><p id="auth">${h.authorization ?? ''}</p><p id="xrw">${h['x-requested-with'] ?? ''}</p><p id="accept">${h.accept ?? ''}</p>` }))
   }
   if (pathname === '/empty') return html(res, 200, '')
+  // Speculation rules: how many times each /spec-* URL was requested
+  if (pathname.startsWith('/spec-')) {
+    const key = pathname + url.search
+    hitCounts.set(key, (hitCounts.get(key) ?? 0) + 1)
+    if (pathname === '/spec-hits') return html(res, 200, String(hitCounts.get(url.searchParams.get('of') ?? '') ?? 0))
+    const cacheable = pathname === '/spec-cached'
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', ...(cacheable && { 'cache-control': 'private, max-age=60' }) })
+    return res.end(shell({ title: pathname, body: `<h1>${pathname}</h1>` }))
+  }
   if (pathname === '/whoami') {
     const who = /(?:^|; )user=([^;]*)/.exec(req.headers.cookie ?? '')?.[1] ?? 'nobody'
     return html(res, 200, shell({ title: 'Who', body: `<h1>Who</h1><p id="who">${who}</p>` }))
