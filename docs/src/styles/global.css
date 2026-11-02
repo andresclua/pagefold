@@ -68,12 +68,38 @@ a:hover {
   text-decoration-thickness: 2px;
   text-decoration-color: currentColor;
 }
+/*
+ * Links inside the documentation text: the text keeps its own color and gets a thick underline in
+ * the color of the brand, and a soft background of that color on hover. It reads as a link without
+ * the look of a browser's default blue.
+ */
+article a {
+  color: var(--text);
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--link);
+  text-decoration-skip-ink: none;
+  border-radius: 3px;
+  transition:
+    background-color 0.15s,
+    text-decoration-color 0.15s;
+}
+article a:hover {
+  color: var(--text);
+  text-decoration-color: var(--link-hover);
+  background: color-mix(in srgb, var(--link) 16%, transparent);
+}
 /* A link that is only code: the chip's bottom edge is the underline, so the two do not stack */
 a:has(> code:only-child) {
   text-decoration: none;
 }
 a > code:only-child {
   border-bottom: 2px solid color-mix(in srgb, var(--link) 50%, transparent);
+}
+article a > code:only-child {
+  border-bottom: 2px solid var(--link);
 }
 a:hover > code:only-child {
   border-bottom-color: var(--link);
