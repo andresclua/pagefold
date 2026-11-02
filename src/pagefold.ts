@@ -238,8 +238,9 @@ export class Pagefold {
     href: string,
     { el, event }: { el?: Element | undefined; event?: Event | undefined } = {}
   ): boolean {
-    const { origin, url, hash } = Location.fromUrl(href)
-    if (origin !== window.location.origin) return true
+    const loc = Location.fromUrl(href)
+    const { origin, url, hash } = loc
+    if (!loc.isWeb || origin !== window.location.origin) return true
     if (el?.matches('[download], [target="_blank"]')) return true
     return this.options.ignoreVisit(url + hash, { el, event })
   }

@@ -2028,3 +2028,40 @@ test.describe('components: Gia', () => {
     expect(await counts()).toEqual([5, 3])
   })
 })
+
+test.describe('which links: links that are not web pages', () => {
+  for (const href of [
+    'mailto:someone@example.com',
+    'tel:+34123456789',
+    'sms:123',
+    'javascript:void(0)',
+  ]) {
+    test(`${href} is left to the browser`, async ({ page }) => {
+      await open(page, '/')
+      await page.evaluate((h) => {
+        const a = document.createElement('a')
+        a.id = 'odd'
+        a.href = h
+        a.textContent = 'odd'
+        document.body.prepend(a)
+        ;(window as never as { __same: boolean }).__same = true
+      }, href)
+      const seen = await page.evaluate(() => {
+        const log: string[] = []
+        ;(
+          window as never as { pagefold: { hooks: { on: (n: string, f: () => void) => void } } }
+        ).pagefold.hooks.on('link:click', () => log.push('link:click'))
+        ;(window as never as { __seen: string[] }).__seen = log
+        return true
+      })
+      expect(seen).toBe(true)
+      await page.locator('#odd').click({ noWaitAfter: true })
+      await page.waitForTimeout(300)
+      expect(await page.evaluate(() => (window as never as { __seen: string[] }).__seen)).toEqual(
+        []
+      )
+      expect(new URL(page.url()).pathname).toBe('/')
+      expect(await page.evaluate(() => (window as never as { __same?: boolean }).__same)).toBe(true)
+    })
+  }
+})
