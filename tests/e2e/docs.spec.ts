@@ -1980,13 +1980,14 @@ test.describe('components: Gia', () => {
       }
       w.__up = 0
       w.__down = 0
+      const counters = window as never as { __up: number; __down: number }
       // What the guide shows
       class Counter extends (Component as never as new (el: Element) => object) {
         mount() {
-          ;(window as never as { __up: number }).__up++
+          counters.__up++
         }
         unmount() {
-          ;(window as never as { __down: number }).__down++
+          counters.__down++
         }
       }
       const components = { Counter }
