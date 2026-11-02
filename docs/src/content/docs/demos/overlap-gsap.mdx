@@ -1,39 +1,54 @@
 ---
 title: "Overlap with GSAP"
-description: "The old and the new page in the page at once, pushed by a GSAP timeline that Pagefold waits for."
+description: "A portfolio where the next page opens as a circle from your click, titles rise word by word and the bar moves too: one GSAP timeline that Pagefold waits for."
 section: demos
 order: 3
 ---
 
 import Demo from '../../../components/Demo.astro'
 
-The [Overlap plugin](/docs/overlap) keeps the old page in the document while the new one comes in. That makes effects possible that a normal transition cannot do, because both pages are on screen together. Here GSAP pushes one over the other.
+The [Overlap plugin](/docs/overlap) keeps the old page in the document while the new one comes in. That makes effects possible that a normal transition cannot do, because both pages are on screen together. Here a whole timeline of GSAP animations runs across both of them, and across the bar that never changes.
 
-<Demo name="overlap-gsap" height={420} files={['main.js', 'index.html', 'style.css']} />
+<Demo name="overlap-gsap" height={560} files={['main.js', 'index.html', 'style.css']} />
 
 ## What to try
 
-- Click **Two**, **Three** and **Four**. The new page slides in from the right over the old one, which moves back and fades a little.
-- Use the browser's **back button**. The push goes the other way, because the code reads `visit.history.direction`.
+- On **Home**, click one of the three projects. The next page opens as a **circle that grows from the point where you clicked**, while the old page steps back.
+- Look at the **title**: it rises word by word from behind a mask. Then the text, the chips, the three panels and the big number follow.
+- Look at the **bar**: the green pill slides to the new link, the counter rolls to the new number and a line fills under the bar for as long as the transition lasts.
+- Click **Next project** at the bottom, or the links in the bar.
+- Use the browser's **back button**. Without a click there is no point to grow from, so this time the new page is wiped down from the top.
+- If your system asks for **less motion**, none of it runs: the page changes at once.
 
 ## How it works
+
+Everything happens in one `content:insert` handler. Overlap has put the new container next to the old one, so GSAP can animate both, and it gets the position of the click from `visit.trigger.event`.
 
 ```js
 pagefold.hooks.on('content:insert', (visit, { containers }) => {
   const { next, previous } = containers[0]
+  const { clientX: x, clientY: y } = visit.trigger.event
+
   timeline = gsap.timeline()
-    .fromTo(next, { xPercent: 100 }, { xPercent: 0 }, 0)
-    .to(previous, { xPercent: -30, opacity: 0.5 }, 0)
+    // The curtain opens, and the old page steps back
+    .fromTo(next, { clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${radius}px at ${x}px ${y}px)` }, 0)
+    .to(previous, { scale: 0.93, opacity: 0.35 }, 0)
+    // The content arrives piece by piece
+    .to(words, { yPercent: 0, stagger: 0.07 }, 0.5)
+    .to(rest, { opacity: 1, y: 0, stagger: 0.06 }, 0.6)
 })
 
+// Pagefold waits for the timeline before it removes the old page
 pagefold.hooks.replace('animation:in:await', () => timeline)
 ```
 
-- **`content:insert`** fires when Overlap has put the new container next to the old one. Both are in the page, so you can animate both.
-- **The two share one grid cell** in the CSS, so they sit on top of each other instead of one below the other.
-- **Pagefold waits for the timeline.** Replacing `animation:in:await` with the timeline tells it when the animation is over. Then the old container is removed.
-- **Only what GSAP set is cleared**, so the page keeps its own styles.
+- **The click.** `visit.trigger.event` is the click that started the visit. On the back button there is none, so the code falls back to a wipe.
+- **The words.** The title is split into words, each one inside a mask with `overflow: hidden`. The words start below the mask and rise into it.
+- **The bar is outside the container.** Pagefold never replaces it, so its pill, its counter and its line are animated by hand, as part of the same timeline.
+- **The old page is removed when the timeline ends.** Returning it from `animation:in:await` is how Pagefold knows.
+- **Reduced motion.** A `visit:start` handler sets `visit.animation.animate = false`, and the page changes without any of this.
+- **Only what GSAP set is cleared** at the end, so the pages keep their own styles.
 
-More in [Overlap](/docs/overlap).
+More in [Overlap](/docs/overlap) and [GSAP](/docs/gsap).
 
 This demo loads GSAP from a CDN (jsDelivr). Pagefold does not include GSAP: install it yourself and check [its license](https://gsap.com/standard-license).

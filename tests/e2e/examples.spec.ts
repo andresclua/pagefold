@@ -162,13 +162,18 @@ test.describe('demos', () => {
     await expect(last).toHaveCSS('opacity', '1')
   })
 
-  test('overlap-gsap: both pages are there during the visit and one is left, with its own style', async ({
+  test('overlap-gsap: the pages cross, the bar follows and nothing is left behind', async ({
     page,
   }) => {
     await useGsap(page)
     await go(page, 'overlap-gsap')
-    const numbers = () =>
-      page.evaluate(() => [...document.querySelectorAll('.num')].map((n) => n.textContent))
+    const titles = () =>
+      page.evaluate(() => [...document.querySelectorAll('h1')].map((h) => h.textContent))
+    const bar = () =>
+      page.evaluate(() => ({
+        count: document.querySelector('.roll')?.textContent,
+        current: document.querySelector('#nav [aria-current]')?.textContent,
+      }))
     await page.evaluate(() => {
       const w = window as unknown as { __max: number }
       w.__max = 0
@@ -176,12 +181,32 @@ test.describe('demos', () => {
         () => (w.__max = Math.max(w.__max, document.querySelectorAll('#pagefold').length))
       ).observe(document.body, { childList: true, subtree: true })
     })
-    await page.click('nav a[href="two.html"]')
-    await expect.poll(numbers).toEqual(['Two']) // the old page is gone once the push is over
-    expect(await page.evaluate(() => (window as unknown as { __max: number }).__max)).toBe(2)
-    await expect(page.locator('#pagefold')).toHaveAttribute('style', /background/) // only what GSAP set was cleared
+    expect(await bar()).toEqual({ count: '01', current: 'Home' })
+    await page.click('a.project[href="atlas.html"]')
+    await expect.poll(titles).toEqual(['Atlas']) // the old page is gone once the timeline is over
+    expect(await page.evaluate(() => (window as unknown as { __max: number }).__max)).toBe(2) // both were there
+    expect(await bar()).toEqual({ count: '02', current: 'Atlas' })
+    // Only what GSAP set was cleared: the page keeps its own style, and nothing is left on the words
+    await expect(page.locator('#pagefold')).toHaveAttribute('style', /--a/)
+    await expect(page.locator('#pagefold')).not.toHaveCSS('clip-path', /circle/)
+    await expect(page.locator('.split .w > span').first()).toHaveCSS('transform', 'none')
+    await page.click('a.next')
+    await expect.poll(titles).toEqual(['Pulse'])
+    expect(await bar()).toEqual({ count: '03', current: 'Pulse' })
     await page.goBack()
-    await expect.poll(numbers).toEqual(['One'])
+    await expect.poll(titles).toEqual(['Atlas'])
+    expect(await bar()).toEqual({ count: '02', current: 'Atlas' })
+  })
+
+  test('overlap-gsap: with reduced motion the page changes at once', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await useGsap(page)
+    await go(page, 'overlap-gsap')
+    await page.click('a.project[href="loom.html"]')
+    await expect(h1(page)).toHaveText('Loom')
+    await expect(page.locator('#pagefold')).toHaveCount(1)
+    await expect(page.locator('.roll')).toHaveText('04')
+    await expect(page.locator('#nav [aria-current]')).toHaveText('Loom')
   })
 
   test('routes: the visit is named after the routes and two pages of one route are marked', async ({

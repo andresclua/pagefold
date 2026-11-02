@@ -3,29 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>One · Overlap</title>
-  <meta name="description" content="The old page is still here while the new one comes in.">
+  <title>Studio · Home</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="top">
-    <strong>Overlap</strong>
-    <nav>
-      <a href="index.html">One</a>
-      <a href="two.html">Two</a>
-      <a href="three.html">Three</a>
-      <a href="four.html">Four</a>
+  <header class="bar">
+    <a class="brand" href="index.html">Studio</a>
+    <nav id="nav" aria-label="Pages">
+      <span class="pill" aria-hidden="true"></span>
+      <a href="index.html">Home</a>
+      <a href="atlas.html">Atlas</a>
+      <a href="pulse.html">Pulse</a>
+      <a href="loom.html">Loom</a>
     </nav>
+    <div class="count" aria-hidden="true"><span class="roll"><span>01</span></span><i>/ 04</i></div>
+    <span class="progress" aria-hidden="true"></span>
   </header>
   <div class="stack">
-    <main id="pagefold" style="background:#1b1bff">
-      <span class="num">One</span>
-      <h1>The old page is still here while the new one comes in.</h1>
+    <main id="pagefold" class="page" style="--a:#00ff9c;--b:#1b1bff">
+      <section class="hero">
+        <p class="kicker">Selected work · 2024 to 2025</p>
+        <h1 class="split">Three projects, one table</h1>
+        <p class="lead">Pick one. The next page opens from the point where you click.</p>
+      </section>
+      <ul class="projects">
+        <li><a class="project" href="atlas.html" style="--a:#7c5cff;--b:#1b1bff"><i></i><b>Atlas</b><span>A travel journal</span><em>2024</em></a></li>
+        <li><a class="project" href="pulse.html" style="--a:#ff5c8a;--b:#ff9f5c"><i></i><b>Pulse</b><span>A heart-rate app</span><em>2025</em></a></li>
+        <li><a class="project" href="loom.html" style="--a:#00ff9c;--b:#1b9d73"><i></i><b>Loom</b><span>An online shop</span><em>2025</em></a></li>
+      </ul>
     </main>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
   <script src="../_lib/pagefold.js"></script>
   <script src="../_lib/overlap.js"></script>
+  <script src="../_lib/head.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
