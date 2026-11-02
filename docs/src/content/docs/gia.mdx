@@ -1,0 +1,63 @@
+---
+title: "Using Pagefold with Gia"
+description: "Load Gia components for the page that arrives and destroy the ones that leave, in a few lines."
+section: guides
+order: 15
+---
+
+[Gia](https://github.com/giantcz/gia) builds your page out of components attached to elements with `g-component`. It loads them once, when you call `loadComponents`. Pagefold then swaps the HTML, so two things have to happen on every visit:
+
+1. The components of the old page are destroyed, so their `unmount` runs and their listeners go.
+2. The components of the new page are created.
+
+## The setup
+
+```js
+import Component from 'gia/Component'
+import loadComponents from 'gia/loadComponents'
+import removeComponents from 'gia/removeComponents'
+import Pagefold from 'pagefold'
+
+class Counter extends Component {
+  mount() {
+    // runs for each element with g-component="Counter"
+  }
+  unmount() {
+    // runs when that element leaves the page
+  }
+}
+
+const components = { Counter }
+const pagefold = new Pagefold()
+
+loadComponents(components)
+
+// What leaves: destroy while the old content is still in the page
+pagefold.hooks.before('content:replace', () => {
+  pagefold.options.containers.forEach((selector) => {
+    const el = document.querySelector(selector)
+    if (el) removeComponents(el)
+  })
+})
+
+// What arrives
+pagefold.hooks.on('content:replace', () => loadComponents(components))
+```
+
+Only the components **inside the containers** are destroyed. A menu or a player outside them keeps running, with its state, and `loadComponents` does not create it a second time because it skips elements that already have an instance.
+
+## Why `before`
+
+`before` runs first, while the old elements are still in the page, so Gia can find them and call their `unmount`. After the swap they are gone and Gia could no longer reach them. `on` runs after the swap, when the new elements are there to be loaded.
+
+## With Overlap
+
+[Overlap](/docs/overlap) keeps the old page in the document while it animates out. The code above destroys its components when the swap starts, so for that time they are gone while the page is still on screen. If that matters, destroy them yourself when the visit ends.
+
+## Without Gia
+
+Gia is a small layer over what [`pagefold.mount`](/docs/components) already does: set up an element when it arrives and clean up when it leaves. If you only need that, `mount` does it with no other library.
+
+## Checked
+
+The browser tests run this setup with the real Gia: a component outside the container keeps running, the old one is destroyed once, new ones are created once, and the back button repeats it.

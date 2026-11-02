@@ -1962,3 +1962,68 @@ test.describe('preload: speculation rules', () => {
     expect(await hits(plain)).toBe(2) // asked again
   })
 })
+
+test.describe('components: Gia', () => {
+  test('the snippet of the guide sets components up and destroys them with the page', async ({
+    page,
+  }) => {
+    await open(page, '/gia-a')
+    await page.evaluate(() => {
+      const w = window as never as Record<string, unknown> & {
+        gia: Record<string, never>
+        pagefold: never
+      }
+      const { Component, loadComponents, removeComponents } = w.gia as never as {
+        Component: new (el: Element) => { mount?: () => void; unmount?: () => void }
+        loadComponents: (c: object) => void
+        removeComponents: (ctx: Element) => void
+      }
+      w.__up = 0
+      w.__down = 0
+      // What the guide shows
+      class Counter extends (Component as never as new (el: Element) => object) {
+        mount() {
+          ;(window as never as { __up: number }).__up++
+        }
+        unmount() {
+          ;(window as never as { __down: number }).__down++
+        }
+      }
+      const components = { Counter }
+      loadComponents(components)
+      const pagefold = w.pagefold as {
+        options: { containers: string[] }
+        hooks: {
+          before: (n: string, f: () => void) => void
+          on: (n: string, f: () => void) => void
+        }
+      }
+      pagefold.hooks.before('content:replace', () => {
+        pagefold.options.containers.forEach((selector) => {
+          const el = document.querySelector(selector)
+          if (el) removeComponents(el)
+        })
+      })
+      pagefold.hooks.on('content:replace', () => loadComponents(components))
+    })
+    const counts = () =>
+      page.evaluate(() => [
+        (window as never as { __up: number }).__up,
+        (window as never as { __down: number }).__down,
+      ])
+    expect(await counts()).toEqual([2, 0]) // one outside the container, one inside
+    await page.evaluate(
+      () =>
+        void (window as never as { pagefold: { navigate: (u: string) => void } }).pagefold.navigate(
+          '/gia-b'
+        )
+    )
+    await expect(heading(page)).toHaveText('Gia B')
+    await done(page)
+    expect(await counts()).toEqual([4, 1]) // the one outside kept running; the old one was destroyed; two arrived
+    await page.goBack()
+    await expect(heading(page)).toHaveText('Gia A')
+    await done(page)
+    expect(await counts()).toEqual([5, 3])
+  })
+})

@@ -80,6 +80,8 @@ const pages = {
   '/admin': { title: 'Admin', body: '<h1>Admin</h1>' },
   '/widgets-a': { title: 'Widgets A', body: '<h1>Widgets A</h1><div data-slider></div>' },
   '/widgets-b': { title: 'Widgets B', body: '<h1>Widgets B</h1><div data-slider></div><div data-slider></div>' },
+  '/gia-a': { title: 'Gia A', head: '<script src="/vendor/gia.js"></script>', split: '<div g-component="Counter" id="outside"></div><div id="pagefold" class="transition-fade"><h1>Gia A</h1><div g-component="Counter"></div></div>' },
+  '/gia-b': { title: 'Gia B', head: '<script src="/vendor/gia.js"></script>', split: '<div g-component="Counter" id="outside"></div><div id="pagefold" class="transition-fade"><h1>Gia B</h1><div g-component="Counter"></div><div g-component="Counter"></div></div>' },
   '/persist-a': { title: 'Persist A', body: '<h1>Persist A</h1><audio id="player" data-pagefold-persist="player" controls></audio>' },
   '/persist-b': { title: 'Persist B', body: '<h1>Persist B</h1><audio id="player" data-pagefold-persist="player" controls></audio>' },
   '/outside-a': { title: 'Outside A', split: '<audio id="player" controls></audio><div id="pagefold" class="transition-fade"><h1>Outside A</h1></div>' },
@@ -135,6 +137,7 @@ createServer(async (req, res) => {
   }
   if (pathname.startsWith('/examples/')) return serveFile(res, ROOT + pathname.slice(1))
   if (pathname.startsWith('/fixtures/')) return serveFile(res, ROOT + 'tests/e2e' + pathname)
+  if (pathname === '/vendor/gia.js') return serveFile(res, ROOT + 'node_modules/gia/dist/gia.min.js')
   if (pathname === '/vendor/gsap.js') return serveFile(res, ROOT + 'node_modules/gsap/dist/gsap.min.js')
   if (pathname === '/vendor/alpine.js') return serveFile(res, ROOT + 'node_modules/alpinejs/dist/cdn.min.js')
   if (pathname === '/vendor/scrolltrigger.js') return serveFile(res, ROOT + 'node_modules/gsap/dist/ScrollTrigger.min.js')

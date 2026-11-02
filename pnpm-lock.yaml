@@ -35,6 +35,9 @@ importers:
       eslint:
         specifier: ^8.57.1
         version: 8.57.1
+      gia:
+        specifier: 1.0.1
+        version: 1.0.1
       gsap:
         specifier: ^3.15.0
         version: 3.15.0
@@ -1513,6 +1516,9 @@ packages:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
     engines: {node: '>= 0.4'}
 
+  babel-regenerator-runtime@6.5.0:
+    resolution: {integrity: sha512-EBScUgCBbiUbeIrFhMYh70nmxflHbsRxoZi17g1J27Opwbo9TR7m/KuLS8itzRDp9BZL3DcSAEbbqSg2Az496w==}
+
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
 
@@ -1992,6 +1998,9 @@ packages:
   get-tsconfig@5.0.0-beta.4:
     resolution: {integrity: sha512-7nF7C9fIPFEMHgEMEfgIlO9wDdZ8CyHw27rWciFZfHvHDReIiPhsYuzPRXsfvBCqFy1l8RRyyWV7QLM+ZhUJsQ==}
     engines: {node: '>=20.20.0'}
+
+  gia@1.0.1:
+    resolution: {integrity: sha512-xhw0xByL4gbdLKXhUo17mxk7ewH6mijp2FesZ2PAU7ULRdOHq6PWh4FSsbRq12HIKD3Mr1mgpdv0dp2qnZlTfQ==}
 
   github-slugger@2.0.0:
     resolution: {integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==}
@@ -4681,6 +4690,8 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
+  babel-regenerator-runtime@6.5.0: {}
+
   bail@2.0.2: {}
 
   balanced-match@1.0.2: {}
@@ -5201,6 +5212,10 @@ snapshots:
   get-tsconfig@5.0.0-beta.4:
     dependencies:
       resolve-pkg-maps: 1.0.0
+
+  gia@1.0.1:
+    dependencies:
+      babel-regenerator-runtime: 6.5.0
 
   github-slugger@2.0.0: {}
 

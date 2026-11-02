@@ -62,6 +62,30 @@ Astro bundles that script for the browser. Because the layout is shared, it is o
 
 Add [Preload](/docs/preload), [Scroll](/docs/scroll) and [Progress](/docs/progress) the same way.
 
+## Islands
+
+Astro hydrates its framework components ("islands") with small scripts that it writes into each page. Pagefold does not run scripts that arrive with new HTML, so **add the [Scripts](/docs/scripts) plugin** if you use islands:
+
+```js
+import PagefoldScripts from 'pagefold/scripts'
+
+new Pagefold({
+  plugins: [new PagefoldHead({ awaitAssets: true }), new PagefoldA11y(), new PagefoldScripts()],
+})
+```
+
+What happens without it, checked with an Astro 6 site and Preact components:
+
+| Directive | Without Scripts | With Scripts |
+|---|---|---|
+| `client:load` | Works, but only because an earlier page had already defined it | Works |
+| `client:idle` | Never hydrates | Works |
+| `client:visible` | Never hydrates, even in view | Works |
+| `client:media` | Never hydrates | Works |
+| `client:only` | Nothing is rendered | Works |
+
+The danger is that `client:load` on the first page makes everything look fine, and the others fail only when a visitor reaches them by clicking.
+
 ## Things to know
 
 - **Do not use Astro's own `<ClientRouter />` at the same time.** Both would try to handle the same clicks.
@@ -70,4 +94,4 @@ Add [Preload](/docs/preload), [Scroll](/docs/scroll) and [Progress](/docs/progre
 
 ## Checked
 
-The documentation site you are reading is the check: the layout above, with Head, A11y, Scroll and Preload, was exercised in a browser. Links navigate without a reload, the title and description change, focus moves, the page is announced, the menu highlights the current page, and the back button works.
+The islands table above was checked by building an Astro 6 site with Preact components and visiting its pages in a browser, with and without the plugin. That check is not part of this project's automatic tests. The documentation site you are reading is the other check: the layout above, with Head, A11y, Scroll and Preload, was exercised in a browser. Links navigate without a reload, the title and description change, focus moves, the page is announced, the menu highlights the current page, and the back button works.
