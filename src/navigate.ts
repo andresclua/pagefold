@@ -140,6 +140,9 @@ export async function performNavigation(
     await p.hooks.call('visit:start', visit, undefined)
     visit.advance(VisitState.STARTED) // never undo an ignore() made before this point
 
+    // Not animating: say so before the page is requested, as the visit will not wait for any animation
+    const skipping = visit.animation.animate ? undefined : p.hooks.call('animation:skip', undefined)
+
     const loading = p.hooks.call('page:load', visit, { options }, async (v, args) => {
       const cached = v.cache.read ? p.cache.get(v.to.url) : undefined
       args.page = cached ?? (await fetchPage(p, v.to.url, args.options, v))
@@ -175,7 +178,7 @@ export async function performNavigation(
 
     await p.hooks.call('visit:transition', visit, undefined, async () => {
       if (!visit.animation.animate) {
-        await p.hooks.call('animation:skip', undefined)
+        await (skipping ?? p.hooks.call('animation:skip', undefined))
         await renderPage(p, visit, await loaded)
         return
       }

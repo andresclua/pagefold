@@ -35,6 +35,23 @@ describe('mergeHead', () => {
     expect(removed).toHaveLength(2)
   })
 
+  test('persisted stylesheets stay before the new ones, so the new page can override them', () => {
+    document.head.innerHTML =
+      '<link rel="stylesheet" href="/shared.css"><link rel="stylesheet" href="/old.css"><meta name="x" content="1">'
+    mergeHead(
+      document.head,
+      parseHead(
+        '<link rel="stylesheet" href="/shared.css"><link rel="stylesheet" href="/new.css">'
+      ),
+      (el) => el.matches('link')
+    )
+    expect(Array.from(document.head.children).map((e) => e.getAttribute('href'))).toEqual([
+      '/shared.css',
+      '/old.css',
+      '/new.css',
+    ])
+  })
+
   test('persisted tags survive', () => {
     document.head.innerHTML = '<link rel="stylesheet" href="/old.css"><meta name="x" content="1">'
     mergeHead(document.head, parseHead(''), (el) => el.matches('link'))

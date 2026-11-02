@@ -26,23 +26,35 @@ export function mergeHead(
   persist: (el: Element) => boolean
 ): { added: Element[]; removed: Element[] } {
   const old = Array.from(current.children)
+  const incoming = Array.from(next.children)
+
+  // First decide which tags stay, so persisted ones can be told apart from the ones that leave
   const matched = new Set<Element>()
+  const same = incoming.map((el) => {
+    const found = old.find((o) => !matched.has(o) && o.isEqualNode(el))
+    if (found) matched.add(found)
+    return found
+  })
+  const kept = (el: Element | null): boolean => !!el && !matched.has(el) && persist(el)
+
   const added: Element[] = []
   let previous: Element | null = null
-
-  for (const incoming of Array.from(next.children)) {
-    const same = old.find((el) => !matched.has(el) && el.isEqualNode(incoming))
-    if (same) {
-      matched.add(same)
-      previous = same
-      continue
+  incoming.forEach((el, i) => {
+    const existing = same[i]
+    if (existing) {
+      previous = existing
+      return
     }
-    const node = document.importNode(incoming, true)
+    // Tags kept from the old page stay before the new ones, as they were loaded first
+    while (kept(previous ? previous.nextElementSibling : current.firstElementChild)) {
+      previous = previous ? previous.nextElementSibling : current.firstElementChild
+    }
+    const node = document.importNode(el, true)
     if (previous) previous.after(node)
     else current.prepend(node)
     added.push(node)
     previous = node
-  }
+  })
 
   const removed = old.filter((el) => !matched.has(el) && !persist(el))
   removed.forEach((el) => el.remove())
@@ -50,12 +62,9 @@ export function mergeHead(
 }
 
 /** Copy the chosen attributes from one element to another, removing the ones that disappeared. */
-export function syncAttributes(
-  target: Element,
-  source: Element,
-  names: (string | RegExp)[]
-): void {
-  const wanted = (name: string) => names.some((n) => (typeof n === 'string' ? n === name : n.test(name)))
+export function syncAttributes(target: Element, source: Element, names: (string | RegExp)[]): void {
+  const wanted = (name: string) =>
+    names.some((n) => (typeof n === 'string' ? n === name : n.test(name)))
   for (const { name, value } of Array.from(source.attributes)) {
     if (wanted(name) && target.getAttribute(name) !== value) target.setAttribute(name, value)
   }
@@ -110,10 +119,13 @@ export default class PagefoldHead extends Plugin {
     if (!incoming) return
     const { awaitAssets, attributes, timeout } = this.options
 
-    const { added, removed } = mergeHead(document.head, incoming.head, (el) => this.shouldPersist(el))
+    const { added, removed } = mergeHead(document.head, incoming.head, (el) =>
+      this.shouldPersist(el)
+    )
     this.pagefold.log(`Head: removed ${removed.length}, added ${added.length}`)
 
-    if (attributes.length) syncAttributes(document.documentElement, incoming.documentElement, attributes)
+    if (attributes.length)
+      syncAttributes(document.documentElement, incoming.documentElement, attributes)
     if (awaitAssets) await waitForStylesheets(added, timeout)
   }
 

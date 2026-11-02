@@ -136,6 +136,12 @@ export class Pagefold {
     this.hooks.on('content:replace', () => this.components.sync())
     this.hooks.on('visit:end', () => this.components.sync())
 
+    // Wait for the document to be parsed, so an instance made in the head sees the whole page
+    if (document.readyState === 'loading') {
+      await new Promise<void>((resolve) => {
+        document.addEventListener('DOMContentLoaded', () => resolve(), { once: true })
+      })
+    }
     await nextTick()
     await this.hooks.call('enable', undefined, undefined, () => {
       if (!this.active) return // destroyed while enabling
