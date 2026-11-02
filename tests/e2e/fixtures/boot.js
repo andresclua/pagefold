@@ -18,31 +18,59 @@ async function engineAnimations(engine) {
   if (engine === 'gsap') {
     await loadScript('/vendor/gsap.js')
     return [
-      { out: (done) => window.gsap.to(el(), { opacity: 0, duration: DURATION, onComplete: done }),
-        in: (done) => window.gsap.fromTo(el(), { opacity: 0 }, { opacity: 1, duration: DURATION, onComplete: done }) },
+      {
+        out: (done) => window.gsap.to(el(), { opacity: 0, duration: DURATION, onComplete: done }),
+        in: (done) =>
+          window.gsap.fromTo(
+            el(),
+            { opacity: 0 },
+            { opacity: 1, duration: DURATION, onComplete: done }
+          ),
+      },
     ]
   }
   if (engine === 'motion') {
     await loadScript('/vendor/motion.js')
     const { animate } = window.Motion
     return [
-      { out: () => animate(el(), { opacity: 0 }, { duration: DURATION }),
-        in: () => animate(el(), { opacity: [0, 1] }, { duration: DURATION }) },
+      {
+        out: () => animate(el(), { opacity: 0 }, { duration: DURATION }),
+        in: () => animate(el(), { opacity: [0, 1] }, { duration: DURATION }),
+      },
     ]
   }
   // The Web Animations API needs no library at all
   return [
-    { out: () => el().animate([{ opacity: 1 }, { opacity: 0 }], { duration: DURATION * 1000, fill: 'forwards' }).finished,
-      in: () => el().animate([{ opacity: 0 }, { opacity: 1 }], { duration: DURATION * 1000 }).finished },
+    {
+      out: () =>
+        el().animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: DURATION * 1000,
+          fill: 'forwards',
+        }).finished,
+      in: () =>
+        el().animate([{ opacity: 0 }, { opacity: 1 }], { duration: DURATION * 1000 }).finished,
+    },
   ]
 }
 
 if (cfg.alpine) await loadScript('/vendor/alpine.js')
 
+// An option given as the string 'fn:(x) => ...' becomes that function, since a test can only pass JSON
+const revive = (o) =>
+  Object.fromEntries(
+    Object.entries(o).map(([k, v]) => [
+      k,
+      typeof v === 'string' && v.startsWith('fn:') ? (0, eval)('(' + v.slice(3) + ')') : v,
+    ])
+  )
+
 const plugins = []
-for (const [name, options = {}] of cfg.plugins ?? []) {
+for (const [name, rawOptions = {}] of cfg.plugins ?? []) {
+  const options = revive(rawOptions)
   const { default: Plugin } = await import(`/dist/${name}.js`)
-  plugins.push(new Plugin(name === 'js' ? { animations: await engineAnimations(options.engine) } : options))
+  plugins.push(
+    new Plugin(name === 'js' ? { animations: await engineAnimations(options.engine) } : options)
+  )
 }
 
 const options = { ...(cfg.options ?? {}), plugins }

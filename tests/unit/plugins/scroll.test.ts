@@ -170,3 +170,18 @@ describe('as a plugin', () => {
     expect(window.scrollY).toBeLessThanOrEqual(reached) // nothing kept pushing it down the page
   })
 })
+
+describe('getAnchorElement', () => {
+  test('a custom finder decides what a hash points to', async () => {
+    resetDom(
+      '<div id="pagefold"><a id="jump" href="/#section">jump</a><h2 data-target="section">Section</h2></div>'
+    )
+    const found = vi.fn((hash: string) =>
+      document.querySelector(`[data-target="${hash.slice(1)}"]`)
+    )
+    make({ animateScroll: false, getAnchorElement: found })
+    document.querySelector<HTMLAnchorElement>('#jump')!.click()
+    expect(found).toHaveBeenCalledWith('#section')
+    expect(scrollIntoView).toHaveBeenCalledTimes(1)
+  })
+})

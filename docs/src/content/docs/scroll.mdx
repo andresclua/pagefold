@@ -18,9 +18,29 @@ options:
     default: "easeInOutCubic"
     description: "Maps progress from 0 to 1 onto distance from 0 to 1."
   - name: "offset"
-    type: "number | (el) => number"
+    type: "number | { top, left } | (el) => number | { top, left }"
     default: "0"
     description: "Space to leave above the target, for example for a fixed header."
+  - name: "scrollContainers"
+    type: "string"
+    default: "'[data-pagefold-scroll-container]'"
+    description: "Elements other than the window whose scroll position is reset on a visit and restored on back."
+  - name: "shouldResetScrollPosition"
+    type: "(link) => boolean"
+    default: "() => true"
+    description: "Return false to restore the position of the page a link goes to, instead of going to the top."
+  - name: "markScrollTarget"
+    type: "boolean"
+    default: "false"
+    description: "Mark the element a hash points to with data-pagefold-scroll-target, to style it."
+  - name: "getAnchorElement"
+    type: "(hash) => Element | null"
+    default: "undefined"
+    description: "Find the element a hash points to. Default: the element with that id, or a[name]."
+  - name: "doScrollingRightAway"
+    type: "boolean"
+    default: "false"
+    description: "Go to the top when the visit starts, not after the new content is in."
   - name: "respectReducedMotion"
     type: "boolean"
     default: "true"
@@ -51,6 +71,48 @@ new Pagefold({
 | `samePageWithHash` | A link to `#section` on the same page |
 | `samePage` | A link to the page you are already on, which scrolls to the top |
 
+## Reset or restore
+
+On every visit the page goes back to the top, as a browser would. On back and forward visits it goes to **where you were** when you left that page. Pagefold remembers the position of each page you leave, so this also works when `animateHistoryBrowsing` is on, which makes Pagefold, and not the browser, responsible for scrolling.
+
+`shouldResetScrollPosition` changes this for links. A custom "back" link would normally scroll the new page to the top, while visitors expect it to behave like the back button:
+
+```js
+new PagefoldScroll({
+  shouldResetScrollPosition: (link) => !link.matches('.backlink'),
+})
+```
+
+## Scroll containers
+
+An element with its own scrollbar, such as an overflowing table or a sidebar, is not part of the window's scroll. Mark the ones that matter and Pagefold resets them on a visit and restores them on back:
+
+```html
+<aside data-pagefold-scroll-container>...</aside>
+```
+
+Or choose them with the option: `scrollContainers: '.sidebar, .results'`. They are remembered by their order in the page, so a container that is replaced by a visit starts at the top anyway, and one that stays outside the containers is the one that benefits.
+
+## Marking the target
+
+`:target` stops working on sites that add their own history entries. With `markScrollTarget: true` the element a hash points to gets the attribute `data-pagefold-scroll-target`, which you can style instead:
+
+```css
+[data-pagefold-scroll-target] {
+  outline: 2px solid var(--accent);
+}
+```
+
+## Hooks and the instance
+
+`scroll:start` and `scroll:end` fire around an animated scroll. The plugin also adds `pagefold.scrollTo(position, animate)`, the same as calling it on the plugin.
+
+```js
+pagefold.hooks.on('scroll:start', () => document.body.classList.add('is-scrolling'))
+pagefold.hooks.on('scroll:end', () => document.body.classList.remove('is-scrolling'))
+await pagefold.scrollTo(2000, true)
+```
+
 ## Stopping
 
 The animation stops as soon as the user takes over (wheel, touch, key press or mouse down) or a new visit starts.
@@ -64,7 +126,7 @@ await scroll.scrollTo(document.querySelector('#pricing'))
 await scroll.scrollTo(300, false)          // jump
 ```
 
-It replaces the default behavior of the `scroll:top` and `scroll:anchor` hooks. Back and forward visits keep the browser's own scroll restoration.
+It replaces the default behavior of the `scroll:top` and `scroll:anchor` hooks. Without `animateHistoryBrowsing`, back and forward visits keep the browser's own scroll restoration.
 
 ## Common problems
 

@@ -1,4 +1,4 @@
-import type { HookDefaultHandler } from '../hooks.js'
+import type { HookDefaultHandler, HookHandler } from '../hooks.js'
 import { Plugin } from '../plugin.js'
 import type { Visit } from '../visit.js'
 
@@ -11,6 +11,27 @@ export interface ScrollKinds {
   samePage: boolean
 }
 
+declare module '../hooks.js' {
+  interface HookDefinitions {
+    'scroll:start': undefined
+    'scroll:end': undefined
+  }
+}
+
+declare module '../pagefold.js' {
+  interface Pagefold {
+    /** Added by the Scroll plugin: scroll to a position or an element */
+    scrollTo?: (target: number | Element, animate?: boolean) => Promise<void>
+  }
+}
+
+type Offset = number | { top?: number; left?: number }
+
+interface Position {
+  top: number
+  left: number
+}
+
 export interface ScrollOptions {
   /** Animate scrolling. `true` animates every kind, an object picks which. */
   animateScroll: boolean | Partial<ScrollKinds>
@@ -19,7 +40,17 @@ export interface ScrollOptions {
   /** Maps progress from 0 to 1 onto distance from 0 to 1 */
   easing: (t: number) => number
   /** Space to leave above the target, for example for a fixed header */
-  offset: number | ((target: Element) => number)
+  offset: Offset | ((target: Element) => Offset)
+  /** Scroll to the top right when the visit starts instead of after the content is replaced. Default: false */
+  doScrollingRightAway: boolean
+  /** Find the element a hash points to. Default: the element with that id, or `a[name]` */
+  getAnchorElement: ((hash: string) => Element | null) | undefined
+  /** Mark the element a hash points to with `data-pagefold-scroll-target`, to style it. Default: false */
+  markScrollTarget: boolean
+  /** Elements, other than the window, whose scroll position is reset and restored. Default: `[data-pagefold-scroll-container]` */
+  scrollContainers: string
+  /** Return false to restore the scroll position of the page a link goes to instead of scrolling to the top. Default: true */
+  shouldResetScrollPosition: (link: Element | undefined) => boolean
   /** Jump instead of animating when the user prefers reduced motion. Default: true */
   respectReducedMotion: boolean
 }
@@ -40,8 +71,16 @@ export default class PagefoldScroll extends Plugin {
     duration: 600,
     easing: easeInOutCubic,
     offset: 0,
+    doScrollingRightAway: false,
+    getAnchorElement: undefined,
+    markScrollTarget: false,
+    scrollContainers: '[data-pagefold-scroll-container]',
+    shouldResetScrollPosition: () => true,
     respectReducedMotion: true,
   }
+
+  /** Where each page was last scrolled to, by URL: the window and each scroll container */
+  private positions = new Map<string, { window: Position; containers: Map<number, Position> }>()
 
   private frame: number | undefined
   private stop: (() => void) | undefined
@@ -52,13 +91,22 @@ export default class PagefoldScroll extends Plugin {
   }
 
   override mount(): void {
+    this.pagefold.hooks.create('scroll:start')
+    this.pagefold.hooks.create('scroll:end')
+    this.pagefold.scrollTo = (target, animate) => this.scrollTo(target, animate)
+    window.addEventListener('scroll', this.remember, { capture: true, passive: true })
     this.replace('scroll:top', this.scrollTop)
     this.replace('scroll:anchor', this.scrollAnchor)
     this.on('visit:start', this.cancel)
+    this.on('animation:out:start', this.scrollEarly)
+    this.on('content:scroll', this.scrollContainers)
   }
 
   override unmount(): void {
     this.cancel()
+    window.removeEventListener('scroll', this.remember, { capture: true })
+    delete this.pagefold.scrollTo
+    this.positions.clear()
     super.unmount()
   }
 
@@ -73,9 +121,11 @@ export default class PagefoldScroll extends Plugin {
       return Promise.resolve()
     }
 
+    this.pagefold.hooks.callSync('scroll:start', undefined, undefined)
     return new Promise((resolve) => {
       const start = performance.now()
       const end = () => {
+        this.pagefold.hooks.callSync('scroll:end', undefined, undefined)
         if (this.frame !== undefined) cancelAnimationFrame(this.frame)
         this.frame = undefined
         INTERRUPTS.forEach((e) => window.removeEventListener(e, end))
@@ -84,7 +134,11 @@ export default class PagefoldScroll extends Plugin {
       }
       const tick = (now: number) => {
         const progress = Math.min(1, Math.max(0, (now - start) / duration))
-        window.scrollTo({ top: from + (to - from) * easing(progress), left: 0, behavior: 'instant' })
+        window.scrollTo({
+          top: from + (to - from) * easing(progress),
+          left: 0,
+          behavior: 'instant',
+        })
         if (progress < 1) this.frame = requestAnimationFrame(tick)
         else end()
       }
@@ -98,29 +152,102 @@ export default class PagefoldScroll extends Plugin {
 
   private positionOf(el: Element): number {
     const { offset } = this.options
-    const space = typeof offset === 'function' ? offset(el) : offset
+    const raw = typeof offset === 'function' ? offset(el) : offset
+    const space = typeof raw === 'number' ? raw : (raw.top ?? 0)
     return el.getBoundingClientRect().top + window.scrollY - space
   }
 
   /** Does this kind of visit animate? */
   private animates(visit: Visit, anchor: boolean): boolean {
     const { animateScroll, respectReducedMotion } = this.options
-    if (respectReducedMotion && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return false
+    if (respectReducedMotion && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+      return false
     if (typeof animateScroll === 'boolean') return animateScroll
     const samePage = visit.from.url === visit.to.url
     if (!samePage) return animateScroll.betweenPages ?? true
     return (anchor ? animateScroll.samePageWithHash : animateScroll.samePage) ?? true
   }
 
+  /** Does this visit go back to a saved position instead of the top? */
+  private restoring(visit: Visit): boolean {
+    return visit.history.popstate || !this.options.shouldResetScrollPosition(visit.trigger.el)
+  }
+
+  /** Keep track of where each page was scrolled to, the window and the scroll containers. */
+  private remember = (event: Event): void => {
+    const key = this.pagefold.location.url
+    let entry = this.positions.get(key)
+    if (!entry) {
+      entry = { window: { top: 0, left: 0 }, containers: new Map() }
+      this.positions.set(key, entry)
+    }
+    const target = event.target
+    if (target instanceof Element && target !== document.documentElement) {
+      const selector = this.options.scrollContainers
+      if (!target.matches(selector)) return
+      const index = Array.from(document.querySelectorAll(selector)).indexOf(target)
+      if (index >= 0)
+        entry.containers.set(index, { top: target.scrollTop, left: target.scrollLeft })
+    } else {
+      entry.window = { top: window.scrollY, left: window.scrollX }
+    }
+  }
+
+  private mark(anchor: Element | null): void {
+    if (!this.options.markScrollTarget) return
+    document.querySelectorAll('[data-pagefold-scroll-target]').forEach((el) => {
+      el.removeAttribute('data-pagefold-scroll-target')
+    })
+    anchor?.setAttribute('data-pagefold-scroll-target', '')
+  }
+
+  /** `doScrollingRightAway`: go to the top as soon as the visit starts animating. */
+  private scrollEarly: HookHandler<'animation:out:start'> = (visit) => {
+    if (!this.options.doScrollingRightAway || !visit.scroll.reset || this.restoring(visit)) return
+    visit.scroll.reset = false
+    void this.scrollTo(0, this.animates(visit, false))
+  }
+
+  /** Scroll containers other than the window: back to the top, or to where they were. */
+  private scrollContainers: HookHandler<'content:scroll'> = (visit) => {
+    const containers = document.querySelectorAll<HTMLElement>(this.options.scrollContainers)
+    if (!containers.length) return
+    const saved = this.restoring(visit) ? this.positions.get(visit.to.url)?.containers : undefined
+    containers.forEach((el, index) => {
+      const position = saved?.get(index)
+      if (position) {
+        el.scrollTop = position.top
+        el.scrollLeft = position.left
+      } else if (!visit.history.popstate && visit.scroll.reset) {
+        el.scrollTop = 0
+        el.scrollLeft = 0
+      }
+    })
+  }
+
   private scrollTop: HookDefaultHandler<'scroll:top'> = (visit, args, next) => {
-    if (!this.animates(visit, false)) return next ? next(visit, args) : false
-    void this.scrollTo(0)
+    this.mark(null)
+    const saved = this.restoring(visit) ? this.positions.get(visit.to.url)?.window : undefined
+    if (!this.animates(visit, false)) {
+      if (!saved) return next ? next(visit, args) : false
+      window.scrollTo({ top: saved.top, left: saved.left, behavior: 'instant' })
+      return true
+    }
+    void this.scrollTo(saved?.top ?? 0)
     return true
   }
 
   private scrollAnchor: HookDefaultHandler<'scroll:anchor'> = (visit, args, next) => {
-    if (!this.animates(visit, true)) return next ? next(visit, args) : false
-    const anchor = this.pagefold.getAnchorElement(args.hash)
+    const { getAnchorElement } = this.options
+    const anchor = getAnchorElement
+      ? getAnchorElement(args.hash)
+      : this.pagefold.getAnchorElement(args.hash)
+    this.mark(anchor)
+    if (!this.animates(visit, true)) {
+      if (!getAnchorElement) return next ? next(visit, args) : false
+      anchor?.scrollIntoView(args.options)
+      return !!anchor
+    }
     if (!anchor) return false
     void this.scrollTo(anchor)
     return true

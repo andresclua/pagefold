@@ -2065,3 +2065,133 @@ test.describe('which links: links that are not web pages', () => {
     })
   }
 })
+
+test.describe('scroll plugin: containers, restoring and marking', () => {
+  const top = (page: Page) => page.evaluate(() => Math.round(scrollY))
+  const go = (page: Page, url: string) =>
+    page.evaluate(
+      (u) =>
+        void (window as never as { pagefold: { navigate: (u: string) => void } }).pagefold.navigate(
+          u
+        ),
+      url
+    )
+
+  test('a scroll container goes back to the top on a visit, and to where it was on back', async ({
+    page,
+  }) => {
+    await open(page, '/box-a', {
+      options: { animateHistoryBrowsing: true },
+      plugins: [['scroll', { animateScroll: false }]],
+    })
+    await page.evaluate(() => ((document.querySelector('#box') as HTMLElement).scrollTop = 300))
+    await page.waitForTimeout(100)
+    await go(page, '/box-b')
+    await expect(heading(page)).toHaveText('Box B')
+    await done(page)
+    expect(
+      await page.evaluate(() => (document.querySelector('#box') as HTMLElement).scrollTop)
+    ).toBe(0)
+    await page.goBack()
+    await expect(heading(page)).toHaveText('Box A')
+    await done(page)
+    expect(
+      await page.evaluate(() => (document.querySelector('#box') as HTMLElement).scrollTop)
+    ).toBe(300)
+  })
+
+  test('with animateHistoryBrowsing the page returns to where it was, not to the top', async ({
+    page,
+  }) => {
+    await open(page, '/long', {
+      options: { animateHistoryBrowsing: true },
+      plugins: [['scroll', { animateScroll: false }]],
+    })
+    await page.evaluate(() => scrollTo(0, 700))
+    await page.waitForTimeout(100)
+    await go(page, '/about')
+    await expect(heading(page)).toHaveText('About')
+    await done(page)
+    expect(await top(page)).toBe(0)
+    await page.goBack()
+    await expect(heading(page)).toHaveText('Long')
+    await done(page)
+    expect(await top(page)).toBe(700)
+  })
+
+  test('shouldResetScrollPosition false restores the position of the page a link goes to', async ({
+    page,
+  }) => {
+    await open(page, '/long', {
+      plugins: [
+        [
+          'scroll',
+          {
+            animateScroll: false,
+            shouldResetScrollPosition: 'fn:(link) => !link?.matches("#back")',
+          },
+        ],
+      ],
+    })
+    await page.evaluate(() => scrollTo(0, 650))
+    await page.waitForTimeout(100)
+    // click() would scroll the page up to the link first
+    await link(page, '/about').dispatchEvent('click')
+    await expect(heading(page)).toHaveText('About')
+    await done(page)
+    await page.evaluate(() => {
+      const a = document.createElement('a')
+      a.id = 'back'
+      a.href = '/long'
+      a.textContent = 'back'
+      document.querySelector('#pagefold')!.append(a)
+    })
+    await page.locator('#back').click()
+    await expect(heading(page)).toHaveText('Long')
+    await done(page)
+    expect(await top(page)).toBe(650)
+  })
+
+  test('markScrollTarget marks the element a hash points to', async ({ page }) => {
+    await open(page, '/', {
+      plugins: [['scroll', { animateScroll: false, markScrollTarget: true }]],
+    })
+    await page.locator('#to-long-hash').click()
+    await expect(heading(page)).toHaveText('Long')
+    await done(page)
+    await expect(page.locator('#bottom')).toHaveAttribute('data-pagefold-scroll-target', '')
+  })
+
+  test('doScrollingRightAway scrolls up before the new page is there', async ({ page }) => {
+    await open(page, '/long', {
+      plugins: [['scroll', { animateScroll: false, doScrollingRightAway: true }]],
+    })
+    await page.evaluate(() => scrollTo(0, 700))
+    await page.waitForTimeout(100)
+    await go(page, '/slow?ms=1200')
+    await page.waitForFunction(() => scrollY === 0)
+    await expect(heading(page)).toHaveText('Long') // the old page is still there
+    await expect(heading(page)).toHaveText('Slow')
+  })
+
+  test('scroll:start and scroll:end fire around an animated scroll, and the instance has scrollTo', async ({
+    page,
+  }) => {
+    await open(page, '/long', { plugins: [['scroll', { duration: 200 }]] })
+    const events = await page.evaluate(async () => {
+      const w = window as never as {
+        pagefold: {
+          hooks: { on: (n: string, f: () => void) => void }
+          scrollTo: (y: number, animate: boolean) => Promise<void>
+        }
+      }
+      const seen: string[] = []
+      w.pagefold.hooks.on('scroll:start', () => seen.push('start'))
+      w.pagefold.hooks.on('scroll:end', () => seen.push('end'))
+      await w.pagefold.scrollTo(500, true)
+      return seen
+    })
+    expect(events).toEqual(['start', 'end'])
+    expect(await top(page)).toBe(500)
+  })
+})
