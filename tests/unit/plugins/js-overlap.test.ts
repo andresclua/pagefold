@@ -69,13 +69,26 @@ describe('PagefoldJs', () => {
     const seen = vi.fn()
     pf = new Pagefold({
       animationSelector: false,
-      plugins: [new PagefoldJs({ animations: [{ from: '/', to: '/blog/:slug', out: (done, data) => {
-        seen(data)
-        done()
-      } }] })],
+      plugins: [
+        new PagefoldJs({
+          animations: [
+            {
+              from: '/',
+              to: '/blog/:slug',
+              out: (done, data) => {
+                seen(data)
+                done()
+              },
+            },
+          ],
+        }),
+      ],
     })
     await pf.navigate('/blog/x')
-    const data = seen.mock.calls[0]?.[0] as { direction: string; to: { params: object; pattern: string } }
+    const data = seen.mock.calls[0]?.[0] as {
+      direction: string
+      to: { params: object; pattern: string }
+    }
     expect(data.direction).toBe('out')
     expect(data.to.params).toEqual({ slug: 'x' })
     expect(data.to.pattern).toBe('/blog/:slug')
@@ -130,7 +143,9 @@ describe('PagefoldOverlap', () => {
   test('keeps both containers while the page animates in, then removes the old one', async () => {
     let release!: () => void
     pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldOverlap()] })
-    pf.hooks.replace('animation:in:await', () => new Promise<void>((r) => (release = r)), { once: true })
+    pf.hooks.replace('animation:in:await', () => new Promise<void>((r) => (release = r)), {
+      once: true,
+    })
 
     const visit = pf.navigate('/a')
     await vi.waitFor(() => expect(containers()).toHaveLength(2))
@@ -176,7 +191,9 @@ describe('PagefoldOverlap', () => {
 
   test('other containers are still replaced normally', async () => {
     resetDom('<div id="pagefold">old</div><div id="aside">old aside</div>')
-    stubFetch({ '/a': `<html><head></head><body><div id="pagefold">new</div><div id="aside">new aside</div></body></html>` })
+    stubFetch({
+      '/a': `<html><head></head><body><div id="pagefold">new</div><div id="aside">new aside</div></body></html>`,
+    })
     pf = new Pagefold({
       animationSelector: false,
       containers: ['#pagefold', '#aside'],

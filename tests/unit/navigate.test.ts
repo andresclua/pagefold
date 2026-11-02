@@ -32,9 +32,7 @@ beforeEach(() => {
   }
   fetchMock = vi.fn((url: string, _init?: RequestInit) => {
     const page = pages[url]
-    return Promise.resolve(
-      page ? respond(url, page.body, page.status) : respond(url, 'nope', 404)
-    )
+    return Promise.resolve(page ? respond(url, page.body, page.status) : respond(url, 'nope', 404))
   })
   vi.stubGlobal('fetch', fetchMock)
 })
@@ -50,7 +48,13 @@ describe('navigate', () => {
   test('loads the page, replaces the content and title, and adds a history entry', async () => {
     make()
     const order: string[] = []
-    for (const hook of ['visit:start', 'page:load', 'content:replace', 'page:view', 'visit:end'] as const) {
+    for (const hook of [
+      'visit:start',
+      'page:load',
+      'content:replace',
+      'page:view',
+      'visit:end',
+    ] as const) {
       pf.hooks.on(hook, () => order.push(hook))
     }
     await pf.navigate('/a')
@@ -162,7 +166,9 @@ describe('links', () => {
       e.preventDefault() // keep jsdom from trying a real navigation
     }
     window.addEventListener('click', probe)
-    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0, ...init }))
+    el.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true, button: 0, ...init })
+    )
     window.removeEventListener('click', probe)
     return handled
   }

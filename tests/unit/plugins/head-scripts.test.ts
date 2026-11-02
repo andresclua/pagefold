@@ -11,24 +11,26 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-const parseHead = (html: string) => new DOMParser().parseFromString(`<head>${html}</head>`, 'text/html').head
+const parseHead = (html: string) =>
+  new DOMParser().parseFromString(`<head>${html}</head>`, 'text/html').head
 
 describe('mergeHead', () => {
   test('keeps identical tags, adds new ones in order and removes the rest', () => {
-    document.head.innerHTML = '<title>Old</title><meta name="a" content="1"><meta name="b" content="2">'
+    document.head.innerHTML =
+      '<title>Old</title><meta name="a" content="1"><meta name="b" content="2">'
     const kept = document.head.querySelector('[name=a]')
-    const next = parseHead('<title>New</title><meta name="a" content="1"><meta name="c" content="3">')
+    const next = parseHead(
+      '<title>New</title><meta name="a" content="1"><meta name="c" content="3">'
+    )
 
     const { added, removed } = mergeHead(document.head, next, () => false)
 
     expect(document.head.querySelector('[name=a]')).toBe(kept) // untouched node
     expect(document.head.querySelector('[name=b]')).toBeNull()
     expect(document.head.querySelector('title')?.textContent).toBe('New')
-    expect(Array.from(document.head.children).map((e) => e.getAttribute('name') ?? e.tagName)).toEqual([
-      'TITLE',
-      'a',
-      'c',
-    ])
+    expect(
+      Array.from(document.head.children).map((e) => e.getAttribute('name') ?? e.tagName)
+    ).toEqual(['TITLE', 'a', 'c'])
     expect(added).toHaveLength(2)
     expect(removed).toHaveLength(2)
   })
@@ -72,7 +74,9 @@ describe('PagefoldHead', () => {
     })
     pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldHead()] })
     await pf.navigate('/a')
-    expect(document.head.querySelector('meta[name=description]')?.getAttribute('content')).toBe('about a')
+    expect(document.head.querySelector('meta[name=description]')?.getAttribute('content')).toBe(
+      'about a'
+    )
     expect(document.documentElement.getAttribute('lang')).toBe('es')
   })
 
@@ -98,7 +102,9 @@ describe('PagefoldHead', () => {
       rendered = true
     })
     const visit = pf.navigate('/a')
-    await vi.waitFor(() => expect(document.head.querySelector('link[href="/a.css"]')).not.toBeNull())
+    await vi.waitFor(() =>
+      expect(document.head.querySelector('link[href="/a.css"]')).not.toBeNull()
+    )
     expect(rendered).toBe(false) // still waiting for the stylesheet
     await visit // times out in jsdom, which never loads stylesheets
     expect(rendered).toBe(true)
@@ -111,7 +117,9 @@ describe('PagefoldHead', () => {
       plugins: [new PagefoldHead({ awaitAssets: true, timeout: 10_000 })],
     })
     const visit = pf.navigate('/a')
-    await vi.waitFor(() => expect(document.head.querySelector('link[href="/a.css"]')).not.toBeNull())
+    await vi.waitFor(() =>
+      expect(document.head.querySelector('link[href="/a.css"]')).not.toBeNull()
+    )
     document.head.querySelector('link[href="/a.css"]')!.dispatchEvent(new Event('load'))
     await visit
     expect(document.querySelector('#pagefold')?.textContent).toBe('a')

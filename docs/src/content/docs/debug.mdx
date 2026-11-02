@@ -17,6 +17,10 @@ options:
     type: "boolean"
     default: "true"
     description: "Warn at startup about containers that are not on the page."
+  - name: "globalInstance"
+    type: "boolean"
+    default: "false"
+    description: "Put the instance on window.pagefold, to try things from the console."
 ---
 
 Import it from `pagefold/debug` (about 1.0 KB minified and compressed, shared code included).

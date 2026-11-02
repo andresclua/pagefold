@@ -84,7 +84,10 @@ describe('PagefoldA11y', () => {
   })
 
   test('does not steal focus from an element marked as persistent', async () => {
-    document.body.insertAdjacentHTML('beforeend', '<div data-pagefold-persist="player"><button id="play">play</button></div>')
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<div data-pagefold-persist="player"><button id="play">play</button></div>'
+    )
     make()
     document.querySelector<HTMLElement>('#play')?.focus()
     await pf.navigate('/a')
@@ -105,7 +108,9 @@ describe('PagefoldA11y', () => {
   })
 
   test('turns animations off when the user prefers reduced motion', async () => {
-    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia
+    window.matchMedia = vi
+      .fn()
+      .mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia
     make()
     let animate: boolean | undefined
     pf.hooks.on('visit:transition', (visit) => {
@@ -116,7 +121,9 @@ describe('PagefoldA11y', () => {
   })
 
   test('keeps animations when reduced motion is not requested, or the option is off', async () => {
-    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as unknown as typeof window.matchMedia
+    window.matchMedia = vi
+      .fn()
+      .mockReturnValue({ matches: false }) as unknown as typeof window.matchMedia
     make()
     let animate: boolean | undefined
     pf.hooks.on('visit:transition', (visit) => {

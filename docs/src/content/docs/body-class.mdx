@@ -9,6 +9,10 @@ options:
     type: "string"
     default: "''"
     description: "Only manage classes that start with this. Classes added by your scripts to the body are left alone. Default: all classes."
+  - name: "attributes"
+    type: "(string | RegExp)[]"
+    default: "[]"
+    description: "More attributes of the body to copy from the new page, such as lang, dir or /^data-/."
 ---
 
 Import it from `pagefold/body-class` (about 0.7 KB minified and compressed, shared code included).
@@ -50,3 +54,13 @@ With a prefix, only the classes that start with it are swapped. Everything else 
 - **Styles of the new page do not apply.** The class you rely on is set by JavaScript after load rather than in the HTML. Pagefold copies what the server sent, so set it on the server.
 - **The menu closes on every visit.** Without a `prefix` the whole attribute is replaced. Add one, and give state classes names that do not start with it.
 - **Only the body is wrong.** This plugin does not touch `html`. Its `lang` and `dir` attributes are handled by [Head](/docs/head), which can sync more with its `attributes` option.
+
+## Other attributes
+
+By default only the classes change. If your pages also differ in other attributes of the `body`, such as `lang`, `dir` or `data-*` values, list them:
+
+```js
+new PagefoldBodyClass({ attributes: ['lang', 'dir', /^data-/] })
+```
+
+An attribute that matches a name or a pattern is copied from the new page, and removed if the new page does not have it. Attributes that match nothing in the list are left alone.

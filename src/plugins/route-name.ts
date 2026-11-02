@@ -13,8 +13,15 @@ export interface RouteAnimation {
 }
 
 export interface RouteNameOptions {
-  /** Named routes: a name and one or more path patterns, such as `{ post: '/blog/:slug' }` */
-  routes: Record<string, string | string[]>
+  /**
+   * Named routes: a name and one or more path patterns, such as `{ post: '/blog/:slug' }`, or a
+   * list of `{ name, path }` where the first match wins.
+   */
+  routes: Record<string, string | string[]> | { name: string; path: string | string[] }[]
+  /** The name of a page that matches no route, or `false` to leave it without one. Default: `'unknown'` */
+  unknownRoute: string | false
+  /** Also add `from-<page>` and `to-<page>`, named after the path (`from-about`, `to-homepage`). Default: false */
+  paths: boolean
   /** Pick an animation by the routes a visit goes between */
   animations: RouteAnimation[]
 }
@@ -30,7 +37,12 @@ export default class PagefoldRouteName extends Plugin {
   name = 'PagefoldRouteName'
 
   options: RouteNameOptions
-  static defaults: RouteNameOptions = { routes: {}, animations: [] }
+  static defaults: RouteNameOptions = {
+    routes: {},
+    unknownRoute: 'unknown',
+    paths: false,
+    animations: [],
+  }
 
   constructor(options: Partial<RouteNameOptions> = {}) {
     super()
@@ -44,10 +56,24 @@ export default class PagefoldRouteName extends Plugin {
 
   /** The name of the first route whose pattern matches the URL. */
   routeOf(url: string): string | undefined {
-    for (const [name, patterns] of Object.entries(this.options.routes)) {
+    const { routes, unknownRoute } = this.options
+    const list = Array.isArray(routes)
+      ? routes.map(({ name, path }) => [name, path] as const)
+      : Object.entries(routes)
+    for (const [name, patterns] of list) {
       if ([patterns].flat().some((pattern) => matchPath(pattern, url))) return name
     }
-    return undefined
+    return unknownRoute === false ? undefined : unknownRoute
+  }
+
+  /** A path as a class name: `/about/` is `about`, `/` is `homepage`. */
+  private slug(url: string): string {
+    const slug = url
+      .toLowerCase()
+      .replace(/\//g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/^-+|-+$/g, '')
+    return slug || 'homepage'
   }
 
   private nameVisit: HookHandler<'visit:start'> = (visit) => {
@@ -57,9 +83,18 @@ export default class PagefoldRouteName extends Plugin {
     visit.to.route = to
     if (from) this.pagefold.classes.add(`from-route-${classify(from)}`)
     if (to) this.pagefold.classes.add(`to-route-${classify(to)}`)
+    if (from && from === to) this.pagefold.classes.add('to-same-route')
+    if (this.options.paths) {
+      this.pagefold.classes.add(
+        `from-${this.slug(visit.from.url)}`,
+        `to-${this.slug(visit.to.url)}`
+      )
+    }
 
     if (!visit.animation.name) {
-      const match = this.options.animations.find((a) => includes(a.from, from) && includes(a.to, to))
+      const match = this.options.animations.find(
+        (a) => includes(a.from, from) && includes(a.to, to)
+      )
       if (match) visit.animation.name = match.animation
     }
   }

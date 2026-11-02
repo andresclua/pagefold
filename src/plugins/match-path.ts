@@ -1,13 +1,18 @@
 /**
- * Match a URL path against a pattern. Supports `:name` parameters and `*` or `(.*)` wildcards.
+ * Match a URL path against a pattern. Supports `:name` parameters, optional ones (`/:lang?`) and
+ * `*` or `(.*)` wildcards.
  * The query string is ignored and a trailing slash is optional.
  * Returns the parameters, or null when the path does not match.
  */
 export function matchPath(pattern: string, url: string): Record<string, string> | null {
   const names: string[] = []
   const source = pattern
-    .split(/(:\w+|\(\.\*\)|\*)/)
+    .split(/(\/:\w+\?|:\w+|\(\.\*\)|\*)/)
     .map((part) => {
+      if (part.startsWith('/:') && part.endsWith('?')) {
+        names.push(part.slice(2, -1))
+        return '(?:/([^/]+))?'
+      }
       if (part.startsWith(':')) {
         names.push(part.slice(1))
         return '([^/]+)'

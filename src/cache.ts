@@ -27,6 +27,11 @@ export class Cache {
     return this.pages.size
   }
 
+  /** Every stored page by its key, oldest first. Changing the map does not change the cache. */
+  get all(): Map<string, PageData> {
+    return new Map(Array.from(this.pages, ([key, entry]) => [key, { ...entry.page }]))
+  }
+
   has(url: string): boolean {
     return this.get(url) !== undefined
   }

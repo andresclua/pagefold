@@ -159,3 +159,14 @@ describe('Plugin', () => {
     expect(satisfies('1.0.0', '^1')).toBe(false)
   })
 })
+
+test('cache.all lists every stored page and is a copy', async () => {
+  const { Cache } = await import('../../src/cache')
+  const cache = new Cache()
+  cache.set('/a', { url: '/a', html: 'A' })
+  cache.set('/b', { url: '/b', html: 'B' })
+  const all = cache.all
+  expect([...all.keys()]).toEqual(['/a', '/b'])
+  all.delete('/a')
+  expect(cache.has('/a')).toBe(true)
+})

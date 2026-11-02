@@ -11,7 +11,9 @@ const make = (options: ConstructorParameters<typeof PagefoldProgress>[0] = {}) =
 
 beforeEach(() => {
   resetDom()
-  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'performance'] })
+  vi.useFakeTimers({
+    toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'performance'],
+  })
   stubFetch({ '/a': page('', 'a') })
 })
 afterEach(async () => {

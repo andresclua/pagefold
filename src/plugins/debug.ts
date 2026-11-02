@@ -8,6 +8,8 @@ export interface DebugOptions {
   filter: (hook: string) => boolean
   /** Warn at startup about containers that are missing from the page. Default: true */
   checkContainers: boolean
+  /** Put the instance on `window.pagefold`, to poke at it from the console. Default: false */
+  globalInstance: boolean
 }
 
 const consoleLog: DebugOptions['log'] = (message, ...details) =>
@@ -21,10 +23,17 @@ export default class PagefoldDebug extends Plugin {
   name = 'PagefoldDebug'
 
   options: DebugOptions
-  static defaults: DebugOptions = { log: consoleLog, filter: () => true, checkContainers: true }
+  static defaults: DebugOptions = {
+    log: consoleLog,
+    filter: () => true,
+    checkContainers: true,
+    globalInstance: false,
+  }
 
   private originalLog: ((message: string, context?: unknown) => void) | undefined
   private started = new Map<number, number>()
+  /** True when this plugin put the instance on `window` */
+  private exposed = false
 
   constructor(options: Partial<DebugOptions> = {}) {
     super()
@@ -32,13 +41,17 @@ export default class PagefoldDebug extends Plugin {
   }
 
   override mount(): void {
-    const { log, filter, checkContainers } = this.options
+    const { log, filter, checkContainers, globalInstance } = this.options
+    this.exposed = globalInstance
+    if (globalInstance) (window as unknown as { pagefold?: unknown }).pagefold = this.pagefold
     this.originalLog = this.pagefold.log
-    this.pagefold.log = (message, context) => log(message, ...(context === undefined ? [] : [context]))
+    this.pagefold.log = (message, context) =>
+      log(message, ...(context === undefined ? [] : [context]))
 
     if (checkContainers) {
       for (const selector of this.pagefold.options.containers) {
-        if (!document.querySelector(selector)) log(`warning: container \`${selector}\` is not on this page`)
+        if (!document.querySelector(selector))
+          log(`warning: container \`${selector}\` is not on this page`)
       }
     }
 
@@ -62,6 +75,8 @@ export default class PagefoldDebug extends Plugin {
 
   override unmount(): void {
     if (this.originalLog) this.pagefold.log = this.originalLog
+    const w = window as unknown as { pagefold?: unknown }
+    if (this.exposed && w.pagefold === this.pagefold) delete w.pagefold
     this.started.clear()
     super.unmount()
   }

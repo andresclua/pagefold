@@ -89,7 +89,10 @@ describe('preload', () => {
 
   test('does nothing on slow connections, unless disabled', async () => {
     const fetchMock = stubFetch({ '/a': page('', 'a') })
-    Object.defineProperty(navigator, 'connection', { value: { saveData: true }, configurable: true })
+    Object.defineProperty(navigator, 'connection', {
+      value: { saveData: true },
+      configurable: true,
+    })
     const plugin = make()
     expect(await plugin.preload('/a')).toBeUndefined()
     expect(fetchMock).not.toHaveBeenCalled()
@@ -184,7 +187,10 @@ describe('hover, touch and focus', () => {
     expect(fetchMock).not.toHaveBeenCalled()
 
     await pf.destroy()
-    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldPreload({ preloadInitialPage: false, hoverDelay: 0 })] })
+    pf = new Pagefold({
+      animationSelector: false,
+      plugins: [new PagefoldPreload({ preloadInitialPage: false, hoverDelay: 0 })],
+    })
     await pf.destroy()
     link().dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     await Promise.resolve()

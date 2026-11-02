@@ -6,9 +6,17 @@ order: 10
 whenToUse: "When the transition depends on where you come from and where you go: home to a project, a list to a detail, any page to the contact page."
 options:
   - name: "routes"
-    type: "Record<string, string | string[]>"
+    type: "Record<string, string | string[]> | { name, path }[]"
     default: "{}"
-    description: "Named routes: a name and one or more path patterns."
+    description: "Named routes: a name and one or more path patterns, as an object or as a list. The first match wins."
+  - name: "unknownRoute"
+    type: "string | false"
+    default: "'unknown'"
+    description: "The name of a page that matches no route. false leaves it without one."
+  - name: "paths"
+    type: "boolean"
+    default: "false"
+    description: "Also add from-<page> and to-<page> classes, named after the path."
   - name: "animations"
     type: "{ from?, to?, animation }[]"
     default: "[]"
@@ -52,7 +60,7 @@ For a visit from `/work` to `/work/hello` with the configuration above:
   caption="to-expand comes from the first entry in animations that matches work to project. All three classes are removed when the visit ends."
 />
 
-- `visit.from.route` and `visit.to.route`, the names of the pages, or `undefined`.
+- `visit.from.route` and `visit.to.route`, the names of the pages. A page with no route is `unknown`.
 - Classes while it runs: `from-route-home`, `to-route-project`. They are removed at the end.
 - If the visit has no animation name yet, the first matching entry in `animations` sets it, which also adds `to-expand` and works with the [JS plugin](/docs/js).
 
@@ -64,4 +72,40 @@ html.from-route-home.to-route-project .transition-fade {
 
 ## Details
 
-Patterns use `:name` and `*` (see [JS](/docs/js#matching)). The first route that matches wins, so list specific routes before general ones. A name you set yourself (a link attribute or `navigate(url, { animation })`) is never overwritten.
+Patterns use `:name`, optional parameters such as `/:lang?`, and `*` or `(.*)` (see [JS](/docs/js#matching)). The first route that matches wins, so list specific routes before general ones. A name you set yourself (a link attribute or `navigate(url, { animation })`) is never overwritten.
+
+Routes can also be a list, which keeps the order explicit:
+
+```js
+new PagefoldRouteName({
+  routes: [
+    { name: 'project', path: '/:lang/project/:slug' },
+    { name: 'projects', path: '/:lang/projects' },
+    { name: 'home', path: '/:lang?' },
+    { name: 'any', path: '(.*)' },
+  ],
+})
+```
+
+### Pages without a route
+
+A page that matches none gets the name `unknown`, so `to-route-unknown` is there to style. Change the name with `unknownRoute`, or set `unknownRoute: false` to leave such pages without a route and without the class.
+
+### Two pages of the same route
+
+When the page you leave and the page you enter have the same route, the visit also gets `to-same-route`. It is handy for turning the transition off between pages with the same layout:
+
+```css
+html.to-same-route .transition-fade {
+  transition: none;
+}
+```
+
+### Classes named after the path
+
+With `paths: true` a visit also gets `from-<page>` and `to-<page>`, named after the path in lower case: `/about/` is `about`, `/blog/hello` is `blog-hello` and `/` is `homepage`. It is useful when you want to style one pair of pages without naming routes.
+
+```html
+<!-- from /about/ to /team -->
+<html class="is-animating from-about to-team">
+```

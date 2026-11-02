@@ -21,13 +21,20 @@ beforeEach(() => {
     '<div id="pagefold"><a id="jump" href="/#section">jump</a><a id="self" href="/">self</a><h2 id="section">Section</h2></div>'
   )
   vi.useFakeTimers({
-    toFake: ['requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'setTimeout', 'clearTimeout'],
+    toFake: [
+      'requestAnimationFrame',
+      'cancelAnimationFrame',
+      'performance',
+      'setTimeout',
+      'clearTimeout',
+    ],
   })
   setScrollY(0)
   scrollTo = vi.fn((opts: ScrollToOptions) => setScrollY(opts.top ?? 0))
   window.scrollTo = scrollTo as unknown as typeof window.scrollTo
   scrollIntoView = vi.fn()
-  Element.prototype.scrollIntoView = scrollIntoView as unknown as typeof Element.prototype.scrollIntoView
+  Element.prototype.scrollIntoView =
+    scrollIntoView as unknown as typeof Element.prototype.scrollIntoView
   stubFetch({ '/a': page('', 'a') })
 })
 afterEach(async () => {
@@ -125,24 +132,26 @@ describe('as a plugin', () => {
     make({ offset: 20 })
     const section = document.querySelector('#section')!
     vi.spyOn(section, 'getBoundingClientRect').mockReturnValue({ top: 520 } as DOMRect)
-    document.querySelector('#jump')!.dispatchEvent(
-      new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 })
-    )
+    document
+      .querySelector('#jump')!
+      .dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }))
     await vi.advanceTimersByTimeAsync(1100)
     expect(window.scrollY).toBe(500)
   })
 
   test('samePageWithHash: false falls back to the instant default', () => {
     make({ animateScroll: { samePageWithHash: false } })
-    document.querySelector('#jump')!.dispatchEvent(
-      new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 })
-    )
+    document
+      .querySelector('#jump')!
+      .dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }))
     expect(scrollIntoView).toHaveBeenCalledTimes(1)
     expect(scrollTo).not.toHaveBeenCalled()
   })
 
   test('reduced motion jumps instead of animating', async () => {
-    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia
+    window.matchMedia = vi
+      .fn()
+      .mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia
     make()
     setScrollY(800)
     await pf.navigate('/a')

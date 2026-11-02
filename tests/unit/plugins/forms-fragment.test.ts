@@ -61,7 +61,10 @@ describe('PagefoldForms', () => {
 
   test('a button can override action and method', async () => {
     resetDom(
-      form('data-pagefold-form action="/save" method="post"', '<button id="alt" formaction="/other" formmethod="get">alt</button>')
+      form(
+        'data-pagefold-form action="/save" method="post"',
+        '<button id="alt" formaction="/other" formmethod="get">alt</button>'
+      )
     )
     make()
     submit('#f', '#alt')
