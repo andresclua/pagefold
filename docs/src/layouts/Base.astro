@@ -49,13 +49,31 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
   import PagefoldPreload from 'pagefold/preload'
   import PagefoldScroll from 'pagefold/scroll'
 
-  new Pagefold({
+  const pagefold = new Pagefold({
     plugins: [
       new PagefoldHead({ awaitAssets: true }),
       new PagefoldA11y(),
       new PagefoldScroll({ duration: 500, animateScroll: { betweenPages: false } }),
       new PagefoldPreload(),
     ],
+  })
+
+  // The diagrams that move as you read (GSAP and ScrollTrigger). `mount` sets each one up when it
+  // arrives and cleans it up when it leaves, so no trigger is left behind after a visit.
+  pagefold.mount<HTMLElement>('[data-motion]', (el) => {
+    let stop: (() => void) | undefined
+    let gone = false
+    void import('../scripts/motion').then(({ animate }) => {
+      if (!gone) stop = animate(el)
+    })
+    return () => {
+      gone = true
+      stop?.()
+    }
+  })
+  // The page may still be moving when the triggers measure it: measure again when the visit is over
+  pagefold.hooks.on('visit:end', () => {
+    void import('../scripts/motion').then(({ refresh }) => refresh())
   })
 
   // One listener on the document: a script that belongs to a single page would not run again
