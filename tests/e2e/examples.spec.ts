@@ -60,3 +60,29 @@ test('fragment: the list keeps its scroll and what was typed; only the detail ch
   await expect(page.locator('#detail h1')).toHaveText('Ada')
   await expect(page.locator('#list input')).toHaveValue('hello')
 })
+
+for (const name of ['fade', 'slide']) {
+  test(`${name}: the new content fades in instead of appearing at once`, async ({ page }) => {
+    await go(page, name)
+    // After the text changes, watch the opacity for a few frames
+    const seen = await page.evaluate(
+      () =>
+        new Promise<number[]>((resolve) => {
+          const main = () => document.querySelector('#pagefold') as HTMLElement
+          const values: number[] = []
+          const tick = () => {
+            if (document.querySelector('h1')?.textContent === 'About')
+              values.push(+getComputedStyle(main()).opacity)
+            if (values.length >= 12) resolve(values)
+            else requestAnimationFrame(tick)
+          }
+          tick()
+          document
+            .querySelector<HTMLElement>('nav a[href="about.html"]')
+            ?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+        })
+    )
+    expect(seen[0]).toBeLessThan(0.5)
+    expect(seen.some((v) => v > 0.05 && v < 0.95)).toBe(true)
+  })
+}

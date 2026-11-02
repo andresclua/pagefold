@@ -51,7 +51,12 @@ async function animateOut(p: Pagefold, visit: Visit): Promise<void> {
 }
 
 async function animateIn(p: Pagefold, visit: Visit): Promise<void> {
-  await p.hooks.call('animation:in:start', visit, undefined, () => p.classes.remove('is-animating'))
+  await p.hooks.call('animation:in:start', visit, undefined, () => {
+    // The new containers must be styled in their "before" state first, or the browser has nothing
+    // to transition from and the content appears at once. Reading a layout property flushes the styles.
+    void document.body.offsetHeight
+    p.classes.remove('is-animating')
+  })
   await p.hooks.call('animation:in:await', visit, { skip: false }, async (v, { skip }) => {
     if (skip) return
     await awaitAnimations({ selector: v.animation.selector, signal: v.controller.signal })
