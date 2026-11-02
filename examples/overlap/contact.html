@@ -7,16 +7,19 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-  </nav>
+  <header class="bar">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <p class="status">Pages in the document: <b id="count">1</b></p>
+  </header>
   <div class="stack">
-    <main id="pagefold">
+    <main id="pagefold" class="transition-overlap" style="background:#00c985;color:#0a0a0a">
       <h1>Contact</h1>
-      <p>The third page. Nothing here is a single-page app: each one is its own HTML file.</p>
-      <div class="card" style="background:#fafaf8"></div>
+      <p><strong>This is the third page.</strong></p>
+      <p>Use the back button: the pages cross in the same way.</p>
     </main>
   </div>
   <script src="../_lib/pagefold.js"></script>

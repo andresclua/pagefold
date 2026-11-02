@@ -43,9 +43,9 @@ The same visit, with and without the plugin. Both animations run at the same tim
   ]}
 />
 
-Try it. The old page slides out while the new one slides in, and for a moment both are on screen:
+Try it. Each page has its own color so you can tell them apart. While the new page slides in, the old one is still there, sliding away, and the counter at the top says there are **two pages in the document**. Each one is tagged `old page` and `new page` while they cross. When the visit ends the old one is removed and the counter goes back to one.
 
-<Demo name="overlap" height={340} />
+<Demo name="overlap" height={380} files={['main.js', 'style.css', 'index.html']} />
 
 ## Classes
 
@@ -59,14 +59,20 @@ Try it. The old page slides out while the new one slides in, and for a moment bo
 Every container also gets a custom property, `--pagefold-overlap-container`, with its position: `0` for the newest.
 
 ```css
-#pagefold {
+.transition-overlap {
   transition: opacity 0.4s;
 }
-#pagefold.is-next-container,
-#pagefold.is-previous-container {
+.transition-overlap.is-next-container,
+.transition-overlap.is-previous-container {
   opacity: 0;
 }
 ```
+
+```html
+<main id="pagefold" class="transition-overlap">...</main>
+```
+
+**The container needs a class that starts with `transition-`.** Pagefold waits for the CSS transitions of the elements that match [`animationSelector`](/docs/options), which by default is `[class*="transition-"]`. Without that class there is nothing to wait for, and the old page is removed the moment the new one is in: the two never overlap.
 
 The previous container also gets `aria-hidden="true"`, so screen readers do not read two pages.
 
@@ -84,6 +90,7 @@ pagefold.hooks.on('visit:start', (visit) => {
 
 ## Common problems
 
+- **The old page disappears at once, with no overlap.** Pagefold is not waiting for your transition. Give the container a class that starts with `transition-`, or set `animationSelector` to match it.
 - **The two pages stack one under the other.** Both containers are in the document at the same time, so the layout has to allow it. For a crossfade, place them on top of each other with `position: absolute` or a shared grid cell.
 - **An old container stays after the visit.** `keep` says how many previous containers to hold on to. Leave it at `0` to remove them all.
 - **It animates when I do not want it to.** Set `visit.animation.overlap = false` for that visit, as shown above.

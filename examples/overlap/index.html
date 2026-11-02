@@ -7,16 +7,19 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-  </nav>
+  <header class="bar">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <p class="status">Pages in the document: <b id="count">1</b></p>
+  </header>
   <div class="stack">
-    <main id="pagefold">
+    <main id="pagefold" class="transition-overlap" style="background:#1b1bff;color:#fafaf8">
       <h1>Home</h1>
-      <p>The first page. Click a link and watch the page change.</p>
-      <div class="card" style="background:#1b1bff"></div>
+      <p><strong>This is the first page.</strong></p>
+      <p>Click About. Both pages will be in the document at the same time.</p>
     </main>
   </div>
   <script src="../_lib/pagefold.js"></script>

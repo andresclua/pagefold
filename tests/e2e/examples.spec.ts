@@ -17,32 +17,30 @@ const go = async (page: Page, name: string) => {
 for (const name of ['fade', 'slide', 'overlap', 'native']) {
   test(`${name}: links change the page without a reload and back works`, async ({ page }) => {
     await go(page, name)
+    const titles = () =>
+      page.evaluate(() => [...document.querySelectorAll('h1')].map((h) => h.textContent))
     await page.evaluate(() => ((window as unknown as { __same: boolean }).__same = true))
     await page.click('nav a[href="about.html"]')
-    await expect(page.locator('h1')).toHaveText('About')
+    await expect.poll(titles).toEqual(['About']) // with overlap, the old page is there until the end
     await expect(page).toHaveURL(new RegExp(`/examples/${name}/about.html$`))
     expect(await page.evaluate(() => (window as unknown as { __same?: boolean }).__same)).toBe(true)
     await page.goBack()
-    await expect(page.locator('h1')).toHaveText('Home')
-    expect(await page.locator('#pagefold').count()).toBe(1)
+    await expect.poll(titles).toEqual(['Home'])
   })
 }
 
-test('overlap: both pages are in the DOM during the visit and one is left after', async ({
+test('overlap: two pages are in the document while they cross, tagged, and one is left after', async ({
   page,
 }) => {
   await go(page, 'overlap')
-  await page.evaluate(() => {
-    const w = window as unknown as { __max: number }
-    w.__max = 0
-    new MutationObserver(
-      () => (w.__max = Math.max(w.__max, document.querySelectorAll('#pagefold').length))
-    ).observe(document.body, { childList: true, subtree: true })
-  })
+  await expect(page.locator('#count')).toHaveText('1')
   await page.click('nav a[href="contact.html"]')
-  await expect(page.locator('h1')).toHaveText('Contact')
-  await expect(page.locator('#pagefold')).toHaveCount(1)
-  expect(await page.evaluate(() => (window as unknown as { __max: number }).__max)).toBe(2)
+  await expect(page.locator('#count')).toHaveText('2') // the counter in the bar says so
+  await expect(page.locator('main.is-previous-container')).toHaveCount(1)
+  await expect(page.locator('main')).toHaveCount(2)
+  await expect(h1(page)).toHaveText('Contact') // settled: only the new page
+  await expect(page.locator('#count')).toHaveText('1')
+  await expect(page.locator('main')).toHaveCount(1)
 })
 
 test('fragment: the list keeps its scroll, its filter and its time; only the detail changes', async ({

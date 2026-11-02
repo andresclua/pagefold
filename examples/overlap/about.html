@@ -7,16 +7,19 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-  </nav>
+  <header class="bar">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <p class="status">Pages in the document: <b id="count">1</b></p>
+  </header>
   <div class="stack">
-    <main id="pagefold">
+    <main id="pagefold" class="transition-overlap" style="background:#7c5cff;color:#fafaf8">
       <h1>About</h1>
-      <p>The second page. The URL changes and the back button works.</p>
-      <div class="card" style="background:#00ff9c"></div>
+      <p><strong>This is the second page.</strong></p>
+      <p>The old one is still here, sliding away, while this one comes in.</p>
     </main>
   </div>
   <script src="../_lib/pagefold.js"></script>

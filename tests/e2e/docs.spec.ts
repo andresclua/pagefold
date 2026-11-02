@@ -45,6 +45,30 @@ test.describe('overlap', () => {
     await expect(page.locator('#pagefold')).toHaveCount(1)
   })
 
+  test('without something to wait for, the old page is removed at once and the pages never overlap', async ({
+    page,
+  }) => {
+    // The default animationSelector looks for a class that starts with transition-. With nothing to wait for:
+    await open(page, '/', { options: { animationSelector: false }, plugins: [['overlap']] })
+    await page.addStyleTag({ content: slow })
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    await page.waitForTimeout(300) // the transition lasts 1.2 s
+    expect(await page.locator('#pagefold').count()).toBe(1)
+  })
+
+  test('with a class that starts with transition- both pages are there while it runs', async ({
+    page,
+  }) => {
+    await openOverlap(page)
+    await link(page, '/about').click()
+    await bothThere(page)
+    await page.waitForTimeout(300)
+    expect(await page.locator('#pagefold').count()).toBe(2)
+    await done(page)
+    await expect(page.locator('#pagefold')).toHaveCount(1)
+  })
+
   test('without extra CSS the two pages stack one under the other', async ({ page }) => {
     await openOverlap(page)
     await link(page, '/about').click()
