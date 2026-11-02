@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Clock · Components</title>
-  <meta name="description" content="A clock with a timer. The timer stops when you leave.">
+  <meta name="description" content="A clock with a timer. The timer should stop when you leave.">
   <link rel="stylesheet" href="../_lib/fade.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -19,11 +19,15 @@
   </header>
   <main id="pagefold" class="transition-fade">
     <h1>Clock</h1>
-    <p class="lead">A clock with a timer. The timer stops when you leave.</p>
+    <p class="lead">A clock with a timer. The timer should stop when you leave.</p>
     <div class="widget" data-clock><span class="time">--:--:--</span></div>
   </main>
   <section id="log" aria-label="What pagefold.mount did">
-    <header><b>pagefold.mount</b><span>timers running: <b id="timers">0</b></span></header>
+    <header>
+      <label class="switch"><input type="checkbox" id="cleanup" checked> Clean up when leaving</label>
+      <span class="stats">alive <b id="alive">0</b> · timers <b id="timers">0</b></span>
+      <button type="button" id="reset">Start over</button>
+    </header>
     <ol id="lines"></ol>
   </section>
   <script src="../_lib/pagefold.js"></script>

@@ -23,7 +23,11 @@
     <div class="widget" data-counter><button type="button">Clicked <b>0</b> times</button></div>
   </main>
   <section id="log" aria-label="What pagefold.mount did">
-    <header><b>pagefold.mount</b><span>timers running: <b id="timers">0</b></span></header>
+    <header>
+      <label class="switch"><input type="checkbox" id="cleanup" checked> Clean up when leaving</label>
+      <span class="stats">alive <b id="alive">0</b> · timers <b id="timers">0</b></span>
+      <button type="button" id="reset">Start over</button>
+    </header>
     <ol id="lines"></ol>
   </section>
   <script src="../_lib/pagefold.js"></script>

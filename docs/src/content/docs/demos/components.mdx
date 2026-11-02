@@ -13,10 +13,27 @@ When Pagefold swaps the HTML, the JavaScript you attached to it stays behind: li
 
 ## What to try
 
-- On **Counter**, click the button a few times. Then go to **Clock**: the log says the counter was cleaned and how many clicks it had.
-- On **Clock**, look at `timers running`. It is 1. Go to another page and it is 0: the timer was stopped, not left running in the background.
-- On **Tabs**, a tabs component and a counter are set up together.
-- Go back and forward. The log follows the page that is on screen.
+With the switch **on** (the default):
+- On **Counter**, click the button a few times. Go to **Clock**: the log says the counter was cleaned.
+- On **Clock**, `timers` is 1. Go to another page and it is 0: the timer was stopped.
+- Go back and forth. `alive` is always the number of components that are on the page.
+
+Now **turn "Clean up when leaving" off** and do the same:
+- Go to **Clock** and away, three times. `timers` goes to 3. Each visit left one more timer running, on an element that is no longer on the page.
+- Go to **Tabs** and away a few times, then press any key. The log shows the **same key handled by several tabs**: `tabs #2`, `tabs #3`, `tabs #4`.
+- `alive` only goes up. The log says `NOT cleaned` at every step.
+- Press **Start over** to begin again.
+
+## Why not cleaning up is bad
+
+The switch does exactly what forgetting the cleanup does: the component is set up again on every visit, and the old one is never undone.
+
+- **Timers and animation loops keep running.** Each one wakes the browser, burns CPU and battery, and works on elements that nobody can see. They add up with every visit.
+- **Listeners on `document`, `window` or a timer fire several times.** The key press above is handled once per visit you made. Real examples are a tracking event sent three times, a modal that opens twice or a request that is made once per old page.
+- **Memory grows.** A listener or a timer holds on to its element, its data and everything its closure can reach, so the old page cannot be freed. On a site where visitors browse for an hour, this is a slow leak that nobody notices until it hurts.
+- **The bugs are hard to find.** Everything works the first time and gets worse with use, so it is easy to miss while developing, where you rarely visit more than a few pages.
+
+The cure is the one in the code: **return a function that undoes what `setup` did**, and `pagefold.mount` runs it when the element leaves. Anything you start (a timer, an observer, a listener outside the element, a third-party instance) needs an undo.
 
 ## How it works
 
@@ -29,6 +46,6 @@ pagefold.mount('[data-clock]', (el) => {
 
 - **Each element is set up once**, and cleaned up once, however many visits come and go.
 - **Return the cleanup.** Without it, every visit to the clock would leave one more timer running.
-- **No listener on a page's scripts** is needed: the code is loaded once and `mount` takes care of the rest.
+- **The code is loaded once**, in the first page. `mount` takes care of setting up and cleaning up, so no script has to run again.
 
 More in [Initializing components](/docs/components) and [Gia](/docs/gia).

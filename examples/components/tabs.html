@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tabs · Components</title>
-  <meta name="description" content="Tabs with their own listeners, and a counter on the same page.">
+  <meta name="description" content="Tabs that also listen to the keyboard. Press a key and look at the log.">
   <link rel="stylesheet" href="../_lib/fade.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -19,12 +19,16 @@
   </header>
   <main id="pagefold" class="transition-fade">
     <h1>Tabs</h1>
-    <p class="lead">Tabs with their own listeners, and a counter on the same page.</p>
+    <p class="lead">Tabs that also listen to the keyboard. Press a key and look at the log.</p>
     <div class="widget" data-tabs><div class="tablist"><button type="button" aria-selected="true">One</button><button type="button">Two</button><button type="button">Three</button></div><p class="panel">Panel one</p></div>
     <div class="widget" data-counter><button type="button">Clicked <b>0</b> times</button></div>
   </main>
   <section id="log" aria-label="What pagefold.mount did">
-    <header><b>pagefold.mount</b><span>timers running: <b id="timers">0</b></span></header>
+    <header>
+      <label class="switch"><input type="checkbox" id="cleanup" checked> Clean up when leaving</label>
+      <span class="stats">alive <b id="alive">0</b> · timers <b id="timers">0</b></span>
+      <button type="button" id="reset">Start over</button>
+    </header>
     <ol id="lines"></ol>
   </section>
   <script src="../_lib/pagefold.js"></script>

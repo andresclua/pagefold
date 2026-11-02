@@ -28,8 +28,16 @@ p{margin:0 0 1rem;max-width:36rem;color:#c9c9c4}
 .panel{margin:0}
 main{padding-bottom:1rem}
 #log{margin:0 1.5rem 1.5rem;border:1px solid #2c2c2c;border-radius:12px;background:#101010;max-width:46rem;font:.8rem ui-monospace,Menlo,monospace}
-#log header{display:flex;justify-content:space-between;padding:.5rem .8rem;border-bottom:1px solid #2c2c2c;color:#a3a39e}
-#lines{list-style:none;margin:0;padding:.4rem .8rem;max-height:9.5rem;overflow:auto}
+#log header{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1.25rem;padding:.5rem .8rem;border-bottom:1px solid #2c2c2c;color:#a3a39e}
+#log .switch{display:flex;align-items:center;gap:.45rem;color:#fafaf8;cursor:pointer}
+#log .switch input{accent-color:#00ff9c;width:1rem;height:1rem;cursor:pointer}
+#log .stats{margin-left:auto}
+#log .stats b{color:#00ff9c;font-variant-numeric:tabular-nums}
+#log.is-leaking .stats b{color:#ff9f5c}
+#log button{font:inherit;color:#fafaf8;background:#1a1a1a;border:1px solid #2c2c2c;border-radius:8px;padding:.2rem .6rem;cursor:pointer}
+#log button:hover{border-color:#00ff9c}
+#lines{list-style:none;margin:0;padding:.4rem .8rem;max-height:9rem;overflow:auto}
 #lines li{padding:.12rem 0;color:#a3a39e}
 #lines .up{color:#00ff9c}
-#lines .down{color:#ff9f5c}
+#lines .down{color:#7cc4ff}
+#lines .leak{color:#ff9f5c}

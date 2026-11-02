@@ -222,18 +222,38 @@ test.describe('demos', () => {
   }) => {
     await go(page, 'components')
     const lines = page.locator('#lines')
-    await expect(lines).toContainText('set up   counter')
-    await page.click('[data-counter] button')
-    await page.click('[data-counter] button')
+    await expect(lines).toContainText('set up       counter')
     await page.click('nav a[href="clock.html"]')
     await expect(h1(page)).toHaveText('Clock')
-    await expect(lines).toContainText('cleaned  counter (it had counted 2)')
-    await expect(lines).toContainText('set up   clock, timer started')
+    await expect(lines).toContainText('cleaned      counter')
     await expect(page.locator('#timers')).toHaveText('1')
     await page.click('nav a[href="tabs.html"]')
     await expect(h1(page)).toHaveText('Tabs')
-    await expect(lines).toContainText('cleaned  clock, timer stopped')
+    await expect(lines).toContainText('cleaned      clock')
     await expect(page.locator('#timers')).toHaveText('0')
+    await expect(page.locator('#alive')).toHaveText('2') // tabs and a counter, which are the ones on the page
+  })
+
+  test('components: without the cleanup, timers and key handlers add up', async ({ page }) => {
+    await go(page, 'components')
+    await page.uncheck('#cleanup')
+    for (const href of ['clock.html', 'tabs.html', 'clock.html', 'tabs.html']) {
+      await page.click(`nav a[href="${href}"]`)
+      await expect(page.locator('#pagefold h1')).toHaveText(
+        href.startsWith('clock') ? 'Clock' : 'Tabs'
+      )
+    }
+    await expect(page.locator('#timers')).toHaveText('2') // two clocks were visited, none stopped
+    await expect(page.locator('#lines')).toContainText('NOT cleaned')
+    await page.keyboard.press('a')
+    // The same key, handled by every tabs that was ever set up
+    await expect(page.locator('#lines li').filter({ hasText: /^key "a"/ })).toHaveCount(2)
+    // Turning it on again does not undo what already leaked, but stops new leaks
+    await page.check('#cleanup')
+    await page.click('nav a[href="clock.html"]')
+    await expect(page.locator('#pagefold h1')).toHaveText('Clock')
+    await page.click('nav a[href="tabs.html"]')
+    await expect(page.locator('#lines')).toContainText('cleaned      clock')
   })
 
   test('inspector: title, description, language, body class, announcement and focus follow the page', async ({
