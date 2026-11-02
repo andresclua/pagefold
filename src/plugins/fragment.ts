@@ -17,6 +17,8 @@ export interface FragmentRule {
    * decides for each visit. Fragment visits keep the scroll position by default.
    */
   scroll?: boolean | string | ((visit: Visit) => boolean | string)
+  /** With the A11y plugin: a selector to focus after these visits, or `false` for no focus change */
+  focus?: boolean | string
   /** Skip this rule for the visits where it returns `false`, even if the paths match */
   if?: (visit: Visit) => boolean
 }
@@ -75,6 +77,8 @@ export default class PagefoldFragment extends Plugin {
     visit.containers = rule.containers
     visit.animation.scope = rule.containers // classes go on the fragment, not the whole page
     if (rule.name && !visit.animation.name) visit.animation.name = rule.name
+    if (visit.a11y && typeof rule.focus === 'string') visit.a11y.focus = rule.focus
+    else if (visit.a11y && rule.focus === false) visit.a11y.focus = false
     const scroll = typeof rule.scroll === 'function' ? rule.scroll(visit) : rule.scroll
     if (typeof scroll === 'string') {
       visit.scroll.target = scroll

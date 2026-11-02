@@ -1,13 +1,52 @@
 import type { HookHandler } from '../hooks.js'
 import { Plugin } from '../plugin.js'
+import type { Visit } from '../visit.js'
+
+declare module '../hooks.js' {
+  interface HookDefinitions {
+    'content:announce': undefined
+    'content:focus': undefined
+  }
+}
+
+declare module '../visit.js' {
+  interface Visit {
+    /** Set by the A11y plugin: what is announced and where focus goes, for this visit */
+    a11y?: {
+      /** The text announced, or `false` for none. Filled in once the new page is there, so change it in `before('content:announce')`. */
+      announce: string | false | undefined
+      /** The element to focus (a selector, or an object to also choose when), or `false` for none */
+      focus: string | false | { selector?: string | undefined; wait?: boolean }
+    }
+  }
+}
+
+declare module '../pagefold.js' {
+  interface Pagefold {
+    /** Added by the A11y plugin: announce something to screen readers */
+    announce?: (text: string) => void
+  }
+}
+
+export interface Announcements {
+  /** Said when the page has a title. `{title}` is replaced. */
+  visit: string
+  /** Said instead of the title when the page has none. `{url}` is replaced. */
+  url: string
+}
 
 export interface A11yOptions {
   /** Tell screen readers about the new page. Default: true */
   announce: boolean
-  /** Text announced after a visit. `{title}` is the page heading, `{url}` the new path. */
-  announcement: string
-  /** Where to look for the page heading. The document title is the fallback. */
-  headingSelector: string
+  /**
+   * What is announced. For several languages, key it by the `lang` of the page and use `*` as the
+   * fallback.
+   */
+  announcements: Announcements | Record<string, Announcements>
+  /** Where to look for the page heading, in order. The document title is the fallback. */
+  headingSelector: string | string[]
+  /** Focus the element with an `autofocus` attribute in the new content. Default: false */
+  autofocus: boolean
   /** Move focus to the new content after a visit. Default: true */
   focus: boolean
   /** The content that receives focus. Default: the first container of the visit. */
@@ -15,6 +54,8 @@ export interface A11yOptions {
   /** Skip animations when the user prefers reduced motion. Default: true */
   respectReducedMotion: boolean
 }
+
+const A11yDefaults: Announcements = { visit: 'Navigated to: {title}', url: 'New page at {url}' }
 
 /** Focus here stays where it is */
 const KEEP_FOCUS = 'input, textarea, select, [contenteditable], [data-pagefold-persist]'
@@ -41,8 +82,9 @@ export default class PagefoldA11y extends Plugin {
   options: A11yOptions
   static defaults: A11yOptions = {
     announce: true,
-    announcement: 'Navigated to: {title}',
-    headingSelector: 'h1',
+    announcements: { visit: 'Navigated to: {title}', url: 'New page at {url}' },
+    headingSelector: ['main h1', 'h1'],
+    autofocus: false,
     focus: true,
     contentSelector: undefined,
     respectReducedMotion: true,
@@ -57,6 +99,9 @@ export default class PagefoldA11y extends Plugin {
   }
 
   override mount(): void {
+    this.pagefold.hooks.create('content:announce')
+    this.pagefold.hooks.create('content:focus')
+    this.pagefold.announce = (text) => this.say(text)
     if (this.options.announce) {
       const el = document.createElement('div')
       el.className = 'pagefold-announcer'
@@ -68,13 +113,16 @@ export default class PagefoldA11y extends Plugin {
       this.announcer = el
     }
 
+    this.on('visit:start', this.prepare, { priority: -1 })
     if (this.options.respectReducedMotion) this.on('visit:start', this.reduceMotion)
     this.on('page:view', this.afterView)
+    this.on('visit:end', this.focusLate)
     this.on('link:anchor', this.focusAnchor)
   }
 
   override unmount(): void {
     clearTimeout(this.timer)
+    delete this.pagefold.announce
     this.announcer?.remove()
     this.announcer = undefined
     super.unmount()
@@ -86,9 +134,46 @@ export default class PagefoldA11y extends Plugin {
     }
   }
 
+  /** Give the visit its `a11y` object, so handlers can change what is announced and focused. */
+  private prepare: HookHandler<'visit:start'> = (visit) => {
+    const { focus, contentSelector } = this.options
+    visit.a11y = {
+      announce: undefined,
+      focus: focus ? { selector: contentSelector ?? visit.containers[0], wait: false } : false,
+    }
+  }
+
   private afterView: HookHandler<'page:view'> = (visit, { url }) => {
-    if (this.options.announce) this.announce(url)
-    if (this.options.focus) this.focusContent(visit.containers[0])
+    const { a11y } = visit
+    if (!a11y) return
+    void this.pagefold.hooks.call('content:announce', visit, undefined, () => {
+      if (a11y.announce === undefined)
+        a11y.announce = this.options.announce ? this.message(url) : false
+      if (a11y.announce) this.say(a11y.announce)
+    })
+    if (!this.focusAt(visit).wait) void this.focus(visit)
+  }
+
+  /** Focus that waits for the visit to be over. */
+  private focusLate: HookHandler<'visit:end'> = (visit) => {
+    if (this.focusAt(visit).wait) void this.focus(visit)
+  }
+
+  private focusAt(visit: Visit): { selector?: string | undefined; wait?: boolean } {
+    const focus = visit.a11y?.focus
+    if (!focus) return {}
+    return typeof focus === 'string' ? { selector: focus, wait: false } : focus
+  }
+
+  private async focus(visit: Visit): Promise<void> {
+    await this.pagefold.hooks.call('content:focus', visit, undefined, () => {
+      if (!visit.a11y?.focus) return
+      this.focusContent(this.focusAt(visit).selector)
+      if (this.options.autofocus) {
+        const el = document.querySelector<HTMLElement>('[autofocus]')
+        if (el) el.focus({ preventScroll: true })
+      }
+    })
   }
 
   private focusAnchor: HookHandler<'link:anchor'> = (_visit, { hash }) => {
@@ -98,10 +183,34 @@ export default class PagefoldA11y extends Plugin {
     }
   }
 
-  private announce(url: string): void {
-    const heading = document.querySelector(this.options.headingSelector)?.textContent?.trim()
-    const title = heading || document.title
-    const text = this.options.announcement.replace('{title}', title).replace('{url}', url)
+  /** The page's own name: the label of its heading, the heading, or the document title. */
+  private pageTitle(): string {
+    const { headingSelector } = this.options
+    for (const selector of [headingSelector].flat()) {
+      const heading = document.querySelector(selector)
+      const text = heading?.getAttribute('aria-label') || heading?.textContent?.trim()
+      if (text) return text
+    }
+    return document.title
+  }
+
+  /** The announcements for the language of the page, with `*` as the fallback. */
+  private texts(): Announcements {
+    const { announcements } = this.options
+    if (typeof announcements.visit === 'string') return announcements as Announcements
+    const byLanguage = announcements as Record<string, Announcements>
+    const lang = document.documentElement.lang
+    return byLanguage[lang] ?? byLanguage['*'] ?? Object.values(byLanguage)[0] ?? A11yDefaults
+  }
+
+  private message(url: string): string {
+    const { visit, url: untitled } = this.texts()
+    const title = this.pageTitle()
+    // Without any title the address is read instead
+    return visit.replace('{title}', title || untitled).replace('{url}', url)
+  }
+
+  private say(text: string): void {
     const el = this.announcer
     if (!el) return
     // Clearing first makes screen readers repeat a message that did not change

@@ -172,12 +172,12 @@ describe('as a plugin', () => {
 })
 
 describe('getAnchorElement', () => {
-  test('a custom finder decides what a hash points to', async () => {
+  test('a custom finder decides what a hash points to', () => {
     resetDom(
       '<div id="pagefold"><a id="jump" href="/#section">jump</a><h2 data-target="section">Section</h2></div>'
     )
-    const found = vi.fn((hash: string) =>
-      document.querySelector(`[data-target="${hash.slice(1)}"]`)
+    const found = vi.fn((hash: string): Element | null =>
+      document.querySelector<Element>(`[data-target="${hash.slice(1)}"]`)
     )
     make({ animateScroll: false, getAnchorElement: found })
     document.querySelector<HTMLAnchorElement>('#jump')!.click()

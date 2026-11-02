@@ -9,14 +9,18 @@ options:
     type: "boolean"
     default: "true"
     description: "Tell screen readers about the new page."
-  - name: "announcement"
-    type: "string"
-    default: "'Navigated to: {title}'"
-    description: "The message. {title} is the page heading and {url} the new path."
+  - name: "announcements"
+    type: "{ visit, url } | Record<lang, { visit, url }>"
+    default: "{ visit: 'Navigated to: {title}', url: 'New page at {url}' }"
+    description: "What is said. visit is used when the page has a title, url when it has none. Key it by language for several."
   - name: "headingSelector"
-    type: "string"
-    default: "'h1'"
-    description: "Where to look for the heading. The document title is the fallback."
+    type: "string | string[]"
+    default: "['main h1', 'h1']"
+    description: "Where to look for the heading, in order. The document title is the fallback."
+  - name: "autofocus"
+    type: "boolean"
+    default: "false"
+    description: "Focus the element with an autofocus attribute in the new content."
   - name: "focus"
     type: "boolean"
     default: "true"
@@ -38,7 +42,7 @@ Import it from `pagefold/a11y` (about 1.3 KB minified and compressed, shared cod
 ```js
 import PagefoldA11y from 'pagefold/a11y'
 
-new Pagefold({ plugins: [new PagefoldA11y({ announcement: 'Ahora en: {title}' })] })
+new Pagefold({ plugins: [new PagefoldA11y()] })
 ```
 
 ## What it does
@@ -67,6 +71,60 @@ After the content is replaced, Pagefold asks this for the focused element:
 If focus is in a text field, a select, a contenteditable element or inside something marked `data-pagefold-persist`, it stays there. People should not be interrupted while typing.
 
 The temporary `tabindex="-1"` it adds to the content is removed when focus leaves.
+
+## What is announced
+
+The plugin looks for the name of the page in this order and says the first it finds:
+
+1. The `aria-label` of the heading: `<h1 aria-label="Homepage">Project title</h1>` is read as "Homepage". It is the easiest way to say something different from the heading.
+2. The text of the heading.
+3. The document title.
+4. If there is none, the address, with the `url` text.
+
+`headingSelector` can be a list. The default looks inside `main` first, so a logo in an `h1` outside it does not win.
+
+### Several languages
+
+Key the texts by the language of the page. It must match the `lang` of the `html` element exactly, and `*` is the fallback:
+
+```js
+new PagefoldA11y({
+  announcements: {
+    'en-US': { visit: 'Navigated to: {title}', url: 'New page at {url}' },
+    'de-DE': { visit: 'Navigiert zu: {title}', url: 'Neue Seite unter {url}' },
+    '*': { visit: '{title}', url: '{url}' },
+  },
+})
+```
+
+Pagefold does not change the `lang` for you. The [Head plugin](/docs/head) does it, or you can in `content:replace`.
+
+## Changing it for one visit
+
+The plugin gives every visit an `a11y` object. Use it to change what is announced or where focus goes:
+
+```js
+// The text is only known once the new page is there, so change it just before it is said
+pagefold.hooks.before('content:announce', (visit) => {
+  visit.a11y.announce = 'Results updated'   // or false to say nothing
+})
+
+pagefold.hooks.on('visit:start', (visit) => {
+  // Focus <main>, and wait until the visit is over instead of doing it right after the swap
+  visit.a11y.focus = { selector: 'main', wait: true }
+  // visit.a11y.focus = false    turns focus handling off for this visit
+})
+```
+
+The hooks `content:announce` and `content:focus` fire when the announcement is made and when focus moves. A [fragment rule](/docs/fragment) can name the element to focus with `focus: '#detail'`, or `focus: false`.
+
+## Announcing something yourself
+
+When the page changes without a visit, such as a filter on a list, say so:
+
+```js
+pagefold.announce?.('Filtered by cats')
+```
 
 ## Tip
 

@@ -55,6 +55,7 @@ Try it. Scroll the list or type in the field, then click a name: only the right 
 | `containers` | The only containers replaced by matching visits |
 | `name` | Becomes the animation name, as `data-pagefold-animation` would |
 | `scroll` | Scroll after the visit. `true` goes to the top, a selector goes to that element, and a function `(visit) => boolean \| string` decides for each visit. Fragment visits keep the scroll position by default |
+| `focus` | With the [A11y plugin](/docs/a11y): a selector to focus after these visits, or `false` to leave focus alone |
 | `if` | `(visit) => boolean`. Return `false` to skip the rule for that visit, even when the paths match |
 
 ## Animations

@@ -884,7 +884,9 @@ test.describe('body class', () => {
 
 test.describe('a11y', () => {
   test('a custom announcement uses the page heading', async ({ page }) => {
-    await open(page, '/', { plugins: [['a11y', { announcement: 'Ahora en: {title}' }]] })
+    await open(page, '/', {
+      plugins: [['a11y', { announcements: { visit: 'Ahora en: {title}', url: 'En {url}' } }]],
+    })
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
     await expect(page.locator('[role="status"][aria-live="polite"]')).toHaveText('Ahora en: About')

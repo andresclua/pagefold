@@ -41,7 +41,7 @@ describe('PagefoldA11y', () => {
 
   test('falls back to the document title and supports a custom message', async () => {
     stubFetch({ '/a': page('<title>Page A</title>', 'no heading here') })
-    make({ announcement: 'Now on {title} ({url})' })
+    make({ announcements: { visit: 'Now on {title} ({url})', url: 'At {url}' } })
     await pf.navigate('/a')
     await vi.waitFor(() => expect(announcer()?.textContent).toBe('Now on Page A (/a)'))
   })
@@ -131,5 +131,98 @@ describe('PagefoldA11y', () => {
     })
     await pf.navigate('/a')
     expect(animate).toBe(true)
+  })
+
+  test('the aria-label of the heading wins, and main h1 comes before other headings', async () => {
+    stubFetch({
+      '/a': page(
+        '<title>Page A</title>',
+        '<h1>Site name</h1><main><h1 aria-label="Real title">Shown title</h1></main>'
+      ),
+    })
+    make()
+    await pf.navigate('/a')
+    await vi.waitFor(() => expect(announcer()?.textContent).toBe('Navigated to: Real title'))
+  })
+
+  test('with no heading and no title the address is announced', async () => {
+    stubFetch({ '/a': page('', 'nothing') })
+    make()
+    document.title = ''
+    await pf.navigate('/a')
+    await vi.waitFor(() => expect(announcer()?.textContent).toBe('Navigated to: New page at /a'))
+  })
+
+  test('announcements by language, with a fallback', async () => {
+    const announcements = {
+      'de-DE': { visit: 'Navigiert zu: {title}', url: 'Neue Seite unter {url}' },
+      '*': { visit: '{title}', url: '{url}' },
+    }
+    stubFetch({ '/a': page('<title>T</title>', '<h1>Heading A</h1>') })
+    document.documentElement.lang = 'de-DE'
+    make({ announcements })
+    await pf.navigate('/a')
+    await vi.waitFor(() => expect(announcer()?.textContent).toBe('Navigiert zu: Heading A'))
+    await pf.destroy()
+    document.documentElement.lang = 'fr'
+    make({ announcements })
+    await pf.navigate('/a')
+    await vi.waitFor(() => expect(announcer()?.textContent).toBe('Heading A'))
+  })
+
+  test('visit.a11y.announce can change the text, or turn it off', async () => {
+    make()
+    pf.hooks.before('content:announce', (visit) => {
+      if (visit.a11y) visit.a11y.announce = 'Custom words'
+    })
+    await pf.navigate('/a')
+    await vi.waitFor(() => expect(announcer()?.textContent).toBe('Custom words'))
+    pf.hooks.before('content:announce', (visit) => {
+      if (visit.a11y) visit.a11y.announce = false
+    })
+    announcer()!.textContent = ''
+    await pf.navigate('/a?again')
+    await new Promise((r) => setTimeout(r, 200))
+    expect(announcer()?.textContent).toBe('')
+  })
+
+  test('visit.a11y.focus chooses the element, or can wait for the end of the visit', async () => {
+    stubFetch({ '/a': page('', '<main id="main">m</main>') })
+    make()
+    pf.hooks.on('visit:start', (visit) => {
+      if (visit.a11y) visit.a11y.focus = { selector: '#main', wait: true }
+    })
+    const focusedAt: (string | undefined)[] = []
+    pf.hooks.on('page:view', () => focusedAt.push(document.activeElement?.id))
+    pf.hooks.on('visit:end', () => focusedAt.push(document.activeElement?.id))
+    await pf.navigate('/a')
+    expect(focusedAt).toEqual(['', 'main'])
+  })
+
+  test('visit.a11y.focus false turns focus handling off for that visit', async () => {
+    make()
+    pf.hooks.on('visit:start', (visit) => {
+      if (visit.a11y) visit.a11y.focus = false
+    })
+    await pf.navigate('/a')
+    expect(document.activeElement).toBe(document.body)
+  })
+
+  test('autofocus focuses the element marked with autofocus', async () => {
+    stubFetch({ '/a': page('', '<input id="name" autofocus>') })
+    make({ autofocus: true })
+    await pf.navigate('/a')
+    expect(document.activeElement?.id).toBe('name')
+  })
+
+  test('the content:announce and content:focus hooks fire, and pagefold.announce speaks', async () => {
+    make()
+    const seen: string[] = []
+    pf.hooks.on('content:announce', () => seen.push('announce'))
+    pf.hooks.on('content:focus', () => seen.push('focus'))
+    await pf.navigate('/a')
+    expect(seen).toEqual(['announce', 'focus'])
+    pf.announce?.('Filtered by cats')
+    await vi.waitFor(() => expect(announcer()?.textContent).toBe('Filtered by cats'))
   })
 })
