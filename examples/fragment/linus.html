@@ -3,33 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Linus · Fragment</title>
+  <title>Linus Torvalds · Fragment</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="layout">
-    <ul id="list">
-      <li><a href="index.html">Ada</a></li>
-      <li><a href="grace.html">Grace</a></li>
-      <li><a href="linus.html">Linus</a></li>
-      <li class="hint">Scroll this list, or type here, then click a name: only the right side changes.</li>
-      <li><input placeholder="Type something"></li>
-      <li class="filler">Item 1</li>
-      <li class="filler">Item 2</li>
-      <li class="filler">Item 3</li>
-      <li class="filler">Item 4</li>
-      <li class="filler">Item 5</li>
-      <li class="filler">Item 6</li>
-      <li class="filler">Item 7</li>
-      <li class="filler">Item 8</li>
-      <li class="filler">Item 9</li>
-      <li class="filler">Item 10</li>
-      <li class="filler">Item 11</li>
-      <li class="filler">Item 12</li>
-    </ul>
-    <section id="detail" class="detail transition-detail">
-      <h1>Linus</h1>
-      <p>Engineer. Started Linux in 1991.</p>
+  <div class="app">
+    <aside id="list">
+      <header>
+        <h2>People</h2>
+        <p>List rendered at <b class="stamp">--:--:--</b></p>
+        <input type="search" placeholder="Filter the list" aria-label="Filter the list">
+      </header>
+      <ul>
+        <li><a href="index.html"><span class="badge">AL</span><span>Ada Lovelace<small>Mathematician</small></span></a></li>
+        <li><a href="grace.html"><span class="badge">GH</span><span>Grace Hopper<small>Rear admiral</small></span></a></li>
+        <li><a href="linus.html"><span class="badge">LT</span><span>Linus Torvalds<small>Engineer</small></span></a></li>
+        <li><a href="margaret.html"><span class="badge">MH</span><span>Margaret Hamilton<small>Software engineer</small></span></a></li>
+        <li><a href="alan.html"><span class="badge">AT</span><span>Alan Turing<small>Mathematician</small></span></a></li>
+        <li><a href="katherine.html"><span class="badge">KJ</span><span>Katherine Johnson<small>Mathematician</small></span></a></li>
+        <li><a href="tim.html"><span class="badge">TB</span><span>Tim Berners-Lee<small>Computer scientist</small></span></a></li>
+        <li><a href="radia.html"><span class="badge">RP</span><span>Radia Perlman<small>Network engineer</small></span></a></li>
+      </ul>
+    </aside>
+    <section id="detail" class="transition-detail">
+      <span class="avatar">LT</span>
+      <h1>Linus Torvalds</h1>
+      <p class="role">Engineer</p>
+      <p>Started the Linux kernel in 1991 and still reviews its patches.</p>
+      <p class="rendered">Detail rendered at <b class="stamp">--:--:--</b></p>
     </section>
   </div>
   <script src="../_lib/pagefold.js"></script>

@@ -1,17 +1,36 @@
 *{box-sizing:border-box}
+html,body{height:100%}
 body{margin:0;font:16px/1.6 system-ui,sans-serif;background:#0a0a0a;color:#fafaf8}
-nav{display:flex;gap:1.25rem;padding:1rem 1.5rem;border-bottom:1px solid #2c2c2c}
 /* Links: the accent color with a quiet underline that gets stronger on hover */
-a{color:#5af0ae;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:rgba(90,240,174,.5);transition:color .15s,text-decoration-color .15s,text-decoration-thickness .15s}
-a:hover{color:#00ff9c;text-decoration-thickness:2px;text-decoration-color:currentColor}
+a{color:#5af0ae;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:rgba(90,240,174,.5);transition:color .15s,text-decoration-color .15s}
+a:hover{color:#00ff9c;text-decoration-color:currentColor}
 a:focus-visible{outline:2px solid #5af0ae;outline-offset:3px;border-radius:2px}
-h1{margin:0 0 .5rem;font-size:2rem}
-p{margin:0 0 1rem;max-width:36rem;color:#a3a39e}
-.card{height:7rem;max-width:36rem;border-radius:12px}
-.layout{display:grid;grid-template-columns:14rem 1fr;height:22rem}
-#list{margin:0;padding:1rem;list-style:none;overflow:auto;border-right:1px solid #2c2c2c}
-#list li{padding:.2rem 0}
-#list input{width:100%;background:#1a1a1a;border:1px solid #2c2c2c;color:inherit;padding:.4rem;border-radius:6px}
-.hint,.filler{color:#a3a39e;font-size:.85rem}
-.detail{padding:1.5rem;transition:opacity .3s ease}
-#detail.is-animating{opacity:0}
+
+.app{display:grid;grid-template-columns:16rem 1fr;height:100%}
+
+/* The list: it never changes while you move between people */
+#list{overflow:auto;border-right:1px solid #2c2c2c;background:#101010}
+#list header{position:sticky;top:0;padding:1rem 1rem .75rem;background:#101010;border-bottom:1px solid #2c2c2c}
+#list h2{margin:0;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:#a3a39e}
+#list header p{margin:.25rem 0 .75rem;font-size:.8rem;color:#a3a39e}
+#list b,#detail b{color:#fafaf8;font-variant-numeric:tabular-nums}
+#list input{width:100%;padding:.5rem .65rem;border-radius:8px;border:1px solid #2c2c2c;background:#1a1a1a;color:inherit;font:inherit}
+#list input:focus{outline:2px solid #5af0ae;outline-offset:1px}
+#list ul{list-style:none;margin:0;padding:.5rem}
+#list li[hidden]{display:none}
+#list li a{display:flex;gap:.65rem;align-items:center;padding:.5rem .6rem;border-radius:8px;color:#fafaf8;text-decoration:none;border-left:3px solid transparent}
+#list li a:hover{background:#1a1a1a}
+#list li a.is-active{background:#1a1a1a;border-left-color:#00ff9c}
+#list small{display:block;color:#a3a39e;font-size:.78rem;line-height:1.2}
+.badge{display:grid;place-items:center;flex:none;width:2.1rem;height:2.1rem;border-radius:50%;background:#1b1bff;color:#fafaf8;font:700 .75rem system-ui}
+
+/* The detail: the only part that is replaced */
+#detail{padding:2rem;overflow:auto;transition:opacity .25s ease,transform .25s ease}
+#detail.is-animating{opacity:0;transform:translateY(10px)}
+.avatar{display:grid;place-items:center;width:4rem;height:4rem;border-radius:50%;background:#1b1bff;color:#fafaf8;font:700 1.25rem system-ui}
+#detail h1{margin:1rem 0 0;font-size:1.9rem;line-height:1.2}
+#detail .role{margin:.1rem 0 1rem;color:#00ff9c;font-size:.9rem}
+#detail p{max-width:32rem;color:#c9c9c4}
+#detail .rendered{margin-top:1.5rem;padding:.55rem .8rem;display:inline-block;border:1px dashed #2c2c2c;border-radius:8px;font-size:.85rem;color:#a3a39e}
+
+@media (max-width:34rem){.app{grid-template-columns:11rem 1fr}#detail{padding:1.25rem}}

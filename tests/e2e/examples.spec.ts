@@ -44,21 +44,31 @@ test('overlap: both pages are in the DOM during the visit and one is left after'
   expect(await page.evaluate(() => (window as unknown as { __max: number }).__max)).toBe(2)
 })
 
-test('fragment: the list keeps its scroll and what was typed; only the detail changes', async ({
+test('fragment: the list keeps its scroll, its filter and its time; only the detail changes', async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 700, height: 300 }) // small, so the list has to scroll
   await go(page, 'fragment')
-  await page.fill('#list input', 'hello')
-  await page.evaluate(() => (document.querySelector('#list') as HTMLElement).scrollTo(0, 80))
-  await page.locator('#list a[href="grace.html"]').dispatchEvent('click') // click() would scroll the list back to the link
-  await expect(page.locator('#detail h1')).toHaveText('Grace')
-  await expect(page.locator('#list input')).toHaveValue('hello')
+  const stamp = (where: string) => page.locator(`${where} .stamp`).textContent()
+  const listTime = await stamp('#list')
+  const detailTime = await stamp('#detail')
+  await page.fill('#list input', 'a')
+  await page.evaluate(() => (document.querySelector('#list') as HTMLElement).scrollTo(0, 60))
+  await page.waitForTimeout(1100) // the clocks show seconds
+  await page.locator('#list a[href="grace.html"]').dispatchEvent('click')
+  await expect(page.locator('#detail h1')).toHaveText('Grace Hopper')
+  await expect(page.locator('#list input')).toHaveValue('a')
   expect(
     await page.evaluate(() => (document.querySelector('#list') as HTMLElement).scrollTop)
-  ).toBeGreaterThan(40)
+  ).toBeGreaterThan(30)
+  expect(await stamp('#list')).toBe(listTime) // never redrawn
+  expect(await stamp('#detail')).not.toBe(detailTime) // new on every visit
+  await expect(page.locator('#list a.is-active')).toHaveAttribute('href', 'grace.html')
   await page.goBack()
-  await expect(page.locator('#detail h1')).toHaveText('Ada')
-  await expect(page.locator('#list input')).toHaveValue('hello')
+  await expect(page.locator('#detail h1')).toHaveText('Ada Lovelace')
+  await expect(page.locator('#list input')).toHaveValue('a')
+  await expect(page.locator('#list a.is-active')).toHaveAttribute('href', 'index.html')
+  expect(await stamp('#list')).toBe(listTime)
 })
 
 for (const name of ['fade', 'slide']) {
