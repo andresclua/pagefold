@@ -1,0 +1,31 @@
+---
+title: "Skill for AI assistants"
+description: "A file you can download so your coding assistant knows how Pagefold works while you build with it."
+section: guides
+order: 20
+---
+
+If you write code with an AI assistant, give it the Pagefold skill. It is a single Markdown file with the setup, the options, the hooks, every plugin and a checklist for the problems people hit most, so the assistant uses the real API and does not invent one.
+
+[Download SKILL.md](/skills/pagefold/SKILL.md)
+
+## Install it
+
+Save it as `pagefold/SKILL.md` inside the skills folder your assistant reads: the one in your project to share it with your team, or the one in your home folder to have it everywhere.
+
+```bash
+mkdir -p skills/pagefold
+curl -o skills/pagefold/SKILL.md https://pagefold.js.org/skills/pagefold/SKILL.md
+```
+
+Check where your assistant looks for skills and put the `pagefold` folder there. The assistant loads it when a task mentions page transitions or Pagefold.
+
+## What is in it
+
+- How to set a page up and the rules behind most problems: every page needs every container, and only `transition-*` elements are waited for.
+- Options, instance methods, hook names and what a `visit` has.
+- Animating with GSAP, Motion or the Web Animations API.
+- A table of the plugins and what each one is for.
+- How to write a plugin, and a debugging checklist.
+
+It points to these docs for the details. When you update Pagefold, download it again.

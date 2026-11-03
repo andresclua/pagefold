@@ -24,7 +24,7 @@ new Pagefold()
 No bundler? Load it with script tags: see the [script tag guide](docs/src/content/docs/script-tag.mdx).
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/pagefold.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.2.0/dist/umd/pagefold.js"></script>
 <script>new Pagefold()</script>
 ```
 

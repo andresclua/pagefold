@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /examples/
+
+Sitemap: https://pagefold.js.org/sitemap-index.xml

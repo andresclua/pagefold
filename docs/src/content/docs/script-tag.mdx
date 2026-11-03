@@ -12,9 +12,9 @@ If your site has no build step, use the UMD files: one per module, each a single
 ```html
 <main id="pagefold" class="transition-fade">...</main>
 
-<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/pagefold.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/head.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/a11y.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.2.0/dist/umd/pagefold.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.2.0/dist/umd/head.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.2.0/dist/umd/a11y.js"></script>
 <script>
   new Pagefold({
     plugins: [new PagefoldHead({ awaitAssets: true }), new PagefoldA11y()],
@@ -31,7 +31,6 @@ If your site has no build step, use the UMD files: one per module, each a single
 
 Load `pagefold.js` first and the plugins after it. Pin a version in the URL, so an update never changes your site without you knowing.
 
-> Pagefold is not published yet, so those addresses will work once it is. You can host the files from `dist/umd/` yourself in the meantime.
 
 ## The globals
 
@@ -64,15 +63,15 @@ If you do have a bundler, import the modules instead: you get the smaller ones, 
 ## The CSS themes
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/css/fade.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pagefold@0.2.0/dist/css/fade.css" />
 ```
 
 ## With GSAP
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/pagefold.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pagefold@0.1.0/dist/umd/js.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.2.0/dist/umd/pagefold.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pagefold@0.2.0/dist/umd/js.js"></script>
 <script>
   new Pagefold({
     animationSelector: false,
