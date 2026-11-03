@@ -101,9 +101,15 @@ export async function performNavigation(
   options: NavigationOptions = {}
 ): Promise<void> {
   if (p.navigating) {
-    if (p.visit.state >= VisitState.ENTERING) {
+    const { queue } = p.options
+    if (queue === 'ignore' && !visit.history.popstate) {
+      visit.state = VisitState.IGNORED
+      return
+    }
+    if (queue === 'all' || p.visit.state >= VisitState.ENTERING) {
       visit.state = VisitState.QUEUED
-      p.pending = () => performNavigation(p, visit, options)
+      const run = () => performNavigation(p, visit, options)
+      p.pending = queue === 'all' ? [...p.pending, run] : [run]
       return
     }
     await p.hooks.call('visit:abort', p.visit, undefined)
@@ -198,9 +204,7 @@ export async function performNavigation(
     visit.state = VisitState.COMPLETED
     p.navigating = false
 
-    const next = p.pending
-    p.pending = undefined
-    void next?.()
+    void p.pending.shift()?.()
   } catch (error) {
     if (!error || (error as FetchError).aborted || visit.state === VisitState.ABORTED) {
       visit.advance(VisitState.ABORTED)

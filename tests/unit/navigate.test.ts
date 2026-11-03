@@ -122,6 +122,53 @@ describe('navigate', () => {
     await vi.waitFor(() => expect(content()).toBe('content b'))
   })
 
+  /** Start /a and hold it in its in-animation, so later visits find the pipeline busy. */
+  const holdFirst = async () => {
+    let release!: () => void
+    pf.hooks.replace('animation:in:await', () => new Promise<void>((r) => (release = r)), {
+      once: true,
+    })
+    const first = pf.navigate('/a')
+    await vi.waitFor(() => expect(pf.visit.state).toBe(VisitState.ENTERING))
+    return { first, release: () => release() }
+  }
+
+  test('queue: all runs every waiting visit, in order', async () => {
+    make({ queue: 'all' })
+    pages['/c'] = { body: html('Page C', 'content c') }
+    const order: string[] = []
+    pf.hooks.on('page:view', (_v, { url }) => order.push(url))
+    const { first, release } = await holdFirst()
+    await pf.navigate('/b')
+    await pf.navigate('/c')
+    release()
+    await first
+    await vi.waitFor(() => expect(content()).toBe('content c'))
+    expect(order).toEqual(['/a', '/b', '/c'])
+  })
+
+  test('queue: ignore drops visits that start while another is on screen', async () => {
+    make({ queue: 'ignore' })
+    const { first, release } = await holdFirst()
+    await pf.navigate('/b')
+    expect(pf.visit.to.url).toBe('/a')
+    release()
+    await first
+    expect(content()).toBe('content a')
+    expect(fetchMock).not.toHaveBeenCalledWith('/b', expect.anything())
+  })
+
+  test('queue: ignore does not drop the back and forward buttons', async () => {
+    make({ queue: 'ignore' })
+    const { first, release } = await holdFirst()
+    const state = { source: 'pagefold', url: '/b', index: 5 }
+    window.history.pushState(state, '', '/b')
+    window.dispatchEvent(new PopStateEvent('popstate', { state }))
+    release()
+    await first
+    await vi.waitFor(() => expect(content()).toBe('content b'))
+  })
+
   test('failOnStatus decides what counts as a failed visit', async () => {
     make({ failOnStatus: (s) => s >= 400 })
     const failed = vi.fn()

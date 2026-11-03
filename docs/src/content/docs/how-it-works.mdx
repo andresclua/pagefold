@@ -88,6 +88,23 @@ The two cases side by side. In both, the visitor clicks a second link while the 
   caption="Click B after A swapped the content: A finishes, then B runs. If C and D are also waiting, only D runs."
 />
 
+### Choosing what waits: `queue`
+
+The second case is what the `queue` option decides:
+
+| `queue` | A visit that starts while another one is on screen |
+|---|---|
+| `'latest'` (default) | Waits. If several wait, only the last one runs. |
+| `'all'` | Waits. Every one runs, in the order they were clicked. A visit that is still loading is not aborted either. |
+| `'ignore'` | Is dropped, the click does nothing. The back and forward buttons are never dropped. |
+
+```js
+// A busy page does not take new clicks
+new Pagefold({ queue: 'ignore' })
+```
+
+`ignore` is the simplest way to stop impatient double clicks from stacking animations. A dropped visit never starts: it gets the state `ignored`.
+
 ## Requests
 
 Pagefold fetches the destination page with `fetch`, sending `X-Requested-With: pagefold` and `Accept: text/html`. By default only a `500` response counts as a failure; a `404` page is shown like any other. Use [`failOnStatus`](/docs/options) to change that.

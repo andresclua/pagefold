@@ -26,6 +26,7 @@ const pagefold = new Pagefold({ /* options */ })
 | `cacheTtl` | `number` | none | Forget cached pages after this many milliseconds. |
 | `failOnStatus` | `(status) => boolean` | `status === 500` | Which response statuses fail a visit, so the browser loads the page normally. |
 | `requestHeaders` | `Record<string, string>` | `X-Requested-With: pagefold`, `Accept: text/html, application/xhtml+xml` | Headers sent with every page request. |
+| `queue` | `'latest' \| 'all' \| 'ignore'` | `'latest'` | What a visit does when another is already on screen: only the last waits, all wait in order, or it is dropped ([details](/docs/how-it-works#choosing-what-waits-queue)). |
 | `timeout` | `number` | `0` | Request timeout in milliseconds. `0` means none. |
 | `resolveUrl` | `(url) => string` | identity | Rewrite URLs before they are loaded or cached, to treat `/en/about` and `/about` as one page, for example. |
 | `skipPopStateHandling` | `(event) => boolean` | skips entries Pagefold did not create | Return `true` to ignore a back or forward event. |
@@ -42,6 +43,7 @@ const pagefold = new Pagefold({ /* options */ })
 | Replace more than one area | `containers: ['#main', '#sidebar']` |
 | Leave a part of the site to the browser | `ignoreVisit` |
 | Treat 404 as a failure | `failOnStatus: (status) => status >= 400` |
+| Ignore clicks while a page is animating | `queue: 'ignore'` |
 | Not wait forever for a slow server | `timeout: 8000` |
 | Treat `/en/about` and `/about` as one page | `resolveUrl` |
 

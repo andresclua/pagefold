@@ -41,6 +41,12 @@ export interface Options {
   /** Use the View Transitions API when the browser has it */
   native: boolean
   plugins: Plugin[]
+  /**
+   * What to do with a visit that starts while another one is on screen. `latest`: only the last one
+   * waiting runs. `all`: every one runs, in order. `ignore`: they are dropped (the back and forward
+   * buttons still work). Default: latest
+   */
+  queue: 'latest' | 'all' | 'ignore'
   requestHeaders: Record<string, string>
   /** Rewrite URLs before they are loaded or cached */
   resolveUrl: (url: string) => string
@@ -62,6 +68,7 @@ const defaults: Options = {
   linkToSelf: 'scroll',
   native: false,
   plugins: [],
+  queue: 'latest',
   requestHeaders: {
     'X-Requested-With': 'pagefold',
     Accept: 'text/html, application/xhtml+xml',
@@ -88,8 +95,8 @@ export class Pagefold {
 
   /** @internal True while a visit owns the pipeline */
   navigating = false
-  /** @internal Latest visit waiting for the running one to finish */
-  pending: (() => Promise<void>) | undefined
+  /** @internal Visits waiting for the running one to finish */
+  pending: (() => Promise<void>)[] = []
   /** @internal Position in the history stack, to tell back from forward */
   historyIndex: number
 
