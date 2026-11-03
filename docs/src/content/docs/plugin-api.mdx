@@ -37,6 +37,17 @@ export default class AnalyticsPlugin extends Plugin {
 new Pagefold({ plugins: [new AnalyticsPlugin({ trackingId: 'G-XXXX' })] })
 ```
 
+## Start from the template
+
+The repository has a small plugin project ready to copy: TypeScript, one test and a build that publishes the types.
+
+```sh
+npx degit andresclua/pagefold/templates/plugin my-plugin
+cd my-plugin && npm install && npm test
+```
+
+Change the name, write your idea in `mount()` and publish. Call the package `pagefold-plugin-<name>` and add the `pagefold-plugin` keyword so people can find it.
+
 ## Its life
 
 <Strips
