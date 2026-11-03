@@ -7,9 +7,9 @@ interface Props {
   description?: string
 }
 const { title, description = 'Page transitions for server-rendered websites.' } = Astro.props
-// Analytics are only added when one of these is set at build time: PUBLIC_GA_ID (Google Analytics 4)
-// or PUBLIC_GTM_ID (Google Tag Manager)
-const ga = import.meta.env.PUBLIC_GA_ID
+// Google Analytics 4. PUBLIC_GA_ID overrides the ID at build time. Google Tag Manager is only
+// added when PUBLIC_GTM_ID is set.
+const ga = import.meta.env.PUBLIC_GA_ID ?? 'G-PSNHLHR5S6'
 const gtm = import.meta.env.PUBLIC_GTM_ID
 ---
 
@@ -21,9 +21,9 @@ const gtm = import.meta.env.PUBLIC_GTM_ID
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title} · Pagefold</title>
-    {ga && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${ga}`} />}
     {ga && (
-      <script is:inline set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${ga}');`} />
+      // Not on localhost, so developing and testing the site does not count as visits
+      <script is:inline set:html={`if(!/^(localhost|127\\.|\\[::1\\])/.test(location.hostname)){var g=document.createElement('script');g.async=true;g.src='https://www.googletagmanager.com/gtag/js?id=${ga}';document.head.appendChild(g);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','${ga}')}`} />
     )}
     {gtm && (
       <script is:inline set:html={`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtm}');`} />
@@ -71,7 +71,7 @@ const gtm = import.meta.env.PUBLIC_GTM_ID
       new PagefoldScroll({ duration: 500, animateScroll: { betweenPages: false } }),
       new PagefoldPreload(),
       // The first page is reported by the analytics snippet, the rest by this plugin
-      ...(import.meta.env.PUBLIC_GA_ID ? [new PagefoldAnalytics({ provider: 'gtag' })] : []),
+      ...('gtag' in window ? [new PagefoldAnalytics({ provider: 'gtag' })] : []),
       ...(import.meta.env.PUBLIC_GTM_ID ? [new PagefoldAnalytics({ provider: 'gtm' })] : []),
     ],
   })
