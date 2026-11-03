@@ -140,7 +140,7 @@ describe('PagefoldRouteName', () => {
 
   beforeEach(() => stubFetch({ '/blog': withBody(''), '/blog/x': withBody('') }))
 
-  test('matchOptions change how the patterns match', async () => {
+  test('matchOptions change how the patterns match', () => {
     pf = new Pagefold({
       animationSelector: false,
       plugins: [
