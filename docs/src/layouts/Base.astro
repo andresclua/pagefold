@@ -7,6 +7,8 @@ interface Props {
   description?: string
 }
 const { title, description = 'Page transitions for server-rendered websites.' } = Astro.props
+// Google Tag Manager is only added when PUBLIC_GTM_ID is set at build time
+const gtm = import.meta.env.PUBLIC_GTM_ID
 ---
 
 <!doctype html>
@@ -17,8 +19,14 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title} · Pagefold</title>
+    {gtm && (
+      <script is:inline set:html={`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtm}');`} />
+    )}
   </head>
   <body>
+    {gtm && (
+      <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtm}`} height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    )}
     <header class="bar">
       <div class="wrap bar-inner">
         <a href="/" class="brand"><Logo size={26} /><span>Pagefold</span></a>
@@ -45,6 +53,7 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
   // This site navigates with Pagefold itself
   import Pagefold from 'pagefold'
   import PagefoldA11y from 'pagefold/a11y'
+  import PagefoldAnalytics from 'pagefold/analytics'
   import PagefoldHead from 'pagefold/head'
   import PagefoldPreload from 'pagefold/preload'
   import PagefoldScroll from 'pagefold/scroll'
@@ -55,6 +64,8 @@ const { title, description = 'Page transitions for server-rendered websites.' } 
       new PagefoldA11y(),
       new PagefoldScroll({ duration: 500, animateScroll: { betweenPages: false } }),
       new PagefoldPreload(),
+      // The first page is reported by the Tag Manager snippet, the rest by this plugin
+      ...(import.meta.env.PUBLIC_GTM_ID ? [new PagefoldAnalytics({ provider: 'gtm' })] : []),
     ],
   })
 

@@ -1,0 +1,3 @@
+[build]
+  command = "pnpm install --frozen-lockfile && pnpm docs:build"
+  publish = "docs/dist"
