@@ -285,7 +285,7 @@ test.describe('plugins', () => {
   })
 
   test('a11y announces the page and moves focus', async ({ page }) => {
-    await open(page, '/', { plugins: [['a11y']] })
+    await open(page, '/', { plugins: [['a11y', { contentSelector: '#pagefold' }]] })
     await link(page, '/about').click()
     await expect(page.locator('.pagefold-announcer')).toHaveText('Navigated to: About')
     expect(await page.evaluate(() => document.activeElement?.id)).toBe('pagefold')

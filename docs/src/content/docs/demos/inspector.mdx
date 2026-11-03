@@ -25,11 +25,11 @@ new Pagefold({
   plugins: [
     new PagefoldHead(),      // title, meta tags, html lang
     new PagefoldBodyClass(), // the class of the body
-    new PagefoldA11y(),      // announces the page, moves focus
+    new PagefoldA11y({ contentSelector: 'main' }), // announces the page, moves focus to main
   ],
 })
 ```
 
 - **[Head](/docs/head)** merges the `<head>` of the new page: it changes the tags that differ and leaves the rest alone.
 - **[Body class](/docs/body-class)** copies the class of the new body, so styles that depend on it keep working.
-- **[A11y](/docs/a11y)** says the name of the page, taken from the `aria-label` of the heading, the heading or the title, and moves focus to the content.
+- **[A11y](/docs/a11y)** says the name of the page, taken from the `aria-label` of the heading, the heading or the title, and moves focus to the content (here `contentSelector: 'main'`; by default it goes to the `body`).

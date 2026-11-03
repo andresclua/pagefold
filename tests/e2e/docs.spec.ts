@@ -916,8 +916,15 @@ test.describe('a11y', () => {
     await expect(page.locator('[role="status"][aria-live="assertive"]')).toHaveText('Ahora en: About')
   })
 
-  test('focus goes to the content and the temporary tabindex goes away', async ({ page }) => {
+  test('focus goes to the body by default', async ({ page }) => {
     await open(page, '/', { plugins: [['a11y']] })
+    await link(page, '/about').click()
+    await expect(heading(page)).toHaveText('About')
+    expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true)
+  })
+
+  test('with contentSelector, focus goes to the content and the temporary tabindex goes away', async ({ page }) => {
+    await open(page, '/', { plugins: [['a11y', { contentSelector: '#pagefold' }]] })
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
     await expect(page.locator('#pagefold')).toBeFocused()

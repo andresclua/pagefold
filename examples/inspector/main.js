@@ -2,7 +2,7 @@ const pagefold = new Pagefold({
   plugins: [
     new PagefoldHead(), // title, meta tags, html lang
     new PagefoldBodyClass(), // the class of the body
-    new PagefoldA11y(), // announces the page and moves focus
+    new PagefoldA11y({ contentSelector: 'main' }), // announces the page and moves focus to main
   ],
 })
 
