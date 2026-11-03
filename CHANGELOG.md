@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/andresclua/pagefold/compare/pagefold-v0.1.0...pagefold-v0.2.0) (2026-11-03)
+
+
+### Features
+
+* 🚀 Add scrollFunction and offset left to scroll, matchOptions to route-name, js and fragment, debug to fragment and minValue to progress ([e41c83c](https://github.com/andresclua/pagefold/commit/e41c83ce5acb3286ee929e3c8468b4efe3639f3c))
+
+
+### Bug fixes
+
+* 🐛 Remove an unneeded async from a route-name test ([660a828](https://github.com/andresclua/pagefold/commit/660a8289ccf5eceb74294b7b21b3cd3f09d352c8))
+
 ## 0.1.0 (2026-11-03)
 
 
