@@ -1,7 +1,7 @@
 import type { HookHandler } from '../hooks.js'
 import { Plugin } from '../plugin.js'
 import { classify } from '../utils.js'
-import { matchPath } from './match-path.js'
+import { matchPath, type MatchOptions } from './match-path.js'
 
 export interface RouteAnimation {
   /** Route names of the page being left. Default: any */
@@ -24,6 +24,8 @@ export interface RouteNameOptions {
   paths: boolean
   /** Pick an animation by the routes a visit goes between */
   animations: RouteAnimation[]
+  /** How the path patterns are matched: `ignoreCase`, `strict` (trailing slash) and `end` */
+  matchOptions: MatchOptions
 }
 
 const includes = (names: string | string[] | undefined, route: string | undefined): boolean =>
@@ -42,6 +44,7 @@ export default class PagefoldRouteName extends Plugin {
     unknownRoute: 'unknown',
     paths: false,
     animations: [],
+    matchOptions: {},
   }
 
   constructor(options: Partial<RouteNameOptions> = {}) {
@@ -61,7 +64,7 @@ export default class PagefoldRouteName extends Plugin {
       ? routes.map(({ name, path }) => [name, path] as const)
       : Object.entries(routes)
     for (const [name, patterns] of list) {
-      if ([patterns].flat().some((pattern) => matchPath(pattern, url))) return name
+      if ([patterns].flat().some((pattern) => matchPath(pattern, url, this.options.matchOptions))) return name
     }
     return unknownRoute === false ? undefined : unknownRoute
   }

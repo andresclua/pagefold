@@ -9,6 +9,10 @@ options:
     type: "JsAnimation[]"
     default: "[]"
     description: "The animations. The first one whose from and to patterns match the visit runs."
+  - name: "matchOptions"
+    type: "{ ignoreCase?, strict?, end? }"
+    default: "{}"
+    description: "How path patterns are matched: ignoreCase (default false), strict (the trailing slash has to match, default false) and end (default true; false also matches the paths below)."
 ---
 
 Import it from `pagefold/js` (about 1.2 KB minified and compressed, shared code included).
@@ -32,7 +36,7 @@ Read [Animating with JavaScript](/docs/javascript-animations) for the contract, 
 ## Matching
 
 - `:name` matches one path segment, `*` or `(.*)` matches anything.
-- The query string is ignored and a trailing slash is optional.
+- The query string is ignored and a trailing slash is optional. `matchOptions` changes that: `{ ignoreCase: true }`, `{ strict: true }` (the trailing slash has to match) and `{ end: false }` (`/blog` also matches `/blog/post`).
 - Matching entries are checked in order. If the visit has an animation name, an entry with that name wins; otherwise the first entry **without** a name runs.
 - When nothing matches, the visit simply does not wait.
 

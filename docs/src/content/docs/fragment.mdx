@@ -9,12 +9,20 @@ options:
     type: "FragmentRule[]"
     default: "[]"
     description: "Rules, checked in order. Each has from, to, containers, and optionally name and scroll."
+  - name: "matchOptions"
+    type: "{ ignoreCase?, strict?, end? }"
+    default: "{}"
+    description: "How path patterns are matched: ignoreCase (default false), strict (the trailing slash has to match, default false) and end (default true; false also matches the paths below)."
+  - name: "debug"
+    type: "boolean"
+    default: "false"
+    description: "Print in the console which rule each visit used, or why each rule was skipped."
 ---
 
 import Panes from '../../components/Panes.astro'
 import Demo from '../../components/Demo.astro'
 
-Import it from `pagefold/fragment` (about 1.2 KB minified and compressed, shared code included).
+Import it from `pagefold/fragment` (about 1.4 KB minified and compressed, shared code included).
 
 ```js
 import PagefoldFragment from 'pagefold/fragment'
@@ -84,6 +92,16 @@ That works when a normal container is bigger than the fragment. Here `#pagefold`
 If the new page is also missing one of the **normal** containers, there is nothing safe to replace. The visit fails and the browser loads the page normally, as for any visit that cannot be done.
 
 `visit.fragment` tells you whether a visit is a fragment visit.
+
+## Finding out why a rule does not apply
+
+Set `debug: true` and Pagefold prints one line per rule for each visit: `used`, or why it was skipped (`from does not match`, `to does not match`, `a container is not on the page`, `if() returned false`).
+
+```js
+new PagefoldFragment({ rules, debug: true })
+```
+
+`matchOptions` (`ignoreCase`, `strict`, `end`) changes how the paths of the rules match.
 
 ## Common problems
 

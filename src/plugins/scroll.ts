@@ -27,9 +27,19 @@ declare module '../pagefold.js' {
 
 type Offset = number | { top?: number; left?: number }
 
-interface Position {
+export interface Position {
   top: number
   left: number
+}
+
+/** What a custom scroll function is told about the scroll it has to make */
+export interface ScrollContext {
+  /** Where the page is now */
+  from: Position
+  duration: number
+  easing: (t: number) => number
+  /** Call it when the scroll is over, so the visit goes on and `scroll:end` fires */
+  done: () => void
 }
 
 export interface ScrollOptions {
@@ -39,8 +49,14 @@ export interface ScrollOptions {
   duration: number
   /** Maps progress from 0 to 1 onto distance from 0 to 1 */
   easing: (t: number) => number
-  /** Space to leave above the target, for example for a fixed header */
+  /** Space to leave above the target, for example for a fixed header. `{ left }` does the same on the left. */
   offset: Offset | ((target: Element) => Offset)
+  /**
+   * Do the scrolling yourself, with GSAP for example. It gets the position to reach and a context,
+   * and must call `ctx.done()` when finished. It may return a function that stops the scroll.
+   * Instant jumps and reduced motion do not use it. Default: Pagefold's own animation
+   */
+  scrollFunction: ((to: Position, ctx: ScrollContext) => void | (() => void)) | undefined
   /** Scroll to the top right when the visit starts instead of after the content is replaced. Default: false */
   doScrollingRightAway: boolean
   /** Find the element a hash points to. Default: the element with that id, or `a[name]` */
@@ -71,6 +87,7 @@ export default class PagefoldScroll extends Plugin {
     duration: 600,
     easing: easeInOutCubic,
     offset: 0,
+    scrollFunction: undefined,
     doScrollingRightAway: false,
     getAnchorElement: undefined,
     markScrollTarget: false,
@@ -113,30 +130,38 @@ export default class PagefoldScroll extends Plugin {
   /** Scroll to a position or an element. Resolves when the animation is over or was interrupted. */
   scrollTo(target: number | Element, animate = true): Promise<void> {
     this.cancel()
-    const to = Math.max(0, typeof target === 'number' ? target : this.positionOf(target))
-    const from = window.scrollY
-    const { duration, easing } = this.options
-    if (!animate || duration <= 0 || from === to) {
-      window.scrollTo({ top: to, left: 0, behavior: 'instant' })
+    const to = typeof target === 'number' ? { top: target, left: 0 } : this.positionOf(target)
+    to.top = Math.max(0, to.top)
+    to.left = Math.max(0, to.left)
+    const from = { top: window.scrollY, left: window.scrollX }
+    const { duration, easing, scrollFunction } = this.options
+    if (!animate || duration <= 0 || (from.top === to.top && from.left === to.left)) {
+      window.scrollTo({ ...to, behavior: 'instant' })
       return Promise.resolve()
     }
 
     this.pagefold.hooks.callSync('scroll:start', undefined, undefined)
     return new Promise((resolve) => {
       const start = performance.now()
+      let over = false
+      let cancelCustom: void | (() => void) = undefined
       const end = () => {
+        if (over) return
+        over = true
         this.pagefold.hooks.callSync('scroll:end', undefined, undefined)
         if (this.frame !== undefined) cancelAnimationFrame(this.frame)
         this.frame = undefined
         INTERRUPTS.forEach((e) => window.removeEventListener(e, end))
         this.stop = undefined
+        if (typeof cancelCustom === 'function') cancelCustom()
         resolve()
       }
       const tick = (now: number) => {
         const progress = Math.min(1, Math.max(0, (now - start) / duration))
+        const eased = easing(progress)
         window.scrollTo({
-          top: from + (to - from) * easing(progress),
-          left: 0,
+          top: from.top + (to.top - from.top) * eased,
+          left: from.left + (to.left - from.left) * eased,
           behavior: 'instant',
         })
         if (progress < 1) this.frame = requestAnimationFrame(tick)
@@ -144,17 +169,24 @@ export default class PagefoldScroll extends Plugin {
       }
       INTERRUPTS.forEach((e) => window.addEventListener(e, end, { passive: true }))
       this.stop = end
-      this.frame = requestAnimationFrame(tick)
+      if (scrollFunction) cancelCustom = scrollFunction(to, { from, duration, easing, done: end })
+      else this.frame = requestAnimationFrame(tick)
+      if (over && typeof cancelCustom === 'function') cancelCustom() // done() came before it returned
     })
   }
 
   private cancel = (): void => this.stop?.()
 
-  private positionOf(el: Element): number {
+  private positionOf(el: Element): Position {
     const { offset } = this.options
     const raw = typeof offset === 'function' ? offset(el) : offset
-    const space = typeof raw === 'number' ? raw : (raw.top ?? 0)
-    return el.getBoundingClientRect().top + window.scrollY - space
+    const space = typeof raw === 'number' ? { top: raw } : raw
+    const rect = el.getBoundingClientRect()
+    return {
+      top: rect.top + window.scrollY - (space.top ?? 0),
+      // Sideways only moves when asked to, so a page that scrolls only up and down stays put
+      left: 'left' in space ? rect.left + window.scrollX - (space.left ?? 0) : window.scrollX,
+    }
   }
 
   /** Does this kind of visit animate? */

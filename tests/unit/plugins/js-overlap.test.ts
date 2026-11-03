@@ -34,6 +34,27 @@ describe('matchPath', () => {
   })
 })
 
+describe('matchPath options', () => {
+  test('ignoreCase makes capital letters not matter', () => {
+    expect(matchPath('/About', '/about')).toBeNull()
+    expect(matchPath('/About', '/about', { ignoreCase: true })).toEqual({})
+  })
+
+  test('strict wants the trailing slash to be the same', () => {
+    expect(matchPath('/about', '/about/', { strict: true })).toBeNull()
+    expect(matchPath('/about/', '/about', { strict: true })).toBeNull()
+    expect(matchPath('/about', '/about', { strict: true })).toEqual({})
+    expect(matchPath('/about', '/about/')).toEqual({})
+  })
+
+  test('end: false also matches the paths below', () => {
+    expect(matchPath('/blog', '/blog/post')).toBeNull()
+    expect(matchPath('/blog', '/blog/post', { end: false })).toEqual({})
+    expect(matchPath('/blog', '/blog', { end: false })).toEqual({})
+    expect(matchPath('/blog', '/blogger', { end: false })).toBeNull()
+  })
+})
+
 describe('PagefoldJs', () => {
   beforeEach(() => {
     stubFetch({ '/a': page('', 'a'), '/blog/x': page('', 'x') })

@@ -1,7 +1,7 @@
 import type { HookDefaultHandler } from '../hooks.js'
 import { Plugin } from '../plugin.js'
 import type { Visit } from '../visit.js'
-import { matchPath } from './match-path.js'
+import { matchPath, type MatchOptions } from './match-path.js'
 
 export interface AnimationSide {
   url: string
@@ -35,11 +35,17 @@ export interface JsAnimation {
 
 export interface JsOptions {
   animations: JsAnimation[]
+  /** How the path patterns are matched: `ignoreCase`, `strict` (trailing slash) and `end` */
+  matchOptions: MatchOptions
 }
 
-const matchSide = (patterns: string | string[] | undefined, url: string): AnimationSide | null => {
+const matchSide = (
+  patterns: string | string[] | undefined,
+  url: string,
+  matchOptions: MatchOptions
+): AnimationSide | null => {
   for (const pattern of [patterns ?? '(.*)'].flat()) {
-    const params = matchPath(pattern, url)
+    const params = matchPath(pattern, url, matchOptions)
     if (params) return { url, pattern, params }
   }
   return null
@@ -69,7 +75,9 @@ export default class PagefoldJs extends Plugin {
 
   constructor(options: Partial<JsOptions> | JsAnimation[] = {}) {
     super()
-    this.options = { animations: Array.isArray(options) ? options : (options.animations ?? []) }
+    this.options = Array.isArray(options)
+      ? { animations: options, matchOptions: {} }
+      : { animations: options.animations ?? [], matchOptions: options.matchOptions ?? {} }
   }
 
   override mount(): void {
@@ -88,8 +96,8 @@ export default class PagefoldJs extends Plugin {
   /** The animation that applies to a visit: the one with its name, else an unnamed match. */
   find(visit: Visit): { animation: JsAnimation; from: AnimationSide; to: AnimationSide } | undefined {
     const matches = this.options.animations.flatMap((animation) => {
-      const from = matchSide(animation.from, visit.from.url)
-      const to = matchSide(animation.to, visit.to.url)
+      const from = matchSide(animation.from, visit.from.url, this.options.matchOptions)
+      const to = matchSide(animation.to, visit.to.url, this.options.matchOptions)
       return from && to ? [{ animation, from, to }] : []
     })
     const name = visit.animation.name

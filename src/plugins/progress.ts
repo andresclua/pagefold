@@ -8,6 +8,8 @@ export interface ProgressOptions {
   delay: number
   /** Where the bar starts, from 0 to 1 */
   initialValue: number
+  /** The bar never shows less than this, from 0 to 1. Default: 0.1 */
+  minValue: number
   /** Run the bar to the end before hiding it. If false it just disappears. */
   finishAnimation: boolean
   /** Apply basic inline styles. Turn off to style `.className` yourself. */
@@ -26,6 +28,7 @@ export default class PagefoldProgress extends Plugin {
     transition: 300,
     delay: 300,
     initialValue: 0.25,
+    minValue: 0.1,
     finishAnimation: true,
     styles: true,
     color: '#1b1bff',
@@ -90,7 +93,7 @@ export default class PagefoldProgress extends Plugin {
   }
 
   private set(value: number): void {
-    this.value = Math.min(1, value)
+    this.value = Math.min(1, Math.max(this.options.minValue, value))
     if (this.bar) this.bar.style.transform = `scaleX(${this.value})`
   }
 

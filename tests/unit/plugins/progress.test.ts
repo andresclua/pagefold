@@ -87,4 +87,11 @@ describe('PagefoldProgress', () => {
     await pf.destroy()
     expect(bar()).toBeNull()
   })
+
+  test('the bar never shows less than minValue', async () => {
+    make({ delay: 100, initialValue: 0.02, minValue: 0.3 })
+    await pf.hooks.call('visit:start', undefined)
+    await vi.advanceTimersByTimeAsync(110)
+    expect(scale()).toBe(0.3)
+  })
 })

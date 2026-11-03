@@ -140,6 +140,21 @@ describe('PagefoldRouteName', () => {
 
   beforeEach(() => stubFetch({ '/blog': withBody(''), '/blog/x': withBody('') }))
 
+  test('matchOptions change how the patterns match', async () => {
+    pf = new Pagefold({
+      animationSelector: false,
+      plugins: [
+        new PagefoldRouteName({
+          routes: { blog: '/Blog' },
+          matchOptions: { ignoreCase: true, end: false },
+        }),
+      ],
+    })
+    const route = pf.plugins.find((p) => p instanceof PagefoldRouteName) as PagefoldRouteName
+    expect(route.routeOf('/blog/x')).toBe('blog')
+    expect(route.routeOf('/shop')).toBe('unknown')
+  })
+
   test('names the pages of a visit', async () => {
     pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldRouteName({ routes })] })
     let seen: [string | undefined, string | undefined] = [undefined, undefined]

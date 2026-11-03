@@ -21,11 +21,15 @@ options:
     type: "{ from?, to?, animation }[]"
     default: "[]"
     description: "Pick an animation by the route names a visit goes between. from and to take a name or a list; leave out for any."
+  - name: "matchOptions"
+    type: "{ ignoreCase?, strict?, end? }"
+    default: "{}"
+    description: "How path patterns are matched: ignoreCase (default false), strict (the trailing slash has to match, default false) and end (default true; false also matches the paths below)."
 ---
 
 import Strips from '../../components/Strips.astro'
 
-Import it from `pagefold/route-name` (about 1.2 KB minified and compressed, shared code included).
+Import it from `pagefold/route-name` (about 1.3 KB minified and compressed, shared code included).
 
 ```js
 import PagefoldRouteName from 'pagefold/route-name'
@@ -71,6 +75,9 @@ html.from-route-home.to-route-project .transition-fade {
 ```
 
 ## Details
+
+Patterns match the way they do in the [JS plugin](/docs/js#matching), and `matchOptions` works the same: `ignoreCase`, `strict` and `end`.
+
 
 Patterns use `:name`, optional parameters such as `/:lang?`, and `*` or `(.*)` (see [JS](/docs/js#matching)). The first route that matches wins, so list specific routes before general ones. A name you set yourself (a link attribute or `navigate(url, { animation })`) is never overwritten.
 

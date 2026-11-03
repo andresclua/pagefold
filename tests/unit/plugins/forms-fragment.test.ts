@@ -299,3 +299,40 @@ describe('PagefoldFragment: if and scroll', () => {
     expect(reset).toBe(false)
   })
 })
+
+describe('PagefoldFragment: matchOptions and debug', () => {
+  const rule = { from: '/Users', to: '/user/:id', containers: ['#detail'] }
+  const visit = (from: string, to: string) =>
+    ({ from: { url: from }, to: { url: to } }) as Parameters<PagefoldFragment['find']>[0]
+  const make = (options: ConstructorParameters<typeof PagefoldFragment>[0]) => {
+    resetDom('<div id="list">users</div><div id="detail">none</div>')
+    pf = new Pagefold({ animationSelector: false, plugins: [new PagefoldFragment(options)] })
+    return pf.plugins.find((p) => p instanceof PagefoldFragment) as PagefoldFragment
+  }
+
+  test('matchOptions change how the paths match', () => {
+    expect(make({ rules: [rule] }).find(visit('/users', '/user/1'))).toBeUndefined()
+    const loose = make({ rules: [rule], matchOptions: { ignoreCase: true } })
+    expect(loose.find(visit('/users', '/user/1'))).toBe(rule)
+  })
+
+  test('debug says which rule was used or why it was not', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const plugin = make({ rules: [rule], matchOptions: { ignoreCase: true }, debug: true })
+    plugin.find(visit('/users', '/user/1'))
+    plugin.find(visit('/users', '/other'))
+    plugin.find(visit('/elsewhere', '/user/1'))
+    const lines = log.mock.calls.map((c) => String(c[0]))
+    log.mockRestore()
+    expect(lines[0]).toContain('used')
+    expect(lines[1]).toContain('to does not match')
+    expect(lines[2]).toContain('from does not match')
+  })
+
+  test('says nothing by default', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    make({ rules: [rule] }).find(visit('/Users', '/user/1'))
+    expect(log).not.toHaveBeenCalled()
+    log.mockRestore()
+  })
+})

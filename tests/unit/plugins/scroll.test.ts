@@ -103,6 +103,65 @@ describe('scrollTo', () => {
   })
 })
 
+describe('scrollFunction and left offset', () => {
+  test('a custom function does the scrolling and ends it with done()', async () => {
+    const calls: unknown[] = []
+    let finish!: () => void
+    make({
+      scrollFunction: (to, ctx) => {
+        calls.push([to, ctx.from, ctx.duration])
+        finish = ctx.done
+      },
+    })
+    const ends = vi.fn()
+    pf.hooks.on('scroll:end', ends)
+    const done = plugin.scrollTo(500)
+    expect(calls).toEqual([[{ top: 500, left: 0 }, { top: 0, left: 0 }, 1000]])
+    expect(scrollTo).not.toHaveBeenCalled() // Pagefold's own animation is off
+    finish()
+    await done
+    expect(ends).toHaveBeenCalledTimes(1)
+  })
+
+  test('the function it returns is called when the user takes over', async () => {
+    const stop = vi.fn()
+    make({ scrollFunction: () => stop })
+    const done = plugin.scrollTo(500)
+    window.dispatchEvent(new Event('wheel'))
+    await done
+    expect(stop).toHaveBeenCalledTimes(1)
+  })
+
+  test('done() called at once still ends the scroll', async () => {
+    make({ scrollFunction: (_to, ctx) => ctx.done() })
+    await plugin.scrollTo(500)
+  })
+
+  test('jumps do not use the custom function', async () => {
+    const fn = vi.fn()
+    make({ scrollFunction: fn })
+    await plugin.scrollTo(300, false)
+    expect(fn).not.toHaveBeenCalled()
+    expect(window.scrollY).toBe(300)
+  })
+
+  test('offset.left moves the page sideways to the target', async () => {
+    make({ offset: { top: 10, left: 20 } })
+    const el = document.querySelector('#section')!
+    vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({ top: 400, left: 320 } as DOMRect)
+    await plugin.scrollTo(el, false)
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 390, left: 300, behavior: 'instant' })
+  })
+
+  test('without offset.left the page does not move sideways', async () => {
+    make({ offset: { top: 10 } })
+    const el = document.querySelector('#section')!
+    vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({ top: 400, left: 320 } as DOMRect)
+    await plugin.scrollTo(el, false)
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 390, left: 0, behavior: 'instant' })
+  })
+})
+
 describe('as a plugin', () => {
   test('a visit to another page animates back to the top', async () => {
     make()

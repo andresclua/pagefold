@@ -20,7 +20,11 @@ options:
   - name: "offset"
     type: "number | { top, left } | (el) => number | { top, left }"
     default: "0"
-    description: "Space to leave above the target, for example for a fixed header."
+    description: "Space to leave above the target, for example for a fixed header. { left } does the same sideways, for pages and containers that scroll horizontally."
+  - name: "scrollFunction"
+    type: "(to, ctx) => void | (() => void)"
+    default: "undefined"
+    description: "Do the scrolling yourself, with GSAP for example. Call ctx.done() when it ends. Jumps and reduced motion do not use it."
   - name: "scrollContainers"
     type: "string"
     default: "'[data-pagefold-scroll-container]'"
@@ -47,7 +51,7 @@ options:
     description: "Jump instead of animating when the user prefers reduced motion."
 ---
 
-Import it from `pagefold/scroll` (about 1.9 KB minified and compressed, shared code included).
+Import it from `pagefold/scroll` (about 2.1 KB minified and compressed, shared code included).
 
 ```js
 import PagefoldScroll from 'pagefold/scroll'
@@ -116,6 +120,34 @@ await pagefold.scrollTo(2000, true)
 ## Stopping
 
 The animation stops as soon as the user takes over (wheel, touch, key press or mouse down) or a new visit starts.
+
+## Scrolling with your own function
+
+To scroll with GSAP, or anything else, give the plugin a `scrollFunction`. It gets the position to reach and a context, and must call `ctx.done()` when it finishes. Return a function to stop it: Pagefold calls it when the user takes over or a new visit starts.
+
+```js
+import { gsap } from 'gsap'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+gsap.registerPlugin(ScrollToPlugin)
+
+new PagefoldScroll({
+  scrollFunction: (to, { duration, done }) => {
+    const tween = gsap.to(window, {
+      scrollTo: { y: to.top, x: to.left },
+      duration: duration / 1000,
+      ease: 'power2.inOut',
+      onComplete: done,
+    })
+    return () => tween.kill()
+  },
+})
+```
+
+Jumps (`animateScroll: false`, reduced motion, or `scrollTo(y, false)`) do not use it.
+
+## Sideways
+
+A page or container that scrolls horizontally can use `offset: { left: 40 }`. Without `left`, scrolling to an element never moves the page sideways.
 
 ## From code
 

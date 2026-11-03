@@ -1,7 +1,7 @@
 import type { HookHandler } from '../hooks.js'
 import { Plugin } from '../plugin.js'
 import type { Visit } from '../visit.js'
-import { matchPath } from './match-path.js'
+import { matchPath, type MatchOptions } from './match-path.js'
 
 export interface FragmentRule {
   /** Path patterns of the page being left */
@@ -25,6 +25,10 @@ export interface FragmentRule {
 
 export interface FragmentOptions {
   rules: FragmentRule[]
+  /** How the path patterns are matched: `ignoreCase`, `strict` (trailing slash) and `end` */
+  matchOptions: MatchOptions
+  /** Print in the console which rule each visit used, and why the others did not apply. Default: false */
+  debug: boolean
 }
 
 declare module '../visit.js' {
@@ -34,8 +38,8 @@ declare module '../visit.js' {
   }
 }
 
-const matches = (patterns: string | string[], url: string): boolean =>
-  [patterns].flat().some((pattern) => matchPath(pattern, url) !== null)
+const matches = (patterns: string | string[], url: string, options: MatchOptions): boolean =>
+  [patterns].flat().some((pattern) => matchPath(pattern, url, options) !== null)
 
 /**
  * Replace only some containers for some visits, such as the detail panel of a list, and leave
@@ -46,7 +50,7 @@ export default class PagefoldFragment extends Plugin {
   name = 'PagefoldFragment'
 
   options: FragmentOptions
-  static defaults: FragmentOptions = { rules: [] }
+  static defaults: FragmentOptions = { rules: [], matchOptions: {}, debug: false }
 
   constructor(options: Partial<FragmentOptions> = {}) {
     super()
@@ -60,13 +64,24 @@ export default class PagefoldFragment extends Plugin {
 
   /** The first rule for this visit whose containers are all on the current page. */
   find(visit: Visit): FragmentRule | undefined {
-    return this.options.rules.find(
-      (rule) =>
-        matches(rule.from, visit.from.url) &&
-        matches(rule.to, visit.to.url) &&
-        rule.containers.every((selector) => document.querySelector(selector)) &&
-        (rule.if?.(visit) ?? true)
-    )
+    const { rules, matchOptions, debug } = this.options
+    return rules.find((rule, index) => {
+      const checks: [string, () => boolean][] = [
+        ['from does not match', () => matches(rule.from, visit.from.url, matchOptions)],
+        ['to does not match', () => matches(rule.to, visit.to.url, matchOptions)],
+        [
+          'a container is not on the page',
+          () => rule.containers.every((selector) => document.querySelector(selector)),
+        ],
+        ['if() returned false', () => rule.if?.(visit) ?? true],
+      ]
+      const failed = checks.find(([, passes]) => !passes())
+      if (debug) {
+        const result = failed ? `skipped, ${failed[0]}` : 'used'
+        console.log(`[pagefold] fragment rule ${index} for ${visit.from.url} -> ${visit.to.url}: ${result}`)
+      }
+      return !failed
+    })
   }
 
   private apply: HookHandler<'visit:start'> = (visit) => {
