@@ -913,7 +913,7 @@ test.describe('a11y', () => {
     })
     await link(page, '/about').click()
     await expect(heading(page)).toHaveText('About')
-    await expect(page.locator('[role="status"][aria-live="polite"]')).toHaveText('Ahora en: About')
+    await expect(page.locator('[role="status"][aria-live="assertive"]')).toHaveText('Ahora en: About')
   })
 
   test('focus goes to the content and the temporary tabindex goes away', async ({ page }) => {

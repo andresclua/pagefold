@@ -49,8 +49,16 @@ export interface A11yOptions {
   autofocus: boolean
   /** Move focus to the new content after a visit. Default: true */
   focus: boolean
-  /** The content that receives focus. Default: the first container of the visit. */
-  contentSelector: string | undefined
+  /**
+   * The element that receives focus. Default: `body`. Use `'main'` or a container selector to put
+   * focus on the new content instead.
+   */
+  contentSelector: string
+  /**
+   * How urgently screen readers read the announcement: `assertive` interrupts, `polite` waits.
+   * Default: `assertive`
+   */
+  politeness: 'assertive' | 'polite'
   /** Skip animations when the user prefers reduced motion. Default: true */
   respectReducedMotion: boolean
 }
@@ -86,7 +94,8 @@ export default class PagefoldA11y extends Plugin {
     headingSelector: ['main h1', 'h1'],
     autofocus: false,
     focus: true,
-    contentSelector: undefined,
+    contentSelector: 'body',
+    politeness: 'assertive',
     respectReducedMotion: true,
   }
 
@@ -106,7 +115,7 @@ export default class PagefoldA11y extends Plugin {
       const el = document.createElement('div')
       el.className = 'pagefold-announcer'
       el.setAttribute('role', 'status')
-      el.setAttribute('aria-live', 'polite')
+      el.setAttribute('aria-live', this.options.politeness)
       el.setAttribute('aria-atomic', 'true')
       el.style.cssText = HIDDEN
       document.body.append(el)
@@ -139,7 +148,7 @@ export default class PagefoldA11y extends Plugin {
     const { focus, contentSelector } = this.options
     visit.a11y = {
       announce: undefined,
-      focus: focus ? { selector: contentSelector ?? visit.containers[0], wait: false } : false,
+      focus: focus ? { selector: contentSelector, wait: false } : false,
     }
   }
 
@@ -225,9 +234,8 @@ export default class PagefoldA11y extends Plugin {
    * Move focus to the content, except while the user is typing or is inside an element that
    * persists across pages. The link that was clicked does not count: its focus should move on.
    */
-  private focusContent(fallbackSelector: string | undefined): void {
+  private focusContent(selector: string | undefined): void {
     if (document.activeElement?.closest(KEEP_FOCUS)) return
-    const selector = this.options.contentSelector ?? fallbackSelector
     const content = selector ? document.querySelector<HTMLElement>(selector) : null
     if (content) focusElement(content)
   }

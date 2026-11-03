@@ -24,11 +24,11 @@ afterEach(async () => {
 })
 
 describe('PagefoldA11y', () => {
-  test('adds a polite live region and removes it on unmount', async () => {
+  test('adds an assertive live region and removes it on unmount', async () => {
     make()
     const region = announcer()
     expect(region?.getAttribute('role')).toBe('status')
-    expect(region?.getAttribute('aria-live')).toBe('polite')
+    expect(region?.getAttribute('aria-live')).toBe('assertive')
     await pf.destroy()
     expect(announcer()).toBeNull()
   })
@@ -51,14 +51,25 @@ describe('PagefoldA11y', () => {
     expect(announcer()).toBeNull()
   })
 
+  test('politeness: polite makes the live region polite', () => {
+    make({ politeness: 'polite' })
+    expect(announcer()?.getAttribute('aria-live')).toBe('polite')
+  })
+
   test('moves focus to the new content, then cleans up its tabindex', async () => {
-    make()
+    make({ contentSelector: '#pagefold' })
     await pf.navigate('/a')
     const content = document.querySelector<HTMLElement>('#pagefold')
     expect(document.activeElement).toBe(content)
     expect(content?.getAttribute('tabindex')).toBe('-1')
     content?.blur()
     expect(content?.hasAttribute('tabindex')).toBe(false)
+  })
+
+  test('focus goes to the body by default', async () => {
+    make()
+    await pf.navigate('/a')
+    expect(document.activeElement).toBe(document.body)
   })
 
   test('uses contentSelector when given', async () => {
@@ -80,7 +91,7 @@ describe('PagefoldA11y', () => {
     make()
     document.querySelector<HTMLElement>('#link')?.focus()
     await pf.navigate('/a')
-    expect(document.activeElement?.id).toBe('pagefold')
+    expect(document.activeElement).toBe(document.body)
   })
 
   test('does not steal focus from an element marked as persistent', async () => {

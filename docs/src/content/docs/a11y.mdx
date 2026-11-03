@@ -26,9 +26,13 @@ options:
     default: "true"
     description: "Move focus to the new content after a visit."
   - name: "contentSelector"
-    type: "string | undefined"
-    default: "undefined"
-    description: "The element to focus. Default: the first container."
+    type: "string"
+    default: "'body'"
+    description: "The element that receives focus. Use 'main' or a container selector to focus the new content instead."
+  - name: "politeness"
+    type: "'assertive' | 'polite'"
+    default: "'assertive'"
+    description: "How urgently screen readers read the announcement: assertive interrupts, polite waits."
   - name: "respectReducedMotion"
     type: "boolean"
     default: "true"
@@ -47,8 +51,8 @@ new Pagefold({ plugins: [new PagefoldA11y()] })
 
 ## What it does
 
-- **Announces** the page: a visually hidden live region (`role="status"`, `aria-live="polite"`) is filled with your message after each visit.
-- **Moves focus** to the new content, so keyboard and screen reader users start at the top of the new page and not on a link that no longer exists. Focus moves even when the link that was clicked has it.
+- **Announces** the page: a visually hidden live region (`role="status"`, `aria-live="assertive"`, or `polite` with the `politeness` option) is filled with your message after each visit.
+- **Moves focus** to the top of the new page (the `body`, or the `contentSelector` you choose), so keyboard and screen reader users start at the top of the new page and not on a link that no longer exists. Focus moves even when the link that was clicked has it.
 - **Respects reduced motion.** If the user asked for less motion, visits are not animated: Pagefold fires `animation:skip` and swaps the content straight away.
 - **Focuses anchors.** A link to `#section` on the same page moves focus to that section.
 
@@ -63,7 +67,7 @@ After the content is replaced, Pagefold asks this for the focused element:
     { q: 'Is it inside something marked data-pagefold-persist?' },
   ]}
   stop="Focus is left where it is. People should not be interrupted while typing."
-  end="Focus moves to the start of the new content."
+  end="Focus moves to the body, or to contentSelector."
 />
 
 ## When it leaves focus alone
