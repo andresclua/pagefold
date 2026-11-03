@@ -1,6 +1,6 @@
 {
   "name": "pagefold",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Page transitions for server-rendered websites.",
   "type": "module",
   "license": "MIT",
