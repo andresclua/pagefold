@@ -68,6 +68,8 @@ export class Visit {
   history: { action: HistoryAction; popstate: boolean; direction: HistoryDirection | undefined }
   scroll: { reset: boolean; target?: string | false | undefined }
   meta: Record<string, unknown> = {}
+  /** True once the new content is on screen: from then on a failure must not reload the page */
+  swapped = false
   /** The browser's `ViewTransition`, set when the swap runs inside one (see the `native` option) */
   transition: ViewTransition | undefined
   /** Aborts the request and animations of this visit */

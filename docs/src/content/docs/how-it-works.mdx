@@ -22,6 +22,8 @@ Every navigation is a **visit**: an object that carries everything about it (whe
 
 If anything fails, `visit:fail` runs and, by default, the browser loads the page normally. A visit never leaves you on a broken page.
 
+The exception is a failure **after the new content is on screen** (in `content:scroll`, `page:view`, the in-animation or `visit:end`). Reloading would fix nothing, so the error is logged in the console, the state classes are removed and the visit stops there. `visit:fail` does not run.
+
 Visits that are not animated skip steps 4 and 6 and fire `animation:skip` instead.
 
 ## The visit as a timeline

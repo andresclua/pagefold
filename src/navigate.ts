@@ -202,21 +202,54 @@ async function runTransition(
   await animateIn(p, visit)
 }
 
-/** What happens to a visit that threw: an abort is silent, anything else ends in the browser. */
+/** The visit no longer owns the pipeline: let the next waiting visit go. */
+function handOver(p: Pagefold, visit: Visit): void {
+  if (p.visit !== visit) return
+  p.navigating = false
+  void p.pending.shift()?.()
+}
+
+/**
+ * What happens to a visit that threw.
+ * - An abort is silent, and the next waiting visit goes.
+ * - A failure after the new content is on screen is only logged: reloading would fix nothing.
+ * - Anything else ends in the browser, unless a handler of `visit:fail` took over.
+ */
 async function settleFailure(p: Pagefold, visit: Visit, error: unknown): Promise<void> {
   const aborted =
     !error || (error as FetchError).aborted || visit.state === VisitState.ABORTED
   if (aborted) {
     visit.advance(VisitState.ABORTED)
+    handOver(p, visit)
     return
   }
   if (visit.ignored) return performNativeNavigation(p, visit)
 
-  await p.hooks.call('visit:fail', visit, { error }, (v, args) => {
-    console.error(args.error)
+  if (visit.swapped) {
+    console.error(error)
+    p.classes.clear()
+    visit.advance(VisitState.FAILED)
+    handOver(p, visit)
+    return
+  }
+
+  let reloaded = false
+  const reload = (v: Visit) => {
+    reloaded = true
     performNativeNavigation(p, v)
-  })
+  }
+  try {
+    await p.hooks.call('visit:fail', visit, { error }, (v, args) => {
+      console.error(args.error)
+      reload(v)
+    })
+  } catch (handlerError) {
+    // A broken handler must not leave the visitor on a page that is not loading
+    console.error(handlerError)
+    if (!reloaded) reload(visit)
+  }
   visit.advance(VisitState.FAILED)
+  if (!reloaded) handOver(p, visit)
 }
 
 /**
@@ -250,17 +283,16 @@ export async function performNavigation(
 
     if (visit.animation.wait) await loaded
     if (visit.ignored) throw new Error(`A handler ignored the visit to ${visit.to.url}`)
-    if (visit.done) return
+    if (visit.done) return handOver(p, visit)
 
     await p.hooks.call('visit:transition', visit, undefined, () =>
       runTransition(p, visit, loaded, skipping)
     )
-    if (visit.done) return
+    if (visit.done) return handOver(p, visit)
 
     await p.hooks.call('visit:end', visit, undefined, () => p.classes.clear())
     visit.state = VisitState.COMPLETED
-    p.navigating = false
-    void p.pending.shift()?.()
+    handOver(p, visit)
   } catch (error) {
     await settleFailure(p, visit, error)
   } finally {

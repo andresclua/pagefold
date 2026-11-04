@@ -120,6 +120,7 @@ export async function renderPage(p: Pagefold, visit: Visit, page: PageData): Pro
 
   followRedirect(p, visit, page.url)
   await p.hooks.call('content:replace', visit, { page }, swapContainers(p))
+  visit.swapped = true
   await p.hooks.call('content:scroll', visit, undefined, () => scrollToContent(p, visit))
   await announceView(p, visit)
 }

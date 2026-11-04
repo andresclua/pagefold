@@ -75,6 +75,8 @@ pagefold.hooks.replace('visit:fail', (visit, { error }) => {
 
 If you replace it, the visit does **not** fall back to a normal load.
 
+If your handler throws, the error is logged and the browser loads the page normally, so the visitor is never left on a page that is not loading. `visit:fail` does not run for an error after the new content is on screen: see [How it works](/docs/how-it-works).
+
 ## `enable` and `disable`
 
 Pagefold starts and stops listening. The default adds and removes the `pagefold-enabled` class on the `html` element. Arguments: none.

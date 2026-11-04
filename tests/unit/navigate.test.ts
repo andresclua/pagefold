@@ -194,6 +194,75 @@ describe('navigate', () => {
     logged.mockRestore()
   })
 
+  test.each(['content:scroll', 'animation:in:end', 'visit:end'] as const)(
+    'a handler that throws in %s, after the swap, is logged and does not reload',
+    async (hook) => {
+      make()
+      const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const failed = vi.fn()
+      pf.hooks.on(hook, () => {
+        throw new Error('late')
+      })
+      pf.hooks.replace('visit:fail', (_v, { error }) => failed(error))
+      await pf.navigate('/a')
+      expect(failed).not.toHaveBeenCalled()
+      expect(content()).toBe('content a')
+      expect(pf.navigating).toBe(false)
+      expect(logged).toHaveBeenCalledWith(expect.objectContaining({ message: 'late' }))
+      logged.mockRestore()
+    }
+  )
+
+  test('a failure before the swap still ends in visit:fail', async () => {
+    make()
+    const failed = vi.fn()
+    pf.hooks.on('content:replace', () => {
+      throw new Error('early')
+    })
+    pf.hooks.replace('visit:fail', (_v, { error }) => failed(error))
+    await pf.navigate('/a')
+    expect(failed).toHaveBeenCalledTimes(1)
+  })
+
+  test('a queued visit runs when the visit in front of it is aborted', async () => {
+    make({ queue: 'all' })
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => (release = resolve))
+    pf.hooks.on('visit:start', async (visit) => {
+      if (visit.to.url === '/a') {
+        await gate
+        visit.abort()
+      }
+    })
+    const first = pf.navigate('/a')
+    void pf.navigate('/b')
+    release()
+    await first
+    await vi.waitFor(() => expect(content()).toBe('content b'))
+  })
+
+  test('a visit:fail handler that throws falls back to the browser and frees the queue', async () => {
+    make()
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    pages['/boom'] = { body: html('Boom', 'x'), status: 500 }
+    pf.hooks.replace('visit:fail', () => {
+      throw new Error('handler broke')
+    })
+    await expect(pf.navigate('/boom')).resolves.toBeUndefined()
+    expect(logged).toHaveBeenCalledWith(expect.objectContaining({ message: 'handler broke' }))
+    logged.mockRestore()
+  })
+
+  test('a replaced visit:fail frees the queue', async () => {
+    make({ queue: 'all' })
+    pages['/boom'] = { body: html('Boom', 'x'), status: 500 }
+    pf.hooks.replace('visit:fail', () => {})
+    const first = pf.navigate('/boom')
+    void pf.navigate('/a')
+    await first
+    await vi.waitFor(() => expect(content()).toBe('content a'))
+  })
+
   test('by default only 500 fails; a 404 page is rendered', async () => {
     make()
     pages['/gone'] = { body: html('Gone', 'not found page'), status: 404 }
