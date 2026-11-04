@@ -33,6 +33,36 @@ describe('PagefoldA11y', () => {
     expect(announcer()).toBeNull()
   })
 
+  test('the content that is leaving is inert while it animates out, and the new content is not', async () => {
+    make()
+    let during: boolean | undefined
+    pf.hooks.on('animation:out:await', () => {
+      during = document.querySelector('#pagefold')?.hasAttribute('inert')
+    })
+    await pf.navigate('/a')
+    expect(during).toBe(true)
+    expect(document.querySelector('#pagefold')?.hasAttribute('inert')).toBe(false)
+  })
+
+  test('inertLeaving: false does not touch the content', async () => {
+    make({ inertLeaving: false })
+    let during: boolean | undefined
+    pf.hooks.on('animation:out:await', () => {
+      during = document.querySelector('#pagefold')?.hasAttribute('inert')
+    })
+    await pf.navigate('/a')
+    expect(during).toBe(false)
+  })
+
+  test('an aborted visit gives the content back, and what the page made inert stays inert', async () => {
+    make()
+    document.querySelector('#link')!.setAttribute('inert', '')
+    pf.hooks.on('animation:out:await', (visit) => visit.abort())
+    await pf.navigate('/a')
+    expect(document.querySelector('#pagefold')?.hasAttribute('inert')).toBe(false)
+    expect(document.querySelector('#link')?.hasAttribute('inert')).toBe(true)
+  })
+
   test('announces the page heading after a visit', async () => {
     make()
     await pf.navigate('/a')

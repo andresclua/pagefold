@@ -37,11 +37,15 @@ options:
     type: "boolean"
     default: "true"
     description: "Skip animations when the user prefers reduced motion."
+  - name: "inertLeaving"
+    type: "boolean"
+    default: "true"
+    description: "Make the content that is leaving inert while it animates out, so it cannot be clicked or focused. It is given back if the visit is aborted. Elements the page made inert itself are left alone."
 ---
 
 import Flow from '../../components/Flow.astro'
 
-Import it from `pagefold/a11y` (about 1.8 KB minified and compressed, shared code included).
+Import it from `pagefold/a11y` (about 1.9 KB minified and compressed, shared code included).
 
 ```js
 import PagefoldA11y from 'pagefold/a11y'

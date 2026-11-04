@@ -125,6 +125,7 @@ export class Pagefold {
     this.active = true
     document.addEventListener('click', this.onClick)
     window.addEventListener('popstate', this.onPopState)
+    window.addEventListener('pageshow', this.onPageShow)
 
     if (this.options.animateHistoryBrowsing) window.history.scrollRestoration = 'manual'
     this.options.native = this.options.native && !!document.startViewTransition
@@ -163,6 +164,7 @@ export class Pagefold {
     this.active = false
     document.removeEventListener('click', this.onClick)
     window.removeEventListener('popstate', this.onPopState)
+    window.removeEventListener('pageshow', this.onPageShow)
     this.cache.clear()
     this.components.clear()
     this.plugins.slice().forEach((plugin) => this.unuse(plugin))
@@ -306,6 +308,20 @@ export class Pagefold {
       if (this.isSameResolvedUrl(url, from)) return
       void performNavigation(this, visit)
     })
+  }
+
+  /**
+   * @internal The browser can bring a page back from its back/forward cache exactly as it was left,
+   * even in the middle of a visit: the state classes would stay on the page for good.
+   */
+  onPageShow = (event: PageTransitionEvent): void => {
+    if (!event.persisted) return
+    if (this.navigating) {
+      this.visit.abort()
+      this.navigating = false
+    }
+    this.pending = []
+    this.classes.clear()
   }
 
   /** @internal */

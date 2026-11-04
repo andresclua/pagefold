@@ -213,6 +213,42 @@ describe('navigate', () => {
     }
   )
 
+  test('after the swap, one throwing handler does not stop the next ones of the same hook', async () => {
+    make()
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const second = vi.fn()
+    pf.hooks.on('page:view', () => {
+      throw new Error('first broke')
+    })
+    pf.hooks.on('page:view', second)
+    await pf.navigate('/a')
+    expect(second).toHaveBeenCalledTimes(1)
+    expect(pf.visit.state).toBe(VisitState.COMPLETED)
+    logged.mockRestore()
+  })
+
+  test('a page restored from the back/forward cache gets rid of a visit that was left half way', async () => {
+    make()
+    fetchMock.mockImplementationOnce(() => new Promise<Response>(() => {}))
+    void pf.navigate('/a')
+    const html = document.documentElement
+    await vi.waitFor(() => expect(html.classList.contains('is-animating')).toBe(true))
+
+    const show = (persisted: boolean) => {
+      const event = new Event('pageshow')
+      Object.defineProperty(event, 'persisted', { value: persisted })
+      window.dispatchEvent(event)
+    }
+    show(false) // a normal load: nothing to undo
+    expect(pf.navigating).toBe(true)
+
+    show(true)
+    expect(pf.navigating).toBe(false)
+    expect(html.classList.contains('is-animating')).toBe(false)
+    await pf.navigate('/b')
+    expect(content()).toBe('content b')
+  })
+
   test('a failure before the swap still ends in visit:fail', async () => {
     make()
     const failed = vi.fn()

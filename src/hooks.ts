@@ -217,10 +217,19 @@ export class Hooks {
     defaultHandler?: HookDefaultHandler<T>
   ): Promise<HookResult<T>>
   async call(hook: HookName, ...rest: unknown[]): Promise<unknown> {
-    const { visit, args, run, plan } = this.prepare(hook, rest)
-    for (const r of plan.before) await run(r)
+    const { visit, args, run, plan, named } = this.prepare(hook, rest)
+    // Once the new page is on screen a handler that throws must not stop the others or reload the page
+    const guarded = async (r: Registration): Promise<void> => {
+      try {
+        await run(r)
+      } catch (error) {
+        if (!(named && visit.swapped && !visit.done)) throw error
+        console.error(error)
+      }
+    }
+    for (const r of plan.before) await guarded(r)
     const result = await plan.main(visit, args)
-    for (const r of plan.after) await run(r)
+    for (const r of plan.after) await guarded(r)
     return result
   }
 
@@ -253,6 +262,7 @@ export class Hooks {
     let [visit, args, def] = rest as [unknown, unknown, unknown]
     // Shorthand without a visit: call(hook, args, default)
     if (visit !== undefined && !(visit instanceof Visit)) [visit, args, def] = [undefined, visit, args]
+    const named = visit !== undefined
     const v = (visit as Visit | undefined) ?? this.owner.visit
 
     const regs = [...(this.registry.get(hook) ?? [])].sort(
@@ -276,6 +286,6 @@ export class Hooks {
       after: regs.filter((r) => !r.before && !r.replace),
       main,
     }
-    return { visit: v, args, run, plan }
+    return { visit: v, args, run, plan, named }
   }
 }

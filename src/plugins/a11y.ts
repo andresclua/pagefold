@@ -61,6 +61,8 @@ export interface A11yOptions {
   politeness: 'assertive' | 'polite'
   /** Skip animations when the user prefers reduced motion. Default: true */
   respectReducedMotion: boolean
+  /** Make the content that is leaving `inert` while it animates out, so it cannot be clicked or focused. Default: true */
+  inertLeaving: boolean
 }
 
 const A11yDefaults: Announcements = { visit: 'Navigated to: {title}', url: 'New page at {url}' }
@@ -97,10 +99,13 @@ export default class PagefoldA11y extends Plugin {
     contentSelector: 'body',
     politeness: 'assertive',
     respectReducedMotion: true,
+    inertLeaving: true,
   }
 
   private announcer: HTMLElement | undefined
   private timer: ReturnType<typeof setTimeout> | undefined
+  /** The elements this plugin made inert */
+  private frozen: Element[] = []
 
   constructor(options: Partial<A11yOptions> = {}) {
     super()
@@ -127,14 +132,37 @@ export default class PagefoldA11y extends Plugin {
     this.on('page:view', this.afterView)
     this.on('visit:end', this.focusLate)
     this.on('link:anchor', this.focusAnchor)
+    if (this.options.inertLeaving) {
+      this.on('animation:out:start', this.freeze)
+      this.before('content:replace', this.thaw)
+      window.addEventListener('pageshow', this.thaw)
+    }
   }
 
   override unmount(): void {
     clearTimeout(this.timer)
+    window.removeEventListener('pageshow', this.thaw)
+    this.thaw()
     delete this.pagefold.announce
     this.announcer?.remove()
     this.announcer = undefined
     super.unmount()
+  }
+
+  private freeze: HookHandler<'animation:out:start'> = (visit) => {
+    this.thaw()
+    // Leave alone what the page made inert itself
+    this.frozen = visit.containers
+      .flatMap((selector) => [...document.querySelectorAll(selector)])
+      .filter((el) => !el.hasAttribute('inert'))
+    this.frozen.forEach((el) => el.setAttribute('inert', ''))
+    // An aborted visit keeps the old content: it has to come back to life
+    visit.controller.signal.addEventListener('abort', this.thaw, { once: true })
+  }
+
+  private thaw = (): void => {
+    this.frozen.forEach((el) => el.removeAttribute('inert'))
+    this.frozen = []
   }
 
   private reduceMotion: HookHandler<'visit:start'> = (visit) => {

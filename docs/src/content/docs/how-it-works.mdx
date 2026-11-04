@@ -22,7 +22,9 @@ Every navigation is a **visit**: an object that carries everything about it (whe
 
 If anything fails, `visit:fail` runs and, by default, the browser loads the page normally. A visit never leaves you on a broken page.
 
-The exception is a failure **after the new content is on screen** (in `content:scroll`, `page:view`, the in-animation or `visit:end`). Reloading would fix nothing, so the error is logged in the console, the state classes are removed and the visit stops there. `visit:fail` does not run.
+The exception is a failure **after the new content is on screen** (in `content:scroll`, `page:view`, the in-animation or `visit:end`). Reloading would fix nothing, so the error is logged in the console, the state classes are removed and the visit stops there. `visit:fail` does not run. A handler that throws at that point does not stop the other handlers of the same hook either.
+
+When the browser brings a page back from its back/forward cache while a visit was half way, Pagefold cancels that visit and removes the state classes, so the page does not come back stuck.
 
 Visits that are not animated skip steps 4 and 6 and fire `animation:skip` instead.
 

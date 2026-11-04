@@ -100,19 +100,6 @@ function swapContainers(p: Pagefold): (visit: Visit) => void {
   }
 }
 
-/**
- * Tell the handlers that the page is in place. The page is already on screen, so a handler
- * that throws (a broken analytics call, say) is reported and the visit goes on, instead of
- * reloading a page that is fine.
- */
-async function announceView(p: Pagefold, visit: Visit): Promise<void> {
-  try {
-    await p.hooks.call('page:view', visit, { url: p.location.url, title: document.title })
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 /** Put the loaded page on screen: replace the content, scroll, announce the view. */
 export async function renderPage(p: Pagefold, visit: Visit, page: PageData): Promise<void> {
   if (visit.done) return
@@ -122,5 +109,5 @@ export async function renderPage(p: Pagefold, visit: Visit, page: PageData): Pro
   await p.hooks.call('content:replace', visit, { page }, swapContainers(p))
   visit.swapped = true
   await p.hooks.call('content:scroll', visit, undefined, () => scrollToContent(p, visit))
-  await announceView(p, visit)
+  await p.hooks.call('page:view', visit, { url: p.location.url, title: document.title })
 }
