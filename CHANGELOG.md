@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/andresclua/pagefold/compare/pagefold-v0.2.0...pagefold-v0.3.0) (2026-11-04)
+
+
+### Features
+
+* 🚀 Add a sitemap, robots.txt and a downloadable skill for AI assistants ([48b57d9](https://github.com/andresclua/pagefold/commit/48b57d96a902ccf91cbdae64ef72c7dfd1b597d6))
+* 🚀 Add Netlify config and optional Google Tag Manager to the docs ([adc2bc6](https://github.com/andresclua/pagefold/commit/adc2bc61ffeee546b13f28af3b03bcf74f1d3146))
+* 🚀 Add optional Google Analytics 4 to the docs ([e69fe45](https://github.com/andresclua/pagefold/commit/e69fe45917bea405c9fbde78bd8963a87cd8164d))
+* 🚀 Set the Google Analytics ID in the docs layout, off on localhost ([f96d0b3](https://github.com/andresclua/pagefold/commit/f96d0b32e63c6bba0faa79de6da8d101afc5199f))
+
+
+### Bug fixes
+
+* 🐛 Build the library before the docs on Netlify ([a97fe0e](https://github.com/andresclua/pagefold/commit/a97fe0e1052df95a3b6166a44dcfeb0fc4d55148))
+* 🐛 Keep the page when a page:view handler throws, and send the referrer to analytics ([7ba8e20](https://github.com/andresclua/pagefold/commit/7ba8e206e1cf9d9789c9c5c337c789fa8773c755))
+
 ## [0.2.0](https://github.com/andresclua/pagefold/compare/pagefold-v0.1.0...pagefold-v0.2.0) (2026-11-03)
 
 
