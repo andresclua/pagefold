@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/andresclua/pagefold/compare/pagefold-v0.3.0...pagefold-v0.3.1) (2026-11-04)
+
+
+### Bug fixes
+
+* 🐛 Do not reload after the content is on screen, and keep the queue moving after an abort ([f4362fa](https://github.com/andresclua/pagefold/commit/f4362faa11b0b2a01f6daf07a472409db7ed02b7))
+
 ## [0.3.0](https://github.com/andresclua/pagefold/compare/pagefold-v0.2.0...pagefold-v0.3.0) (2026-11-04)
 
 
