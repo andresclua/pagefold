@@ -42,8 +42,8 @@ Keep your analytics snippet on the page as usual. It reports the **first** page.
 
 | Provider | What is sent |
 |---|---|
-| `gtag` (GA4) | `gtag('event', 'page_view', { page_title, page_location, page_path })`. Requires `window.gtag` |
-| `gtm` | Pushes `{ event, page_title, page_location, page_path }` to `window.dataLayer`. Create a trigger in Tag Manager for the event name |
+| `gtag` (GA4) | `gtag('event', 'page_view', { page_title, page_location, page_path, page_referrer })`. Requires `window.gtag` |
+| `gtm` | Pushes `{ event, page_title, page_location, page_path, page_referrer }` to `window.dataLayer`. Create a trigger in Tag Manager for the event name |
 | `matomo` | Pushes `setReferrerUrl`, `setCustomUrl`, `setDocumentTitle` and `trackPageView` to `_paq` |
 | a function | Receives `{ url, title, location, referrer }` |
 

@@ -23,6 +23,38 @@ export class FetchError extends Error {
 }
 
 /**
+ * One signal for a request. It fires when the visit is aborted, when the signal the caller passed
+ * fires, or when the timeout runs out; `expired` tells the last case apart.
+ */
+function guardRequest(visit: Visit, caller: AbortSignal | null | undefined, timeout: number) {
+  const controller = new AbortController()
+  const stop = () => controller.abort()
+  const sources = [visit.controller.signal, caller].filter((s): s is AbortSignal => !!s)
+  let expired = false
+
+  for (const source of sources) {
+    if (source.aborted) stop()
+    else source.addEventListener('abort', stop)
+  }
+  const timer =
+    timeout > 0
+      ? setTimeout(() => {
+          expired = true
+          stop()
+        }, timeout)
+      : undefined
+
+  return {
+    signal: controller.signal,
+    expired: () => expired,
+    release: () => {
+      clearTimeout(timer)
+      for (const source of sources) source.removeEventListener('abort', stop)
+    },
+  }
+}
+
+/**
  * Fetch a page. Aborting the visit cancels the request. Writes to the cache when
  * the visit allows it.
  */
@@ -33,72 +65,45 @@ export async function fetchPage(
   visit: Visit = p.visit
 ): Promise<PageData> {
   url = Location.fromUrl(url).url
-
-  const timeout = options.timeout ?? p.options.timeout
-  const controller = new AbortController()
-  const forward = () => controller.abort()
-  if (visit.controller.signal.aborted) controller.abort()
-  visit.controller.signal.addEventListener('abort', forward)
-  // A signal passed to navigate() cancels the request too
-  if (options.signal?.aborted) controller.abort()
-  options.signal?.addEventListener('abort', forward)
-
-  let timedOut = false
-  const timer =
-    timeout > 0
-      ? setTimeout(() => {
-          timedOut = true
-          controller.abort()
-        }, timeout)
-      : undefined
-
-  const requestOptions: FetchOptions = {
+  const guard = guardRequest(visit, options.signal, options.timeout ?? p.options.timeout)
+  const request: FetchOptions = {
     ...options,
     headers: { ...p.options.requestHeaders, ...options.headers },
-    signal: controller.signal,
+    signal: guard.signal,
   }
 
   let response: Response
   try {
-    response = await p.hooks.call(
-      'fetch:request',
-      visit,
-      { url, options: requestOptions },
-      (_visit, args) => fetch(args.url, args.options)
+    response = await p.hooks.call('fetch:request', visit, { url, options: request }, (_v, args) =>
+      fetch(args.url, args.options)
     )
   } catch (error) {
-    if (timedOut) {
+    if (guard.expired()) {
       await p.hooks.call('fetch:timeout', visit, { url })
-      throw new FetchError(`Request timed out: ${url}`, { url, timedOut })
+      throw new FetchError(`Request timed out: ${url}`, { url, timedOut: true })
     }
-    if (controller.signal.aborted || (error as Error)?.name === 'AbortError') {
+    if (guard.signal.aborted || (error as Error)?.name === 'AbortError') {
       throw new FetchError(`Request aborted: ${url}`, { url, aborted: true })
     }
     throw error
   } finally {
-    clearTimeout(timer)
-    visit.controller.signal.removeEventListener('abort', forward)
-    options.signal?.removeEventListener('abort', forward)
+    guard.release()
   }
 
-  const { status, url: responseUrl } = response
+  const { status, url: answeredUrl } = response
   const html = await response.text()
 
   if (p.options.failOnStatus(status)) {
-    await p.hooks.call('fetch:error', visit, { status, response, url: responseUrl })
-    throw new FetchError(`Server error: ${responseUrl}`, { status, url: responseUrl })
+    await p.hooks.call('fetch:error', visit, { status, response, url: answeredUrl })
+    throw new FetchError(`Server error: ${answeredUrl}`, { status, url: answeredUrl })
   }
-  if (!html) {
-    throw new FetchError(`Empty response: ${responseUrl}`, { status, url: responseUrl })
-  }
+  if (!html) throw new FetchError(`Empty response: ${answeredUrl}`, { status, url: answeredUrl })
 
-  // Real URL after redirects
-  const finalUrl = Location.fromUrl(responseUrl).url
-  const page = { url: finalUrl, html }
+  // The URL after redirects is the page's identity
+  const page: PageData = { url: Location.fromUrl(answeredUrl).url, html }
 
-  // Only cache safe requests that were not redirected
-  if (visit.cache.write && (!options.method || options.method === 'GET') && url === finalUrl) {
-    p.cache.set(page.url, page)
-  }
+  // Only safe requests that were not redirected are worth keeping
+  const plainGet = !options.method || options.method === 'GET'
+  if (visit.cache.write && plainGet && url === page.url) p.cache.set(page.url, page)
   return page
 }

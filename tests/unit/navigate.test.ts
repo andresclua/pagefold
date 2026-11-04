@@ -178,6 +178,22 @@ describe('navigate', () => {
     expect(pf.visit.state).toBe(VisitState.FAILED)
   })
 
+  test('a handler that throws in page:view is logged and the visit still completes', async () => {
+    make()
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failed = vi.fn()
+    pf.hooks.on('page:view', () => {
+      throw new Error('boom')
+    })
+    pf.hooks.replace('visit:fail', (_v, { error }) => failed(error))
+    await pf.navigate('/a')
+    expect(failed).not.toHaveBeenCalled()
+    expect(content()).toBe('content a')
+    expect(pf.visit.state).toBe(VisitState.COMPLETED)
+    expect(logged).toHaveBeenCalledWith(expect.objectContaining({ message: 'boom' }))
+    logged.mockRestore()
+  })
+
   test('by default only 500 fails; a 404 page is rendered', async () => {
     make()
     pages['/gone'] = { body: html('Gone', 'not found page'), status: 404 }

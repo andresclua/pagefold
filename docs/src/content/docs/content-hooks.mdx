@@ -66,3 +66,21 @@ pagefold.hooks.on('page:view', (visit, { url, title }) => {
   analytics.page({ path: url, title })
 })
 ```
+
+`url` is the path and query of the new page (`/about/?x=1`), not a full address, so `new URL(url)` throws. The browser is already on the new page: read `window.location.href`, `window.location.pathname` and `document.title`. `visit.from.url` is the page that was left. `document.referrer` does not change between visits, so build the referrer from `visit.from.url`:
+
+```js
+pagefold.hooks.on('page:view', (visit) => {
+  window.dataLayer.push({
+    event: 'VirtualPageview',
+    virtualPageURL: window.location.href,
+    virtualPageTitle: document.title,
+    virtualPagePath: window.location.pathname,
+    virtualPageReferrer: window.location.origin + visit.from.url,
+  })
+})
+```
+
+The page is already on screen when `page:view` runs, so an error thrown by a handler is logged in the console and the visit goes on. It does **not** reload the page. Handlers run one after the other: the ones registered after the one that threw do not run for that visit.
+
+The [Analytics plugin](/docs/analytics) does all of this for you.

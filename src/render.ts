@@ -77,30 +77,49 @@ export function replaceContent(visit: Visit): boolean {
   return replaced.length === visit.containers.length
 }
 
-/** Put the loaded page on screen: replace content, scroll, announce the view. */
+/** The server may have answered from another URL: make the address bar and the visit follow. */
+function followRedirect(p: Pagefold, visit: Visit, answeredUrl: string): void {
+  if (p.isSameResolvedUrl(getCurrentUrl(), answeredUrl)) return
+  updateHistoryRecord(answeredUrl)
+  p.location = Location.fromUrl(answeredUrl)
+  visit.to.url = p.location.url
+  visit.to.hash = p.location.hash
+}
+
+/** The default of `content:replace`: swap the containers and give the new ones the visit's classes. */
+function swapContainers(p: Pagefold): (visit: Visit) => void {
+  return (visit) => {
+    const animated = visit.animation.animate
+    p.classes.remove('is-leaving')
+    if (animated) p.classes.add('is-rendering')
+    if (!replaceContent(visit)) throw new Error('[pagefold] The containers of the two pages do not match')
+    if (!animated) return
+    // The containers are new elements: they need the classes again
+    p.classes.add('is-changing', 'is-animating', 'is-rendering')
+    if (visit.animation.name) p.classes.add(`to-${classify(visit.animation.name)}`)
+  }
+}
+
+/**
+ * Tell the handlers that the page is in place. The page is already on screen, so a handler
+ * that throws (a broken analytics call, say) is reported and the visit goes on, instead of
+ * reloading a page that is fine.
+ */
+async function announceView(p: Pagefold, visit: Visit): Promise<void> {
+  try {
+    await p.hooks.call('page:view', visit, { url: p.location.url, title: document.title })
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+/** Put the loaded page on screen: replace the content, scroll, announce the view. */
 export async function renderPage(p: Pagefold, visit: Visit, page: PageData): Promise<void> {
   if (visit.done) return
   visit.advance(VisitState.ENTERING)
 
-  // Redirected: the URL in the address bar must follow
-  if (!p.isSameResolvedUrl(getCurrentUrl(), page.url)) {
-    updateHistoryRecord(page.url)
-    p.location = Location.fromUrl(page.url)
-    visit.to.url = p.location.url
-    visit.to.hash = p.location.hash
-  }
-
-  await p.hooks.call('content:replace', visit, { page }, (v) => {
-    p.classes.remove('is-leaving')
-    if (v.animation.animate) p.classes.add('is-rendering')
-    if (!replaceContent(v)) throw new Error('[pagefold] Container mismatch, aborting')
-    if (v.animation.animate) {
-      // The containers are new elements: give them the classes again
-      p.classes.add('is-changing', 'is-animating', 'is-rendering')
-      if (v.animation.name) p.classes.add(`to-${classify(v.animation.name)}`)
-    }
-  })
-
+  followRedirect(p, visit, page.url)
+  await p.hooks.call('content:replace', visit, { page }, swapContainers(p))
   await p.hooks.call('content:scroll', visit, undefined, () => scrollToContent(p, visit))
-  await p.hooks.call('page:view', visit, { url: p.location.url, title: document.title })
+  await announceView(p, visit)
 }

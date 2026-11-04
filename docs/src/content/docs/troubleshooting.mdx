@@ -9,7 +9,7 @@ order: 8
 
 Pagefold decided it could not do the visit and handed it to the browser. Check the console for one of these:
 
-- **Container mismatch**: a selector in `containers` is missing in the current or the new page. Every page needs every container. By default there is one: `#pagefold`.
+- **The containers do not match**: a selector in `containers` is missing in the current or the new page. Every page needs every container. By default there is one: `#pagefold`.
 - A server error (`500`) or an empty response. See `failOnStatus`.
 - The link matches a rule in [Which links are handled](/docs/which-links): another origin, `target="_blank"`, `data-no-pagefold`, a modifier key.
 

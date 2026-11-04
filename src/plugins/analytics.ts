@@ -69,6 +69,7 @@ export default class PagefoldAnalytics extends Plugin {
           page_title: view.title,
           page_location: view.location,
           page_path: view.url,
+          page_referrer: view.referrer,
         })
         break
       case 'gtm':
@@ -78,6 +79,7 @@ export default class PagefoldAnalytics extends Plugin {
           page_title: view.title,
           page_location: view.location,
           page_path: view.url,
+          page_referrer: view.referrer,
         })
         break
       case 'matomo': {

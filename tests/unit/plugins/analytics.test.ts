@@ -34,6 +34,7 @@ describe('PagefoldAnalytics', () => {
       page_title: 'Page A',
       page_location: `${window.location.origin}/a`,
       page_path: '/a',
+      page_referrer: `${window.location.origin}/`,
     })
     await pf.navigate('/b')
     expect(gtag).toHaveBeenCalledTimes(2)
@@ -48,6 +49,7 @@ describe('PagefoldAnalytics', () => {
         page_title: 'Page A',
         page_location: `${window.location.origin}/a`,
         page_path: '/a',
+        page_referrer: `${window.location.origin}/`,
       },
     ])
   })
