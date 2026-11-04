@@ -1,6 +1,7 @@
 ---
 import { Code } from 'astro:components'
 import Base from '../layouts/Base.astro'
+import { version } from '../../../package.json'
 
 const themes = { light: 'github-light', dark: 'github-dark' }
 
@@ -17,7 +18,7 @@ const features = [
   },
   {
     title: 'Small and modular',
-    text: 'A 7.1 KB core with no dependencies. Every module is its own import, so you ship what you use.',
+    text: 'A 7.4 KB core with no dependencies. Every module is its own import, so you ship what you use.',
     icon: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
   },
   {
@@ -59,7 +60,7 @@ const modules = [
   <section class="hero">
     <div class="wrap hero-inner">
       <div class="copy">
-        <p class="eyebrow"><span class="dot"></span> v0.1 · MIT</p>
+        <p class="eyebrow"><span class="dot"></span> v{version} · MIT</p>
         <h1>Pages that <em>fold</em> into each other.</h1>
         <p class="lead">
           Page transitions for server-rendered websites. Keep your HTML, add one container and one
