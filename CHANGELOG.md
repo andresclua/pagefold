@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/andresclua/pagefold/compare/pagefold-v0.3.1...pagefold-v0.4.0) (2026-11-05)
+
+
+### Features
+
+* 🚀 Isolate handler errors after the swap, make leaving content inert and recover from the back/forward cache ([1873b02](https://github.com/andresclua/pagefold/commit/1873b021985262efc4e7e6ce02458324b82c4578))
+
+
+### Documentation
+
+* 📚 Link pages with the trailing slash, cache built assets and measure navigation with pnpm bench ([73a2652](https://github.com/andresclua/pagefold/commit/73a26521ece949442237f92af90ad3fb08f1f6be))
+* 📚 Show the package version on the homepage ([1b50076](https://github.com/andresclua/pagefold/commit/1b500766e2ea27c27bb0dda60f7f00338bbbe455))
+
 ## [0.3.1](https://github.com/andresclua/pagefold/compare/pagefold-v0.3.0...pagefold-v0.3.1) (2026-11-04)
 
 
