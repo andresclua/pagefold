@@ -60,11 +60,11 @@ Astro bundles that script for the browser. Because the layout is shared, it is o
 - **Head**: Astro gives every page its own title, description and, depending on its styles, its own stylesheets. Without it, they would not change. `awaitAssets: true` waits for new stylesheets, so a page never appears unstyled.
 - **A11y**: announces the page and moves focus.
 
-Add [Preload](/docs/preload), [Scroll](/docs/scroll) and [Progress](/docs/progress) the same way.
+Add [Preload](/docs/preload/), [Scroll](/docs/scroll/) and [Progress](/docs/progress/) the same way.
 
 ## Islands
 
-Astro hydrates its framework components ("islands") with small scripts that it writes into each page. Pagefold does not run scripts that arrive with new HTML, so **add the [Scripts](/docs/scripts) plugin** if you use islands:
+Astro hydrates its framework components ("islands") with small scripts that it writes into each page. Pagefold does not run scripts that arrive with new HTML, so **add the [Scripts](/docs/scripts/) plugin** if you use islands:
 
 ```js
 import PagefoldScripts from 'pagefold/scripts'
@@ -90,7 +90,7 @@ The danger is that `client:load` on the first page makes everything look fine, a
 
 - **Do not use Astro's own `<ClientRouter />` at the same time.** Both would try to handle the same clicks.
 - **Scripts of your own pages.** Astro publishes a page's `<script>` as a module, and the browser runs a module only once per document, even if its tag appears again. Code that must run on every visit belongs in a function that you call from the `page:view` hook.
-- **Components that initialize in JavaScript** need the pattern in [Initializing components](/docs/components).
+- **Components that initialize in JavaScript** need the pattern in [Initializing components](/docs/components/).
 
 ## Checked
 

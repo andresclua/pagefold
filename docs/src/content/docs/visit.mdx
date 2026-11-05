@@ -39,7 +39,7 @@ pagefold.hooks.on('visit:start', (visit) => {
 | `containers` | `string[]` | The containers that will be replaced |
 | `trigger` | `{ el?, event? }` | The link or form that started it |
 | `meta` | `object` | Your own data, from `navigate(url, { meta })` |
-| `transition` | `ViewTransition \| undefined` | The browser's transition, when the swap runs inside one. See [View Transitions](/docs/view-transitions#reaching-the-transition) |
+| `transition` | `ViewTransition \| undefined` | The browser's transition, when the swap runs inside one. See [View Transitions](/docs/view-transitions/#reaching-the-transition) |
 | `controller` | `AbortController` | Cancels the request and the waiting of this visit |
 
 ## `animation`
@@ -50,7 +50,7 @@ pagefold.hooks.on('visit:start', (visit) => {
 | `wait` | `false` | Wait for the page to load before animating out |
 | `name` | none | Animation name: adds `to-<name>` to the html element and picks entries in the JS plugin |
 | `native` | the `native` option | Use the View Transitions API |
-| `types` | `[]` | Names for the browser transition, for CSS. See [View Transitions](/docs/view-transitions#transition-types) |
+| `types` | `[]` | Names for the browser transition, for CSS. See [View Transitions](/docs/view-transitions/#transition-types) |
 | `scope` | the `animationScope` option | Where classes go: `'html'`, `'containers'`, or a list of selectors |
 | `selector` | the `animationSelector` option | What to wait for |
 | `overlap` | none | Set by the Overlap plugin. Set it to `false` to opt a visit out |

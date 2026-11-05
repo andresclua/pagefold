@@ -7,7 +7,7 @@ order: 2
 
 import Demo from '../../../components/Demo.astro'
 
-ScrollTrigger keeps its triggers until you kill them. On a site that never reloads, they would pile up with every visit. This demo hands each element to [`pagefold.mount`](/docs/components), which sets it up when it arrives and runs the cleanup when it leaves.
+ScrollTrigger keeps its triggers until you kill them. On a site that never reloads, they would pile up with every visit. This demo hands each element to [`pagefold.mount`](/docs/components/), which sets it up when it arrives and runs the cleanup when it leaves.
 
 <Demo name="scrolltrigger" height={520} files={['main.js', 'index.html', 'style.css']} />
 
@@ -38,6 +38,6 @@ pagefold.mount('[data-reveal]', (el) => {
 - **Measure again after the visit.** The new page has another height, so `visit:end` calls `ScrollTrigger.refresh()`.
 - **Without the cleanup** the counter would grow on every visit, and old triggers would keep working on elements that are gone.
 
-More in [Initializing components](/docs/components) and [GSAP](/docs/gsap).
+More in [Initializing components](/docs/components/) and [GSAP](/docs/gsap/).
 
 This demo loads GSAP from a CDN (jsDelivr). Pagefold does not include GSAP: install it yourself and check [its license](https://gsap.com/standard-license).

@@ -46,7 +46,7 @@ const preload = new PagefoldPreload({ preloadVisibleLinks: { delay: 300 } })
 new Pagefold({ plugins: [preload] })
 ```
 
-Preloaded pages go into the [cache](/docs/caching-and-history), so a later visit makes no request.
+Preloaded pages go into the [cache](/docs/caching-and-history/), so a later visit makes no request.
 
 ## What it saves
 
@@ -73,6 +73,22 @@ The click happens at the same moment in all three rows. Without Preload the visi
   ]}
   caption="Third row: the click arrives before the request ends. The visit waits for that request instead of starting a second one."
 />
+
+## Measured
+
+Time from the click until the new page is on screen, on this documentation site, median of eight pages. The full page load already has the CSS and scripts in the browser cache, so what it pays is the page itself and the checks for the rest:
+
+| Connection | Full page load | Pagefold | Pagefold + Preload |
+| --- | --- | --- | --- |
+| No throttling | 16 ms · 6 requests | 8 ms · 1 request | 12 ms · 1 request |
+| Fast 4G | 376 ms · 6 requests | 190 ms · 1 request | 12 ms · 1 request |
+| Slow 3G | 912 ms · 6 requests | 565 ms · 1 request | 314 ms · 1 request |
+
+Preload waited 300 ms with the pointer on the link, the default. On Slow 3G that is not enough for the page to arrive, so part of the wait remains: the click joins the request that is already under way.
+
+These are guides, not promises. They come from one browser (Chromium 156), one machine and a local server that sends the same cache headers as Netlify, with the network slowed down by the browser. Run `pnpm bench` in the repository to measure your own build.
+
+**Links need the trailing slash your server uses.** If a link goes to `/docs/options` and the server redirects it to `/docs/options/`, the page that comes back is stored under a different URL than the one the link names, so neither the cache nor Preload can use it. Link to the final address. See [Caching and history](/docs/caching-and-history/).
 
 ## If the click comes first
 
@@ -115,5 +131,5 @@ The second point is easy to miss, because nothing breaks: everything works, with
 
 - **Each page is requested twice.** You also use speculation rules and the server does not allow caching. See above.
 - **Too many requests.** Lower `throttle`, turn off `preloadVisibleLinks`, or mark links with `data-no-preload`.
-- **A page that depends on the visitor looks old.** A preloaded page goes into the cache like any other. Keep it out with `ignore`, or set a short `cacheTtl`. See [Caching and history](/docs/caching-and-history).
+- **A page that depends on the visitor looks old.** A preloaded page goes into the cache like any other. Keep it out with `ignore`, or set a short `cacheTtl`. See [Caching and history](/docs/caching-and-history/).
 - **Nothing is preloaded on a phone.** On slow connections, or when the visitor asked to save data, the plugin does nothing. Turn that off with `respectConnection: false` if you would rather not respect it.

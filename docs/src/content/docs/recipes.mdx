@@ -56,7 +56,7 @@ pagefold.hooks.on('visit:start', () => {
 })
 ```
 
-If you use the [Body class plugin](/docs/body-class) without a `prefix`, it replaces the whole `class` attribute of the body and would also remove `menu-open`. Give it a prefix, as that page explains.
+If you use the [Body class plugin](/docs/body-class/) without a `prefix`, it replaces the whole `class` attribute of the body and would also remove `menu-open`. Give it a prefix, as that page explains.
 
 ## Turn the animation off for some pages
 
@@ -74,7 +74,7 @@ new Pagefold({ ignoreVisit: (url) => url.startsWith('/admin') })
 
 ## Show a loading indicator
 
-For visits that take a while, use the [Progress plugin](/docs/progress): it appears after 300 ms, so quick visits show nothing. For your own indicator, `html.is-changing` is present during the whole transition:
+For visits that take a while, use the [Progress plugin](/docs/progress/): it appears after 300 ms, so quick visits show nothing. For your own indicator, `html.is-changing` is present during the whole transition:
 
 ```css
 .spinner {
@@ -102,7 +102,7 @@ pagefold.hooks.on('page:view', (visit, { url, title }) => {
 })
 ```
 
-`page:view` runs once per visit, when the new page is in place. For components that must be created and destroyed with their page, see [Initializing components](/docs/components).
+`page:view` runs once per visit, when the new page is in place. For components that must be created and destroyed with their page, see [Initializing components](/docs/components/).
 
 ## Show a message when a page fails to load
 

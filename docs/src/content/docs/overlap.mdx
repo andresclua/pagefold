@@ -72,7 +72,7 @@ Every container also gets a custom property, `--pagefold-overlap-container`, wit
 <main id="pagefold" class="transition-overlap">...</main>
 ```
 
-**The container needs a class that starts with `transition-`.** Pagefold waits for the CSS transitions of the elements that match [`animationSelector`](/docs/options), which by default is `[class*="transition-"]`. Without that class there is nothing to wait for, and the old page is removed the moment the new one is in: the two never overlap.
+**The container needs a class that starts with `transition-`.** Pagefold waits for the CSS transitions of the elements that match [`animationSelector`](/docs/options/), which by default is `[class*="transition-"]`. Without that class there is nothing to wait for, and the old page is removed the moment the new one is in: the two never overlap.
 
 The previous container also gets `aria-hidden="true"`, so screen readers do not read two pages.
 

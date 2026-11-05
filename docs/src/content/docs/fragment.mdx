@@ -59,11 +59,11 @@ Try it. Type in the filter, scroll the list and open a person. The time on the l
 
 | Field | What it does |
 |---|---|
-| `from`, `to` | Path patterns, or a list of them. `:name` and `*` work as in [JS](/docs/js#matching). |
+| `from`, `to` | Path patterns, or a list of them. `:name` and `*` work as in [JS](/docs/js/#matching). |
 | `containers` | The only containers replaced by matching visits |
 | `name` | Becomes the animation name, as `data-pagefold-animation` would |
 | `scroll` | Scroll after the visit. `true` goes to the top, a selector goes to that element, and a function `(visit) => boolean \| string` decides for each visit. Fragment visits keep the scroll position by default |
-| `focus` | With the [A11y plugin](/docs/a11y): a selector to focus after these visits, or `false` to leave focus alone |
+| `focus` | With the [A11y plugin](/docs/a11y/): a selector to focus after these visits, or `false` to leave focus alone |
 | `if` | `(visit) => boolean`. Return `false` to skip the rule for that visit, even when the paths match |
 
 ## Animations
@@ -106,5 +106,5 @@ new PagefoldFragment({ rules, debug: true })
 ## Common problems
 
 - **The way back replaces everything.** A rule needs the page you leave **and** the page you enter. Add a second rule for the return trip.
-- **A rule never applies.** Every container in the rule must exist on the current page, and both patterns must match. Turn on the [Debug plugin](/docs/debug) to see what the visit does.
+- **A rule never applies.** Every container in the rule must exist on the current page, and both patterns must match. Turn on the [Debug plugin](/docs/debug/) to see what the visit does.
 - **The scroll position resets.** Fragment visits keep it unless the rule has `scroll: true`.

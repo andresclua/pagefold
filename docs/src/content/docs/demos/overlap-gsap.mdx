@@ -7,7 +7,7 @@ order: 3
 
 import Demo from '../../../components/Demo.astro'
 
-The [Overlap plugin](/docs/overlap) keeps the old page in the document while the new one comes in. That makes effects possible that a normal transition cannot do, because both pages are on screen together. Here a whole timeline of GSAP animations runs across both of them, and across the bar that never changes.
+The [Overlap plugin](/docs/overlap/) keeps the old page in the document while the new one comes in. That makes effects possible that a normal transition cannot do, because both pages are on screen together. Here a whole timeline of GSAP animations runs across both of them, and across the bar that never changes.
 
 <Demo name="overlap-gsap" height={560} files={['main.js', 'index.html', 'style.css']} />
 
@@ -49,6 +49,6 @@ pagefold.hooks.replace('animation:in:await', () => timeline)
 - **Reduced motion.** A `visit:start` handler sets `visit.animation.animate = false`, and the page changes without any of this.
 - **Only what GSAP set is cleared** at the end, so the pages keep their own styles.
 
-More in [Overlap](/docs/overlap) and [GSAP](/docs/gsap).
+More in [Overlap](/docs/overlap/) and [GSAP](/docs/gsap/).
 
 This demo loads GSAP from a CDN (jsDelivr). Pagefold does not include GSAP: install it yourself and check [its license](https://gsap.com/standard-license).

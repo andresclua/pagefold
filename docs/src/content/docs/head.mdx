@@ -58,7 +58,7 @@ The `lang` and `dir` attributes of the `html` element are copied too. Add more w
 
 ## Scripts in the head
 
-New `<script>` tags are inserted but the browser does not run them. Use the [Scripts plugin](/docs/scripts) for that. The two work together: an identical script that is already in the head is kept and is not run again.
+New `<script>` tags are inserted but the browser does not run them. Use the [Scripts plugin](/docs/scripts/) for that. The two work together: an identical script that is already in the head is kept and is not run again.
 
 ## Waiting for stylesheets
 
@@ -68,4 +68,4 @@ With `awaitAssets` the visit waits for the `load` or `error` event of every new 
 
 - **A stylesheet from the old page is still there.** Only tags that are identical on both pages are kept. A tag that only the old page has is removed, unless you list it in `persistTags`.
 - **The page flashes without its styles.** Turn on `awaitAssets`, so the visit waits for the new stylesheets.
-- **A script in the head did not run.** Inserting it is not enough. Add the [Scripts plugin](/docs/scripts).
+- **A script in the head did not run.** Inserting it is not enough. Add the [Scripts plugin](/docs/scripts/).

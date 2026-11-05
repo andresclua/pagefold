@@ -197,7 +197,8 @@
     "prepare": "husky",
     "test:e2e": "pnpm build && playwright test -c tests/e2e/playwright.config.ts",
     "check:package": "attw --pack .",
-    "check:showcase": "node scripts/check-showcase.mjs"
+    "check:showcase": "node scripts/check-showcase.mjs",
+    "bench": "node scripts/bench.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",

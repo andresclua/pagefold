@@ -7,7 +7,7 @@ order: 6
 
 import Demo from '../../../components/Demo.astro'
 
-When Pagefold swaps the HTML, the JavaScript you attached to it stays behind: listeners, timers and instances of libraries. [`pagefold.mount`](/docs/components) creates a component for every element that matches a selector, and runs its cleanup when the element leaves.
+When Pagefold swaps the HTML, the JavaScript you attached to it stays behind: listeners, timers and instances of libraries. [`pagefold.mount`](/docs/components/) creates a component for every element that matches a selector, and runs its cleanup when the element leaves.
 
 <Demo name="components" height={540} files={['main.js', 'index.html', 'style.css']} />
 
@@ -48,4 +48,4 @@ pagefold.mount('[data-clock]', (el) => {
 - **Return the cleanup.** Without it, every visit to the clock would leave one more timer running.
 - **The code is loaded once**, in the first page. `mount` takes care of setting up and cleaning up, so no script has to run again.
 
-More in [Initializing components](/docs/components) and [Gia](/docs/gia).
+More in [Initializing components](/docs/components/) and [Gia](/docs/gia/).

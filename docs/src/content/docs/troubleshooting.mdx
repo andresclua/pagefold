@@ -11,9 +11,9 @@ Pagefold decided it could not do the visit and handed it to the browser. Check t
 
 - **The containers do not match**: a selector in `containers` is missing in the current or the new page. Every page needs every container. By default there is one: `#pagefold`.
 - A server error (`500`) or an empty response. See `failOnStatus`.
-- The link matches a rule in [Which links are handled](/docs/which-links): another origin, `target="_blank"`, `data-no-pagefold`, a modifier key.
+- The link matches a rule in [Which links are handled](/docs/which-links/): another origin, `target="_blank"`, `data-no-pagefold`, a modifier key.
 
-Add the [Debug plugin](/docs/debug) to see every hook and the reason in order.
+Add the [Debug plugin](/docs/debug/) to see every hook and the reason in order.
 
 ## Nothing animates
 
@@ -22,7 +22,7 @@ Add the [Debug plugin](/docs/debug) to see every hook and the reason in order.
 
 ## Scripts in the new page do not run
 
-Scripts that come in with new HTML do not run by themselves. Add the [Scripts plugin](/docs/scripts).
+Scripts that come in with new HTML do not run by themselves. Add the [Scripts plugin](/docs/scripts/).
 
 ## My analytics count only the first page
 
@@ -36,11 +36,11 @@ pagefold.hooks.on('page:view', (visit, { url, title }) => {
 
 ## The title, meta tags and stylesheets stay the same
 
-Only the containers are replaced. Add the [Head plugin](/docs/head).
+Only the containers are replaced. Add the [Head plugin](/docs/head/).
 
 ## My components stop working after a visit
 
-See [Initializing components](/docs/components).
+See [Initializing components](/docs/components/).
 
 ## My server answers differently to Pagefold
 

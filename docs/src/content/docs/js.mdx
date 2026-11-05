@@ -31,7 +31,7 @@ Each animation is an object:
 
 You can pass the array directly: `new PagefoldJs([ ... ])`.
 
-Read [Animating with JavaScript](/docs/javascript-animations) for the contract, and the guides for [GSAP](/docs/gsap), [Motion](/docs/motion) and the [Web Animations API](/docs/web-animations).
+Read [Animating with JavaScript](/docs/javascript-animations/) for the contract, and the guides for [GSAP](/docs/gsap/), [Motion](/docs/motion/) and the [Web Animations API](/docs/web-animations/).
 
 ## Matching
 
@@ -67,6 +67,6 @@ Put the most specific entries first and a plain fallback last. Without a fallbac
 
 ## Common problems
 
-- **The animation is skipped.** No entry matched and there is no fallback, or the visit has `animation.animate = false` (for example a back-button visit). See [Caching and history](/docs/caching-and-history).
+- **The animation is skipped.** No entry matched and there is no fallback, or the visit has `animation.animate = false` (for example a back-button visit). See [Caching and history](/docs/caching-and-history/).
 - **The page waits forever.** An `out` or `in` that takes `done` never calls it, for example because of an exception before it. Pagefold has no timeout of its own here, so wrap risky code in `try / finally`.
 - **Both CSS and JS animate.** Set `animationSelector: false` so Pagefold does not also wait for CSS transitions.

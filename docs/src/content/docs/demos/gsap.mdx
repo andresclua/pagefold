@@ -7,7 +7,7 @@ order: 1
 
 import Demo from '../../../components/Demo.astro'
 
-A transition written with a GSAP timeline instead of CSS. Pagefold gives GSAP the two moments, leaving and arriving, through the [JS plugin](/docs/js), and waits until each one is over.
+A transition written with a GSAP timeline instead of CSS. Pagefold gives GSAP the two moments, leaving and arriving, through the [JS plugin](/docs/js/), and waits until each one is over.
 
 <Demo name="gsap" height={420} files={['main.js', 'index.html', 'style.css']} />
 
@@ -34,6 +34,6 @@ The JS plugin takes a list of animations. The first one has `from: '(.*)'` and `
 - **Give the page back as it was.** The timeline ends with `clearProps`, so GSAP leaves no inline style behind and your CSS keeps control.
 - **Names pick the animation.** `data-pagefold-animation` on a link, or `navigate(url, { animation })`, chooses the entry with that name.
 
-More about it in [GSAP](/docs/gsap) and [Animating with JavaScript](/docs/javascript-animations).
+More about it in [GSAP](/docs/gsap/) and [Animating with JavaScript](/docs/javascript-animations/).
 
 This demo loads GSAP from a CDN (jsDelivr). Pagefold does not include GSAP: install it yourself and check [its license](https://gsap.com/standard-license).

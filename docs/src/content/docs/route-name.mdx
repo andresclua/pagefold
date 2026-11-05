@@ -66,7 +66,7 @@ For a visit from `/work` to `/work/hello` with the configuration above:
 
 - `visit.from.route` and `visit.to.route`, the names of the pages. A page with no route is `unknown`.
 - Classes while it runs: `from-route-home`, `to-route-project`. They are removed at the end.
-- If the visit has no animation name yet, the first matching entry in `animations` sets it, which also adds `to-expand` and works with the [JS plugin](/docs/js).
+- If the visit has no animation name yet, the first matching entry in `animations` sets it, which also adds `to-expand` and works with the [JS plugin](/docs/js/).
 
 ```css
 html.from-route-home.to-route-project .transition-fade {
@@ -76,10 +76,10 @@ html.from-route-home.to-route-project .transition-fade {
 
 ## Details
 
-Patterns match the way they do in the [JS plugin](/docs/js#matching), and `matchOptions` works the same: `ignoreCase`, `strict` and `end`.
+Patterns match the way they do in the [JS plugin](/docs/js/#matching), and `matchOptions` works the same: `ignoreCase`, `strict` and `end`.
 
 
-Patterns use `:name`, optional parameters such as `/:lang?`, and `*` or `(.*)` (see [JS](/docs/js#matching)). The first route that matches wins, so list specific routes before general ones. A name you set yourself (a link attribute or `navigate(url, { animation })`) is never overwritten.
+Patterns use `:name`, optional parameters such as `/:lang?`, and `*` or `(.*)` (see [JS](/docs/js/#matching)). The first route that matches wins, so list specific routes before general ones. A name you set yourself (a link attribute or `navigate(url, { animation })`) is never overwritten.
 
 Routes can also be a list, which keeps the order explicit:
 

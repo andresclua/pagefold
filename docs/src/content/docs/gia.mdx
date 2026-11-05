@@ -52,11 +52,11 @@ Only the components **inside the containers** are destroyed. A menu or a player 
 
 ## With Overlap
 
-[Overlap](/docs/overlap) keeps the old page in the document while it animates out. The code above destroys its components when the swap starts, so for that time they are gone while the page is still on screen. If that matters, destroy them yourself when the visit ends.
+[Overlap](/docs/overlap/) keeps the old page in the document while it animates out. The code above destroys its components when the swap starts, so for that time they are gone while the page is still on screen. If that matters, destroy them yourself when the visit ends.
 
 ## Without Gia
 
-Gia is a small layer over what [`pagefold.mount`](/docs/components) already does: set up an element when it arrives and clean up when it leaves. If you only need that, `mount` does it with no other library.
+Gia is a small layer over what [`pagefold.mount`](/docs/components/) already does: set up an element when it arrives and clean up when it leaves. If you only need that, `mount` does it with no other library.
 
 ## Checked
 

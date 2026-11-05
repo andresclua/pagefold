@@ -31,7 +31,7 @@ A visit from a page with one slider to a page with two:
 |---|---|
 | You call `mount` | The first slider is set up |
 | `content:replace` fires | The old slider's element is gone, so its cleanup runs. The two new elements are found and set up |
-| The visit ends | A last check, for containers that stayed until the end, such as the previous page with [Overlap](/docs/overlap) |
+| The visit ends | A last check, for containers that stayed until the end, such as the previous page with [Overlap](/docs/overlap/) |
 | Back button, to the first page | The two are cleaned up and one is created |
 
 The cleanup runs after the old element has left the page. If it needs the element to still be there, use the hook `content:replace` with `before` and clean up in it yourself.
@@ -41,4 +41,4 @@ The cleanup runs after the old element has left the page. If it needs the elemen
 - **Two sliders on the same element.** You attached them somewhere other than `mount`, such as a `DOMContentLoaded` listener that also runs on the first page. Keep one place that creates components.
 - **Memory grows with every visit.** `setup` returned nothing, so the old instance was never destroyed. Always return the cleanup, even when it only removes a listener.
 - **The component flickers when the page appears.** It is created after the transition has already started showing the page. `mount` already sets components up on `content:replace`. If you create them yourself in `visit:end`, move them to `mount`.
-- **Scripts in the page do not run.** Inline `<script>` tags are not part of this. See [Scripts](/docs/scripts) for new scripts in the incoming page.
+- **Scripts in the page do not run.** Inline `<script>` tags are not part of this. See [Scripts](/docs/scripts/) for new scripts in the incoming page.

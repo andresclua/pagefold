@@ -35,7 +35,7 @@ const { title, description, whenToUse, options } = entry.data
               <ul>
                 {items.map((d) => (
                   <li>
-                    <a href={`/docs/${d.id}`} aria-current={d.id === entry.id ? 'page' : undefined}>
+                    <a href={`/docs/${d.id}/`} aria-current={d.id === entry.id ? 'page' : undefined}>
                       {d.data.title}
                     </a>
                   </li>

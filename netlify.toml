@@ -1,3 +1,9 @@
 [build]
   command = "pnpm install --frozen-lockfile && pnpm build && pnpm docs:build"
   publish = "docs/dist"
+
+# Built assets have a hash in their name, so they never change.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

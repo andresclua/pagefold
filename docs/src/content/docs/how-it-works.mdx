@@ -8,11 +8,11 @@ order: 1
 import Timeline from '../../components/Timeline.astro'
 import Lanes from '../../components/Lanes.astro'
 
-Every navigation is a **visit**: an object that carries everything about it (where from, where to, what triggered it, how it animates). Every hook handler receives it. See [The Visit object](/docs/visit).
+Every navigation is a **visit**: an object that carries everything about it (where from, where to, what triggered it, how it animates). Every hook handler receives it. See [The Visit object](/docs/visit/).
 
 ## The steps
 
-1. **Click.** A listener on the document catches clicks on links. Links that should not be handled are left to the browser (see [Which links are handled](/docs/which-links)). Hook: `link:click`.
+1. **Click.** A listener on the document catches clicks on links. Links that should not be handled are left to the browser (see [Which links are handled](/docs/which-links/)). Hook: `link:click`.
 2. **Start.** `visit:start`. If another visit is still loading, it is aborted, including its network request.
 3. **Load.** `page:load` finds the page in the cache or fetches it (`fetch:request`). The address bar and history change right away.
 4. **Animate out.** `animation:out:start`, `animation:out:await`, `animation:out:end`. The default waits for CSS transitions and animations.
@@ -111,4 +111,4 @@ new Pagefold({ queue: 'ignore' })
 
 ## Requests
 
-Pagefold fetches the destination page with `fetch`, sending `X-Requested-With: pagefold` and `Accept: text/html`. By default only a `500` response counts as a failure; a `404` page is shown like any other. Use [`failOnStatus`](/docs/options) to change that.
+Pagefold fetches the destination page with `fetch`, sending `X-Requested-With: pagefold` and `Accept: text/html`. By default only a `500` response counts as a failure; a `404` page is shown like any other. Use [`failOnStatus`](/docs/options/) to change that.

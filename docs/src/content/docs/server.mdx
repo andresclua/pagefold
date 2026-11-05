@@ -24,7 +24,7 @@ Pagefold needs very little from a server. It asks for the same pages the browser
 - **Every container.** If you use the default, each page needs `<main id="pagefold">` (or whatever element your `containers` option names). A page without it makes the visit fail, and the browser loads that page normally, so nothing breaks, but the transition is lost.
 - **A `<title>`.** It is updated on every visit.
 
-To update meta tags, stylesheets and the `lang` attribute, add the [Head plugin](/docs/head).
+To update meta tags, stylesheets and the `lang` attribute, add the [Head plugin](/docs/head/).
 
 ## Status codes and redirects
 
@@ -45,7 +45,7 @@ new Pagefold({ failOnStatus: (status) => status >= 400 })
 
 The request is a normal same-origin `fetch`, so it carries the visitor's cookies. A page that depends on the session comes back personalised, exactly as it would on a normal load.
 
-What changes is the [cache](/docs/caching-and-history): a page fetched while logged out stays in memory after the visitor logs in. Clear it when the session changes:
+What changes is the [cache](/docs/caching-and-history/): a page fetched while logged out stays in memory after the visitor logs in. Clear it when the session changes:
 
 ```js
 pagefold.cache.clear()
@@ -63,7 +63,7 @@ Without it, a cache could give a visitor who opens the address directly the page
 
 ## Forms
 
-A `POST` made with the [Forms plugin](/docs/forms) is shown like any page: your server answers with the page to display. It is never stored in the cache.
+A `POST` made with the [Forms plugin](/docs/forms/) is shown like any page: your server answers with the page to display. It is never stored in the cache.
 
 ## A checklist
 

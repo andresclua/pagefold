@@ -7,7 +7,7 @@ order: 5
 
 import Demo from '../../../components/Demo.astro'
 
-The [Preload plugin](/docs/preload) fetches a page when the pointer rests on its link, and puts it in the cache. By the time of the click there is nothing left to wait for. The log in this demo shows it happening.
+The [Preload plugin](/docs/preload/) fetches a page when the pointer rests on its link, and puts it in the cache. By the time of the click there is nothing left to wait for. The log in this demo shows it happening.
 
 <Demo name="preload" height={540} files={['main.js', 'index.html', 'style.css']} />
 
@@ -30,4 +30,4 @@ pagefold.hooks.on('page:preload', (visit, { page }) => log(`preloaded ${page.url
 - **The cache is Pagefold's own.** A preloaded page is stored in it like any other, which is why the visit finds it. It works with any server, with no special headers.
 - **The times are small here** because this site runs on a fast connection. On a slower one the difference between the cache and the network is much bigger.
 
-More in [Preload](/docs/preload) and [Caching and history](/docs/caching-and-history).
+More in [Preload](/docs/preload/) and [Caching and history](/docs/caching-and-history/).
