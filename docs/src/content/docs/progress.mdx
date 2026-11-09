@@ -35,7 +35,7 @@ options:
     description: "Apply basic inline styles. Turn off to style the class yourself."
   - name: "color"
     type: "string"
-    default: "'#1b1bff'"
+    default: "'#ff4165'"
     description: "Color of the bar."
   - name: "height"
     type: "number"
@@ -50,7 +50,7 @@ Import it from `pagefold/progress` (about 1.2 KB minified and compressed, shared
 ```js
 import PagefoldProgress from 'pagefold/progress'
 
-new Pagefold({ plugins: [new PagefoldProgress({ color: '#00ff9c' })] })
+new Pagefold({ plugins: [new PagefoldProgress({ color: '#ff9c2b' })] })
 ```
 
 The bar appears if a visit takes longer than `delay`, counted from the click until the new page is in place. That includes the animation out, so if yours lasts 400 ms, use a `delay` longer than that or the bar will show on every visit. It starts at `initialValue`, and moves forward slower and slower, so it never looks finished before it is. When the page is shown it runs to the end and fades out. If the visit fails, it disappears.
@@ -85,7 +85,7 @@ new PagefoldProgress({ styles: false })
   position: fixed;
   inset: 0 0 auto 0;
   height: 4px;
-  background: linear-gradient(90deg, #1b1bff, #00ff9c);
+  background: linear-gradient(90deg, #ff4165, #ff9c2b);
   transform-origin: 0 50%;
   transition: transform 0.3s;
   z-index: 9999;

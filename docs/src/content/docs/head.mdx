@@ -51,7 +51,7 @@ The new page's `<head>` is compared tag by tag with the current one.
     { label: 'Old <head>', items: [{ text: 'style.css' }, { text: 'analytics.js' }, { text: 'home.css', tone: 'gone' }] },
     { label: 'New <head>', items: [{ text: 'style.css' }, { text: 'analytics.js' }, { text: 'blog.css', tone: 'new' }] },
   ]}
-  caption="Identical tags are left alone, so nothing reloads. home.css is removed (crossed out) and blog.css is inserted (green)."
+  caption="Identical tags are left alone, so nothing reloads. home.css is removed (crossed out) and blog.css is inserted (orange)."
 />
 
 The `lang` and `dir` attributes of the `html` element are copied too. Add more with `attributes`, using names or patterns such as `/^data-/`.

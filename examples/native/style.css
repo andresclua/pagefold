@@ -1,13 +1,13 @@
 *{box-sizing:border-box}
-body{margin:0;font:16px/1.6 system-ui,sans-serif;background:#0a0a0a;color:#fafaf8}
-nav{display:flex;gap:1.25rem;padding:1rem 1.5rem;border-bottom:1px solid #2c2c2c}
+body{margin:0;font:16px/1.6 system-ui,sans-serif;background:#172024;color:#fdf5f0}
+nav{display:flex;gap:1.25rem;padding:1rem 1.5rem;border-bottom:1px solid #2f3d43}
 /* Links: the accent color with a quiet underline that gets stronger on hover */
-a{color:#5af0ae;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:rgba(90,240,174,.5);transition:color .15s,text-decoration-color .15s,text-decoration-thickness .15s}
-a:hover{color:#00ff9c;text-decoration-thickness:2px;text-decoration-color:currentColor}
-a:focus-visible{outline:2px solid #5af0ae;outline-offset:3px;border-radius:2px}
+a{color:#ff6a85;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:rgba(255,106,133,.5);transition:color .15s,text-decoration-color .15s,text-decoration-thickness .15s}
+a:hover{color:#ff9c2b;text-decoration-thickness:2px;text-decoration-color:currentColor}
+a:focus-visible{outline:2px solid #ff6a85;outline-offset:3px;border-radius:2px}
 main{padding:2rem 1.5rem}
 h1{margin:0 0 .5rem;font-size:2rem}
-p{margin:0 0 1rem;max-width:36rem;color:#a3a39e}
+p{margin:0 0 1rem;max-width:36rem;color:#a9b3b6}
 .card{height:7rem;max-width:36rem;border-radius:12px}
 
 /* Only the content moves: the menu keeps its place because it is not part of the "page" transition */

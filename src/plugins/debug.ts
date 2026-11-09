@@ -13,7 +13,7 @@ export interface DebugOptions {
 }
 
 const consoleLog: DebugOptions['log'] = (message, ...details) =>
-  console.log(`%c[pagefold]%c ${message}`, 'color:#00a870;font-weight:bold', '', ...details)
+  console.log(`%c[pagefold]%c ${message}`, 'color:#e5701f;font-weight:bold', '', ...details)
 
 /**
  * Logs every hook with the visit it belongs to and the time since the visit started, and

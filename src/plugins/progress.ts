@@ -31,7 +31,7 @@ export default class PagefoldProgress extends Plugin {
     minValue: 0.1,
     finishAnimation: true,
     styles: true,
-    color: '#1b1bff',
+    color: '#ff4165',
     height: 3,
   }
 

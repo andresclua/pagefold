@@ -1,14 +1,14 @@
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;overflow:hidden;font:16px/1.6 system-ui,sans-serif;background:#0a0a0a;color:#fafaf8}
+body{margin:0;overflow:hidden;font:16px/1.6 system-ui,sans-serif;background:#172024;color:#fdf5f0}
 /* Links: the accent color with a quiet underline that gets stronger on hover */
-a{color:#5af0ae;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:rgba(90,240,174,.5);transition:color .15s,text-decoration-color .15s}
-a:hover{color:#00ff9c;text-decoration-color:currentColor}
-a:focus-visible{outline:2px solid #5af0ae;outline-offset:3px;border-radius:2px}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.7rem 1.5rem;border-bottom:1px solid #2c2c2c}
+a{color:#ff6a85;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:rgba(255,106,133,.5);transition:color .15s,text-decoration-color .15s}
+a:hover{color:#ff9c2b;text-decoration-color:currentColor}
+a:focus-visible{outline:2px solid #ff6a85;outline-offset:3px;border-radius:2px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.7rem 1.5rem;border-bottom:1px solid #2f3d43}
 .bar nav{display:flex;gap:1.25rem}
-.status{margin:0;font:.8rem ui-monospace,Menlo,monospace;color:#a3a39e}
-.status b{display:inline-block;min-width:1.2em;text-align:center;padding:.05rem .4rem;border-radius:6px;background:#1a1a1a;color:#00ff9c}
+.status{margin:0;font:.8rem ui-monospace,Menlo,monospace;color:#a9b3b6}
+.status b{display:inline-block;min-width:1.2em;text-align:center;padding:.05rem .4rem;border-radius:6px;background:#1f2a2f;color:#ff9c2b}
 
 /* Both containers are in the page at the same time, so they share one cell */
 .stack{display:grid;height:calc(100% - 3.1rem);overflow:hidden}
@@ -27,5 +27,5 @@ main p{max-width:26rem;margin:0 0 .75rem}
 
 /* A tag on each page while they cross, so you can tell which is which */
 main::after{content:'';position:absolute;bottom:1rem;left:1.75rem;padding:.2rem .6rem;border-radius:999px;font:700 .72rem ui-monospace,Menlo,monospace;letter-spacing:.04em;text-transform:uppercase;opacity:0;transition:opacity .2s}
-.stack:has(.is-previous-container) main.is-previous-container::after{content:'old page';left:45%;background:#0a0a0a;color:#fafaf8;opacity:1}
-.stack:has(.is-previous-container) main:not(.is-previous-container)::after{content:'new page';background:#0a0a0a;color:#00ff9c;opacity:1}
+.stack:has(.is-previous-container) main.is-previous-container::after{content:'old page';left:45%;background:#172024;color:#fdf5f0;opacity:1}
+.stack:has(.is-previous-container) main:not(.is-previous-container)::after{content:'new page';background:#172024;color:#ff9c2b;opacity:1}

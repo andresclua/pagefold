@@ -1,19 +1,19 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
 
-/* Brand tokens. Dark is the brand default; the light palette follows the OS setting. */
+/* Brand tokens (logo manual, v1.0). Dark is the brand default; the light palette follows the OS setting. */
 :root {
-  --bg: #0a0a0a;
-  --surface: #1a1a1a;
-  --border: #2c2c2c;
-  --text: #fafaf8;
-  --muted: #a3a39e;
-  --primary: #1b1bff;
-  --accent: #00ff9c;
-  /* Primary on dark is only ~2.5:1, so links use a softer mint of the accent (about 13:1); hover is the full accent */
-  --link: #5af0ae;
+  --bg: #172024;
+  --surface: #1f2a2f;
+  --border: #2f3d43;
+  --text: #fdf5f0;
+  --muted: #a9b3b6;
+  --primary: #ff4165;
+  --accent: #ff9c2b;
+  /* Coral on dark is ~4.9:1, so links use a lighter coral (about 6:1); hover is the orange */
+  --link: #ff6a85;
   --link-hover: var(--accent);
-  --on-primary: #fafaf8;
+  --on-primary: #172024;
   --font-head: 'JetBrains Mono Variable', ui-monospace, monospace;
   --font-body: 'Inter Variable', system-ui, sans-serif;
   color-scheme: dark light;
@@ -21,14 +21,14 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --bg: #fafaf8;
-    --surface: #f0f0ec;
-    --border: #e0e0d9;
-    --text: #0a0a0a;
-    --muted: #5c5c57;
-    /* The brand blue, deepened a little so it reads calmly and still looks blue next to black text (about 8:1) */
-    --link: #2f2fd0;
-    --link-hover: var(--primary);
+    --bg: #fdf5f0;
+    --surface: #f7ebe3;
+    --border: #ead9cd;
+    --text: #172024;
+    --muted: #5b676b;
+    /* The brand coral, deepened so it reads calmly on the warm background (about 5.4:1) */
+    --link: #c41e48;
+    --link-hover: #a3173c;
   }
 }
 
@@ -72,7 +72,7 @@ a:hover {
  * Links inside running text (the documentation, the line under the modules, the footer and the
  * credits of the showcase): the text keeps its own color and gets a thick underline in
  * the color of the brand, and a soft background of that color on hover. It reads as a link without
- * the look of a browser's default blue.
+ * the look of a browser's default link color.
  */
 :is(article, .more, .foot, .meta span) a {
   color: var(--text);
