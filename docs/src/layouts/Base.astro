@@ -20,6 +20,19 @@ const gtm = import.meta.env.PUBLIC_GTM_ID
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#172024" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pagefold" />
+    <meta property="og:title" content={`${title} · Pagefold`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:image" content={new URL('/og.png', Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <title>{title} · Pagefold</title>
     {ga && (
       // Not on localhost, so developing and testing the site does not count as visits
@@ -83,6 +96,18 @@ const gtm = import.meta.env.PUBLIC_GTM_ID
     let gone = false
     void import('../scripts/motion').then(({ animate }) => {
       if (!gone) stop = animate(el)
+    })
+    return () => {
+      gone = true
+      stop?.()
+    }
+  })
+  // The home page: a story told while you scroll. Same idea: set up on arrival, undone on leave.
+  pagefold.mount<HTMLElement>('[data-home]', (el) => {
+    let stop: (() => void) | undefined
+    let gone = false
+    void import('../scripts/home').then(({ home }) => {
+      if (!gone) stop = home(el)
     })
     return () => {
       gone = true

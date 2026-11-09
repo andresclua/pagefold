@@ -65,6 +65,15 @@ importers:
 
   docs:
     dependencies:
+      '@andresclua/perlindom':
+        specifier: ^0.1.1
+        version: 0.1.1
+      '@andresclua/sliderkit':
+        specifier: ^2.1.4
+        version: 2.1.4
+      '@andresclua/sliderkit-plugins':
+        specifier: ^2.4.0
+        version: 2.4.0(@andresclua/sliderkit@2.1.4)
       '@astrojs/mdx':
         specifier: ^5.0.6
         version: 5.0.6(astro@6.4.8(@types/node@24.19.2)(jiti@2.7.0)(lightningcss@1.33.0)(rollup@4.67.2)(yaml@2.9.1))
@@ -94,6 +103,17 @@ importers:
         version: 0.35.5(@types/node@24.19.2)
 
 packages:
+
+  '@andresclua/perlindom@0.1.1':
+    resolution: {integrity: sha512-PniNBuzRUvMqATtLJ531rNj4po6hl/ES9BGhvrU578jTDbiw/NMjYseMARKqkyI3tuyOBZOZkbzRk6OhJvz10w==}
+
+  '@andresclua/sliderkit-plugins@2.4.0':
+    resolution: {integrity: sha512-1JeCDCz4vEaer8T9NX0tamYHqLu545G48zmlAwp/0n5VtXy/OFqzv0AwMaKYC9+WjGyKpWlym8ba9N4TdE4osg==}
+    peerDependencies:
+      '@andresclua/sliderkit': ^2.0.0
+
+  '@andresclua/sliderkit@2.1.4':
+    resolution: {integrity: sha512-qcsm6BQ0YxMyHl4CeboISxbZMZ0ypch7slUB2GlYPM6Cwq9szyJy3c7M6XRnx5cj6vPWpjwRkDcAqr5vndWyvg==}
 
   '@andrewbranch/untar.js@1.0.4':
     resolution: {integrity: sha512-pVXSwPsLuw8IGLo2Di0EaOfsk+ntVvpkk942J/sHYIkwvtKUakEcPh7HBgZ6tuimgzKSEHgCvO4XgQ05DEbwDw==}
@@ -3452,6 +3472,14 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@andresclua/perlindom@0.1.1': {}
+
+  '@andresclua/sliderkit-plugins@2.4.0(@andresclua/sliderkit@2.1.4)':
+    dependencies:
+      '@andresclua/sliderkit': 2.1.4
+
+  '@andresclua/sliderkit@2.1.4': {}
 
   '@andrewbranch/untar.js@1.0.4': {}
 
