@@ -1,0 +1,48 @@
+---
+title: "Why Pagefold"
+description: "What you get by using it: your server-rendered site keeps working as it is, and gains page transitions without becoming an app."
+section: concepts
+order: 2
+---
+
+Pagefold is for sites that render their pages on the server and want them to feel continuous. You do not move to a framework and your pages stay plain HTML. These are the advantages, with where to read more about each.
+
+## Your HTML stays as it is
+
+Pagefold fetches the full page and takes one container from it, so there is **no API and no special response** to build. Every page is still a real URL that works without JavaScript, can be indexed and can be shared. If anything fails, the browser loads the page normally and a visit never leaves you on a broken page. See [How it works](/docs/how-it-works/).
+
+## Small, and you ship only what you use
+
+The core is about **7.5 KB with no dependencies**. Everything else is a module with its own import (head, scripts, preload, forms, progress, analytics and more), so what you do not import never reaches your bundle. See the [plugins](/docs/head/).
+
+## Fewer requests on every visit
+
+The CSS, the scripts and the rest of the page shell stay in the browser, so a visit is one request for the page instead of a full load. On the documentation site that is about twice as fast on a fast 4G connection, and with the [preload plugin](/docs/preload/) the page is often already there when the visitor clicks. On a fast connection the gain is a few milliseconds. See the [measurements](/docs/preload/#measured).
+
+## Animate with what you already use
+
+The default is plain CSS: write transitions and Pagefold waits for them. When you need more, use GSAP, Motion, the Web Animations API or the View Transitions API. They all plug into the same hooks. See [Animating with CSS](/docs/css-animations/) and [Animating with JavaScript](/docs/javascript-animations/).
+
+## A hook at every step
+
+Every step of a visit has a hook that is typed and awaited, and the plugins use the same API you do. You can run code before the request, after the swap or when a visit fails, and nothing is hidden from you. See [Using hooks](/docs/using-hooks/).
+
+## It handles what is easy to get wrong
+
+- **Clicks twice**: the first request is aborted, it is not left running in the background.
+- **Back and forward**: the address bar, the history and the scroll position keep working.
+- **Links that are not yours**: downloads, other origins and modified clicks are left to the browser. See [Which links are handled](/docs/which-links/).
+- **The back/forward cache**: a visit that was half way is cancelled, so the page does not come back stuck.
+- **Errors after the swap**: they are logged and the other handlers still run.
+
+## Accessible by default
+
+With the [a11y plugin](/docs/a11y/) the new page is announced, focus moves to the new content, and motion is skipped when the visitor asks for less of it.
+
+## Easy to leave
+
+You mark one container with an id and start Pagefold with one call. If you stop using it, the site is still a normal multi-page site and there is nothing to migrate.
+
+## Next
+
+How a visit goes from the click to the end: [How it works](/docs/how-it-works/). Or start with [Getting started](/docs/getting-started/).
