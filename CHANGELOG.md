@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.0](https://github.com/andresclua/pagefold/compare/pagefold-v0.3.1...pagefold-v0.4.0) (2026-11-13)
+
+
+### Features
+
+* 🚀 Add timings to the debug plugin, with colors and icons by how long a request took ([45784dc](https://github.com/andresclua/pagefold/commit/45784dc45c396d4eba385eef9b82c276b6d1fd4a))
+* 🚀 Isolate handler errors after the swap, make leaving content inert and recover from the back/forward cache ([1873b02](https://github.com/andresclua/pagefold/commit/1873b021985262efc4e7e6ce02458324b82c4578))
+* 🚀 Polish the home: page-turn chapter, animated titles and a full-width features slider ([776a763](https://github.com/andresclua/pagefold/commit/776a7637bfb49755451269026157f089be3fbe69))
+* 🚀 Publish llms.txt and llms-full.txt for language models ([9b7cf5a](https://github.com/andresclua/pagefold/commit/9b7cf5a0205a8fbad1d0298f625da1fe7b118635))
+* 🚀 Tell the home page as a story told while you scroll ([1785a58](https://github.com/andresclua/pagefold/commit/1785a5863adfc53a853f663f41acf6c88e0d7911))
+
+
+### Documentation
+
+* 📚 Add andresclua.com to the showcase ([77fc4f4](https://github.com/andresclua/pagefold/commit/77fc4f4631a99b63b6e844206c28eaa5267fea4d))
+* 📚 Add the Why Pagefold page after How it works ([3e29b89](https://github.com/andresclua/pagefold/commit/3e29b89c9b24afb43236054538b774df285d3bf0))
+* 📚 Link pages with the trailing slash, cache built assets and measure navigation with pnpm bench ([73a2652](https://github.com/andresclua/pagefold/commit/73a26521ece949442237f92af90ad3fb08f1f6be))
+* 📚 Show the package version on the homepage ([1b50076](https://github.com/andresclua/pagefold/commit/1b500766e2ea27c27bb0dda60f7f00338bbbe455))
+
 ## [0.3.1](https://github.com/andresclua/pagefold/compare/pagefold-v0.3.0...pagefold-v0.3.1) (2026-11-04)
 
 
