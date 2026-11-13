@@ -111,6 +111,33 @@ describe('PagefoldDebug', () => {
     expect(messages(log).every((m) => m.startsWith('visit:'))).toBe(true)
   })
 
+  test('timings logs the request and the total, and says when there was no request', async () => {
+    stubFetch({ '/a': withBody('') })
+    const { log } = setup({ timings: true, filter: () => false })
+    await pf.navigate('/a')
+    expect(messages(log).filter((m) => m.includes('Server request'))).toHaveLength(1)
+    expect(messages(log).find((m) => m.includes('Total'))).toMatch(/\/ → \/a: \d+\.\d+ms$/)
+    log.mockClear()
+    await pf.navigate('/')
+    await pf.navigate('/a') // /a is in the cache now
+    expect(messages(log).some((m) => m.includes('No request'))).toBe(true)
+  })
+
+  test('timings colors a request by its level, and the levels can be changed', async () => {
+    stubFetch({ '/a': withBody('') })
+    const timing = vi.fn()
+    setup({ timings: true, timing, levels: [{ upTo: 100000, icon: '⚡', color: 'hotpink' }] })
+    await pf.navigate('/a')
+    expect(timing).toHaveBeenCalledWith(expect.stringMatching(/^⚡ Server request: /), 'hotpink')
+  })
+
+  test('timings is off by default', async () => {
+    stubFetch({ '/a': withBody('') })
+    const { log } = setup()
+    await pf.navigate('/a')
+    expect(messages(log).some((m) => m.includes('Total'))).toBe(false)
+  })
+
   test('warns about missing containers', () => {
     const { log } = setup()
     pf.destroy().catch(() => {})

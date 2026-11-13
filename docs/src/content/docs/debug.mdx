@@ -21,9 +21,21 @@ options:
     type: "boolean"
     default: "false"
     description: "Put the instance on window.pagefold, to try things from the console."
+  - name: "timings"
+    type: "boolean"
+    default: "false"
+    description: "Also log how long each request and each visit took."
+  - name: "levels"
+    type: "{ upTo: number, icon: string, color: string }[]"
+    default: "green < 500 ms, gold < 1000, orange < 2000, red after"
+    description: "The color and icon of a request by how long it took. The first level whose upTo is above the time."
+  - name: "timing"
+    type: "(message, color) => void"
+    default: "console.log, in that color"
+    description: "Where the timing lines go, with the color of their level."
 ---
 
-Import it from `pagefold/debug` (about 1.0 KB minified and compressed, shared code included).
+Import it from `pagefold/debug` (about 1.5 KB minified and compressed, shared code included).
 
 ```js
 import PagefoldDebug from 'pagefold/debug'
@@ -44,6 +56,35 @@ visit:end · visit #3 / → /about +640ms
 ```
 
 Each line has the hook, the visit id, where it goes and the time since the visit started. The arguments of the hook are logged next to it.
+
+## Timings
+
+With `timings: true` it also logs the time of the server request and of the whole visit:
+
+```js
+new PagefoldDebug({ timings: true })
+```
+
+```text
+🟢 Server request: 84.20ms
+🔄 Total: / → /about: 640.50ms
+🟢 No request: the page came from the cache or was preloaded
+```
+
+The request line takes the color and the icon of its level: green below 500 ms, gold below 1000, orange below 2000 and red from there. The console prints it in that color. Change the limits, the colors or the icons with `levels`:
+
+```js
+new PagefoldDebug({
+  timings: true,
+  levels: [
+    { upTo: 200, icon: '⚡', color: '#22c55e' },
+    { upTo: 600, icon: '🐢', color: '#eab308' },
+    { upTo: Infinity, icon: '🔥', color: '#ef4444' },
+  ],
+})
+```
+
+Send the lines somewhere else, such as a panel on the page, with `timing: (message, color) => …`. If you only set `log`, the lines go there without color. The total runs from `visit:start` to `visit:end`, so it includes both animations. A visit that is aborted or fails logs nothing.
 
 ## Also
 
