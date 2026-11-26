@@ -364,6 +364,19 @@ describe('links', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  test('a click that was already cancelled is left alone', () => {
+    make()
+    const link = document.querySelector('#link')!
+    const onLinkClick = vi.fn()
+    pf.hooks.on('link:click', onLinkClick)
+    const cancel = (e: Event) => e.preventDefault()
+    window.addEventListener('click', cancel, true) // runs first, like a drag guard
+    click(link)
+    window.removeEventListener('click', cancel, true)
+    expect(onLinkClick).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   test('data-no-pagefold opts a link out', () => {
     make()
     const link = document.querySelector('#link')!

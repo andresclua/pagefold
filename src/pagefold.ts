@@ -262,6 +262,8 @@ export class Pagefold {
 
   /** @internal */
   onClick = (event: MouseEvent): void => {
+    // Someone else already cancelled this click (a slider ending a drag, a modal): it is not a navigation
+    if (event.defaultPrevented) return
     const el = (event.target as Element | null)?.closest?.(this.options.linkSelector)
     if (!(el instanceof HTMLAnchorElement)) return
 
