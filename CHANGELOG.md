@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/andresclua/pagefold/compare/pagefold-v0.4.0...pagefold-v0.4.1) (2026-11-26)
+
+
+### Bug fixes
+
+* 🐛 Ignore clicks that were already cancelled ([972f0f4](https://github.com/andresclua/pagefold/commit/972f0f424e99bcdbd024558e57d2aa2fedb0a04d))
+
 ## [0.4.0](https://github.com/andresclua/pagefold/compare/pagefold-v0.3.1...pagefold-v0.4.0) (2026-11-13)
 
 
